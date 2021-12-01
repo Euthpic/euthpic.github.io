@@ -10,7 +10,16 @@
     </image>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Tue, 30 Nov 2021 17:54:17 +0800</lastBuildDate><atom:link href="http://euthpic.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 02 Dec 2021 00:06:10 +0800</lastBuildDate><atom:link href="http://euthpic.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>用hugo搭建自己的博客</title>
+      <link>http://euthpic.github.io/posts/learn-hugo/</link>
+      <pubDate>Thu, 02 Dec 2021 00:06:10 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/posts/learn-hugo/</guid>
+      <description>为什么是hugo? 其实无所谓hugo还是hexo,我是为了paperMod这个皮肤才搭的这个博客.它排版简洁素雅,让注意力容易集中到内容本身</description>
+    </item>
+    
     <item>
       <title>乱花渐欲迷人眼</title>
       <link>http://euthpic.github.io/posts/mmm/</link>
