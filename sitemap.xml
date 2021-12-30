@@ -3,12 +3,17 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>http://euthpic.github.io/posts/</loc>
-    <lastmod>2021-12-02T00:06:10+08:00</lastmod>
+    <lastmod>2021-12-30T16:32:48+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
     <loc>http://euthpic.github.io/</loc>
-    <lastmod>2021-12-02T00:06:10+08:00</lastmod>
+    <lastmod>2021-12-30T16:32:48+08:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>http://euthpic.github.io/posts/%E9%83%A8%E7%BD%B2yapi/</loc>
+    <lastmod>2021-12-30T16:32:48+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
@@ -19,6 +24,10 @@
   </url><url>
     <loc>http://euthpic.github.io/posts/mmm/</loc>
     <lastmod>2021-11-30T17:54:17+08:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>http://euthpic.github.io/archives/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
