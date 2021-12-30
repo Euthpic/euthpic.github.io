@@ -13,10 +13,10 @@
     <lastBuildDate>Thu, 30 Dec 2021 16:32:48 +0800</lastBuildDate><atom:link href="http://euthpic.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>部署yapi</title>
-      <link>http://euthpic.github.io/posts/%E9%83%A8%E7%BD%B2yapi/</link>
+      <link>http://euthpic.github.io/posts/deploy-yapi/</link>
       <pubDate>Thu, 30 Dec 2021 16:32:48 +0800</pubDate>
       
-      <guid>http://euthpic.github.io/posts/%E9%83%A8%E7%BD%B2yapi/</guid>
+      <guid>http://euthpic.github.io/posts/deploy-yapi/</guid>
       <description>官方给出的部署教程比较简短,只有两行命令: npm install -g yapi-cli --registry https://registry.npm.taobao.org yapi server 如果是新的Linux机器,跟着操作应该没什么问题,但是我在测试机和wsl上实操发现</description>
     </item>
     
