@@ -3,12 +3,37 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>http://euthpic.github.io/posts/</loc>
-    <lastmod>2021-12-30T16:32:48+08:00</lastmod>
+    <lastmod>2022-04-24T06:24:46+08:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>http://euthpic.github.io/posts/telepresence/</loc>
+    <lastmod>2022-04-24T06:24:46+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
     <loc>http://euthpic.github.io/</loc>
-    <lastmod>2021-12-30T16:32:48+08:00</lastmod>
+    <lastmod>2022-04-24T06:24:46+08:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>http://euthpic.github.io/posts/solve-zookeeper-no-response/</loc>
+    <lastmod>2022-02-16T22:36:36+08:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>http://euthpic.github.io/posts/scala-practice/</loc>
+    <lastmod>2022-02-13T15:14:19+08:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>http://euthpic.github.io/posts/k8s-note/</loc>
+    <lastmod>2022-02-11T14:15:12+08:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>http://euthpic.github.io/posts/scala-note/</loc>
+    <lastmod>2022-02-11T14:00:29+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
@@ -19,11 +44,6 @@
   </url><url>
     <loc>http://euthpic.github.io/posts/learn-hugo/</loc>
     <lastmod>2021-12-02T00:06:10+08:00</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url><url>
-    <loc>http://euthpic.github.io/posts/mmm/</loc>
-    <lastmod>2021-11-30T17:54:17+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>

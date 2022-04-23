@@ -17,7 +17,7 @@
 <link rel=mask-icon href=http://euthpic.github.io/apple-touch-icon.png>
 <meta name=theme-color content="#2e2e33">
 <meta name=msapplication-TileColor content="#2e2e33">
-<meta name=generator content="Hugo 0.89.2">
+<meta name=generator content="Hugo 0.89.4">
 <link rel=alternate type=application/rss+xml href=http://euthpic.github.io/posts/index.xml>
 <noscript>
 <style>#theme-toggle,.top-link{display:none}</style>
@@ -74,40 +74,67 @@
 </header>
 <article class=post-entry>
 <header class=entry-header>
-<h2>部署yapi
+<h2>Telepresence
 </h2>
 </header>
 <section class=entry-content>
-<p>官方给出的部署教程比较简短,只有两行命令: npm install -g yapi-cli --registry https://registry.npm.taobao.org yapi server 如果是新的Linux机器,跟着操作应该没什么问题,但是我在测试机和wsl上实操发现...</p>
+<p>需求背景 我们的集群迁移到云上的k8s后,本地无法继续直连调试,需要新的远程调试方案. 同事先调研了阿里出品的kt-connect,给出的结论是...</p>
 </section>
-<footer class=entry-footer><span title="2021-12-30 16:32:48 +0800 CST">December 30, 2021</span>&nbsp;·&nbsp;2 分钟&nbsp;·&nbsp;Guangfa</footer>
-<a class=entry-link aria-label="post link to 部署yapi" href=http://euthpic.github.io/posts/deploy-yapi/></a>
+<footer class=entry-footer><span title="2022-04-24 06:24:46 +0800 CST">April 24, 2022</span>&nbsp;·&nbsp;7 分钟&nbsp;·&nbsp;Guangfa</footer>
+<a class=entry-link aria-label="post link to Telepresence" href=http://euthpic.github.io/posts/telepresence/></a>
 </article>
 <article class=post-entry>
 <header class=entry-header>
-<h2>用hugo搭建自己的博客
+<h2>zookeeper服务频繁无响应,我仅修改一行配置就解决它了
 </h2>
 </header>
 <section class=entry-content>
-<p>为什么是hugo? 其实无所谓hugo还是hexo,我是为了paperMod这个皮肤才搭的这个博客.它排版简洁素雅,让注意力容易集中到内容本身...</p>
+<p>在迁移到k8s之前,我们的测试环境是用docker部署到自己的物理机上的.那时常常会发生这样一种情况:过了一晚上或一个周末后,原本在测试环境...</p>
 </section>
-<footer class=entry-footer><span title="2021-12-02 00:06:10 +0800 CST">December 2, 2021</span>&nbsp;·&nbsp;3 分钟&nbsp;·&nbsp;Guangfa</footer>
-<a class=entry-link aria-label="post link to 用hugo搭建自己的博客" href=http://euthpic.github.io/posts/learn-hugo/></a>
+<footer class=entry-footer><span title="2022-02-16 22:36:36 +0800 CST">February 16, 2022</span>&nbsp;·&nbsp;2 分钟&nbsp;·&nbsp;Guangfa</footer>
+<a class=entry-link aria-label="post link to zookeeper服务频繁无响应,我仅修改一行配置就解决它了" href=http://euthpic.github.io/posts/solve-zookeeper-no-response/></a>
 </article>
 <article class=post-entry>
 <header class=entry-header>
-<h2>乱花渐欲迷人眼
+<h2>Scala基础练习
 </h2>
 </header>
 <section class=entry-content>
-<p>浅草才能没马蹄</p>
+<p>import java.io.{PrintWriter} import scala.collection.mutable import scala.io.{Source, StdIn} import scala.reflect.io.File case class Person(id: Int, name: String, age: Int) /** * Scala 基本笔记 */ object ScalaLesson extends App { /** * 基础-算术 */ def lesson1() = { println(1.+(2)) println(2.-(2)) println(2.*(2)) println(2./(2)) println(10 max 2) } /** * 基础-重载 */ def lesson2() = { val str = "Hello"(2) //等同...</p>
 </section>
-<footer class=entry-footer><span title="2021-11-30 17:54:17 +0800 CST">November 30, 2021</span>&nbsp;·&nbsp;1 分钟&nbsp;·&nbsp;Guangfa</footer>
-<a class=entry-link aria-label="post link to 乱花渐欲迷人眼" href=http://euthpic.github.io/posts/mmm/></a>
+<footer class=entry-footer><span title="2022-02-13 15:14:19 +0800 CST">February 13, 2022</span>&nbsp;·&nbsp;14 分钟&nbsp;·&nbsp;Guangfa</footer>
+<a class=entry-link aria-label="post link to Scala基础练习" href=http://euthpic.github.io/posts/scala-practice/></a>
 </article>
+<article class=post-entry>
+<header class=entry-header>
+<h2>K8s笔记
+</h2>
+</header>
+<section class=entry-content>
+<p>容器本身没有价值,有价值的是容器编排技术 容器(docker)其实是一种沙盒技术,一是可以将应用之间隔离开来,二是方便地将应用"搬来...</p>
+</section>
+<footer class=entry-footer><span title="2022-02-11 14:15:12 +0800 CST">February 11, 2022</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;Guangfa</footer>
+<a class=entry-link aria-label="post link to K8s笔记" href=http://euthpic.github.io/posts/k8s-note/></a>
+</article>
+<article class=post-entry>
+<header class=entry-header>
+<h2>Scala简易笔记
+</h2>
+</header>
+<section class=entry-content>
+<p>看完&lt;快学scala>的一些笔记. 该书的课后练习参考答案: https://github.com/vybae/scala-hello 类型推断错误有时候ide检测不出来 ide联想到的api不能总是及时展...</p>
+</section>
+<footer class=entry-footer><span title="2022-02-11 14:00:29 +0800 CST">February 11, 2022</span>&nbsp;·&nbsp;9 分钟&nbsp;·&nbsp;Guangfa</footer>
+<a class=entry-link aria-label="post link to Scala简易笔记" href=http://euthpic.github.io/posts/scala-note/></a>
+</article>
+<footer class=page-footer>
+<nav class=pagination>
+<a class=next href=http://euthpic.github.io/posts/page/2/>下一页 »</a>
+</nav>
+</footer>
 </main>
 <footer class=footer>
-<span>&copy; 2021 <a href=http://euthpic.github.io/>乱花渐欲迷人眼</a></span>
+<span>&copy; 2022 <a href=http://euthpic.github.io/>乱花渐欲迷人眼</a></span>
 <span>
 Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
