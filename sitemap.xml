@@ -58,5 +58,9 @@
     <loc>http://euthpic.github.io/tags/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+  </url><url>
+    <loc>http://euthpic.github.io/search/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>
