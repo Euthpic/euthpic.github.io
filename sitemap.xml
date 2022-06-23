@@ -2,47 +2,52 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://euthpic.github.io/posts/</loc>
-    <lastmod>2022-04-24T06:24:46+08:00</lastmod>
+    <loc>http://euthpic.github.io/tech/https%E6%95%B0%E5%AD%97%E8%AF%81%E4%B9%A6%E5%92%8C%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D/</loc>
+    <lastmod>2022-06-08T23:42:53+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://euthpic.github.io/posts/telepresence/</loc>
-    <lastmod>2022-04-24T06:24:46+08:00</lastmod>
+    <loc>http://euthpic.github.io/tech/</loc>
+    <lastmod>2022-06-08T23:42:53+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
     <loc>http://euthpic.github.io/</loc>
+    <lastmod>2022-06-08T23:42:53+08:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>http://euthpic.github.io/tech/telepresence/</loc>
     <lastmod>2022-04-24T06:24:46+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://euthpic.github.io/posts/solve-zookeeper-no-response/</loc>
+    <loc>http://euthpic.github.io/tech/zookeeper%E6%9C%8D%E5%8A%A1%E9%A2%91%E7%B9%81%E6%97%A0%E5%93%8D%E5%BA%94%E6%88%91%E4%BB%85%E4%BF%AE%E6%94%B9%E4%B8%80%E8%A1%8C%E9%85%8D%E7%BD%AE%E5%B0%B1%E8%A7%A3%E5%86%B3%E5%AE%83%E4%BA%86/</loc>
     <lastmod>2022-02-16T22:36:36+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://euthpic.github.io/posts/scala-practice/</loc>
+    <loc>http://euthpic.github.io/tech/scala%E5%9F%BA%E7%A1%80%E7%BB%83%E4%B9%A0/</loc>
     <lastmod>2022-02-13T15:14:19+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://euthpic.github.io/posts/k8s-note/</loc>
+    <loc>http://euthpic.github.io/tech/k8s%E7%AC%94%E8%AE%B0/</loc>
     <lastmod>2022-02-11T14:15:12+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://euthpic.github.io/posts/scala-note/</loc>
+    <loc>http://euthpic.github.io/tech/scala%E7%AE%80%E6%98%93%E7%AC%94%E8%AE%B0/</loc>
     <lastmod>2022-02-11T14:00:29+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://euthpic.github.io/posts/deploy-yapi/</loc>
+    <loc>http://euthpic.github.io/tech/%E9%83%A8%E7%BD%B2yapi/</loc>
     <lastmod>2021-12-30T16:32:48+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
-    <loc>http://euthpic.github.io/posts/learn-hugo/</loc>
+    <loc>http://euthpic.github.io/tech/%E7%94%A8hugo%E6%90%AD%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E5%8D%9A%E5%AE%A2/</loc>
     <lastmod>2021-12-02T00:06:10+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>

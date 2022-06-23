@@ -1,0 +1,837 @@
+<!doctype html><html lang=zh dir=auto>
+<head><meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=robots content="index, follow">
+<title>Scala基础练习 | 乱花渐欲迷人眼</title>
+<meta name=keywords content>
+<meta name=description content="import java.io.{PrintWriter} import scala.collection.mutable import scala.io.{Source, StdIn} import scala.reflect.io.File case class Person(id: Int, name: String, age: Int) /** * Scala 基本笔记 */ object ScalaLesson extends App { /** * 基础-算术 */ def lesson1() = { println(1.+(2)) println(2.-(2)) println(2.*(2)) println(2./(2)) println(10 max 2) } /** * 基础-重载 */ def lesson2() = { val str = &#34;Hello&#34;(2) //等同">
+<meta name=author content="Guangfa">
+<link rel=canonical href=http://euthpic.github.io/tech/scala%E5%9F%BA%E7%A1%80%E7%BB%83%E4%B9%A0/>
+<meta name=yandex-verification content="73b1a797f62c0e98">
+<link crossorigin=anonymous href=/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css integrity="sha256-yIlj/i15RiAA/Q+xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as=style>
+<script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=http://euthpic.github.io/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=http://euthpic.github.io/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=http://euthpic.github.io/favicon-32x32.png>
+<link rel=apple-touch-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<link rel=mask-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<meta name=theme-color content="#2e2e33">
+<meta name=msapplication-TileColor content="#2e2e33">
+<meta name=generator content="Hugo 0.89.4">
+<noscript>
+<style>#theme-toggle,.top-link{display:none}</style>
+<style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style>
+</noscript>
+<script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(a,e,f,g,b,c,d){a.GoogleAnalyticsObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=1,c.src=g,d.parentNode.insertBefore(c,d)}(window,document,'script','https://www.google-analytics.com/analytics.js','ga'),ga('create','UA-136094326-1','auto'),ga('send','pageview'))</script><meta property="og:title" content="Scala基础练习">
+<meta property="og:description" content="import java.io.{PrintWriter} import scala.collection.mutable import scala.io.{Source, StdIn} import scala.reflect.io.File case class Person(id: Int, name: String, age: Int) /** * Scala 基本笔记 */ object ScalaLesson extends App { /** * 基础-算术 */ def lesson1() = { println(1.+(2)) println(2.-(2)) println(2.*(2)) println(2./(2)) println(10 max 2) } /** * 基础-重载 */ def lesson2() = { val str = &#34;Hello&#34;(2) //等同">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://euthpic.github.io/tech/scala%E5%9F%BA%E7%A1%80%E7%BB%83%E4%B9%A0/"><meta property="og:image" content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="article:section" content="tech">
+<meta property="article:published_time" content="2022-02-13T15:14:19+08:00">
+<meta property="article:modified_time" content="2022-02-13T15:14:19+08:00"><meta property="og:site_name" content="乱花渐欲迷人眼">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:image content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name=twitter:title content="Scala基础练习">
+<meta name=twitter:description content="import java.io.{PrintWriter} import scala.collection.mutable import scala.io.{Source, StdIn} import scala.reflect.io.File case class Person(id: Int, name: String, age: Int) /** * Scala 基本笔记 */ object ScalaLesson extends App { /** * 基础-算术 */ def lesson1() = { println(1.+(2)) println(2.-(2)) println(2.*(2)) println(2./(2)) println(10 max 2) } /** * 基础-重载 */ def lesson2() = { val str = &#34;Hello&#34;(2) //等同">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Teches","item":"http://euthpic.github.io/tech/"},{"@type":"ListItem","position":2,"name":"Scala基础练习","item":"http://euthpic.github.io/tech/scala%E5%9F%BA%E7%A1%80%E7%BB%83%E4%B9%A0/"}]}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Scala基础练习","name":"Scala基础练习","description":"import java.io.{PrintWriter} import scala.collection.mutable import scala.io.{Source, StdIn} import scala.reflect.io.File case class Person(id: Int, name: String, age: Int) /** * Scala 基本笔记 */ object ScalaLesson extends App { /** * 基础-算术 */ def lesson1() = { println(1.+(2)) println(2.-(2)) println(2.*(2)) println(2./(2)) println(10 max 2) } /** * 基础-重载 */ def lesson2() = { val str = \u0026#34;Hello\u0026#34;(2) //等同","keywords":[],"articleBody":"import java.io.{PrintWriter} import scala.collection.mutable import scala.io.{Source, StdIn} import scala.reflect.io.File case class Person(id: Int, name: String, age: Int) /** * Scala 基本笔记 */ object ScalaLesson extends App { /** * 基础-算术 */ def lesson1() = { println(1.+(2)) println(2.-(2)) println(2.*(2)) println(2./(2)) println(10 max 2) } /** * 基础-重载 */ def lesson2() = { val str = \"Hello\"(2) //等同于java中的”Hello“.charAt(2)  println(str) //实现原理为StringOps包中的一个apply方法：def apply(n:Int): Char  val s = \"Hello\".apply(2) println(s) } /** * 基础-字符串操作 */ def lesson3() = { val str = \"Hello World\" //获取字符串的第一个字符  println(str.head) //获取字符串的最后一个字符  println(str.last) //获取字符串前3个字符  println(str.take(3)) //获取字符串后3个字符  println(str.takeRight(3)) //删除字符串前3个字符  println(str.drop(3)) //删除字符串后3个字符  println(str.dropRight(3)) } /** * 结构与函数-条件判断 */ def lesson4(n: Int) = { //if/else语法结构与java结构一致，在scala中表达式是有值的，这个值就是跟在if/else之后的表达式的值  val s = if (n  1) 1 else 0 //等同于以下方式,不过在scala中推荐使用val而尽量不使用var可变量  //注：scala中不支持三目运算，scala把java的三目运算结合在了if/else中  var a = 0 if (n  1) a = 1 else a = 0 println(s) println(a) } /** * 结构与函数-公共超类 */ def lesson5(n: Int) = { //在scala中存在一个公共超类Any，java中只能返回指定类型，scala可以返回不指定的类型,支持混合型表达式  val s = if (n  0) \"Hello World\" else 1 println(s) //在scala中如果if/else中缺失了else后部分，如：  val a = if (n  0) \"Hello World\" //在scala中每个表达式都是有值的，如果缺失了else后部分，为了解决这个问题，在java的基础上引入了一个Unit类，写作()，这样就等同于if(n0) \"Hello World\" else ()  //这个()相当于一个无用值，Unit与java中的void相当，区别在于void没有值，Unit有一个“无用”的值。  println(a) } /** * 结构与函数-终止语句 */ def lesson6(n: Int) = { //scala中不需要加分号结束,如果是多行写成1行则需要分号结束，但不建议这样写,如：  val s = if (n  0) { var r = 1 * n r -= 1 } else 1 //  } /** * 结构与函数-块表达式 */ def lesson7(n: Int) = { //与java中的{}一致，但scala的块是一种表达式，所以有值，值为表达式的最后语句返回值  val s = { val a = 5 a * n } println(s) } /** * 结构与函数-输入与输出 */ def lesson8() = { //不换行打印  //print(\"Scala\")  //换行打印  //println(\"你好\")  //上面2个打印等同于下面语句  //println(\"Scala\" + \"你好\")  //带C风格格式化字符串的函数  //printf(\"Hello,%s! 你是一款很好的语言,你存在有 %y 年了吗？\",\"Scala\",10)  //读取控制台一行输入(2.11.0以后的版本使用StdIn)  val name = StdIn.readLine() println(\"你输入的姓名是:\" + name) val age = StdIn.readInt() println(\"你输入的年龄是:\" + age) } /** * 结构与函数-while循环 */ def lesson9(n: Int) = { //与java中的while和do循环一致  var i = n while (i  0) { println(i * 3) i -= 1 } } /** * 结构与函数-for循环 */ def lesson10(n: Int) = { //scala中的for循环与java的结构不一样,scala的结构为 for(i  for (i  0 to n) println(i * 3) println(\"-----------------这是分割线-------------------\") //在RichInt类中存在 to 这个方法。0 to n 代表的是 0到n的区间（包含n），如果只是0到n-1的话这采用until方法，如下:  for (i  0 until n) println(i * 3) println(\"-----------------这是分割线-------------------\") val str = \"Hello\" var sum = 0 //在循环中不仅可以对数字区间进行遍历，也可以对字符串进行遍历  for (ch  str) sum += ch println(sum) } /** * 结构与函数-退出循环 */ def lesson11(n: Int) = { //scala中的并没有提供break或者continue语句来退出循环，如果需要break该怎么做，如下：  //1：需要引入import util.control.Breaks._包  import util.control.Breaks._ //break例子  breakable( for (i  0 to 5) { println(i) if (i == n) break } ) println(\"-----------------这是分割线-------------------\") //continue例子,需要注意判断要放在最前面  for (i  0 to 5) { breakable { if (i == n) break println(i) } } println(\"-----------------这是分割线-------------------\") //中断嵌套循环  breakable( for (i  0 to 5) { println(i) breakable( for (a  1 to 3) { println(\"i * a = \" + i * a) if (i * a == 1) break } ) } ) } /** * 结构与函数-高级循环 */ def lesson12(n: Int) = { //scala支持多个生成器,之间用分号隔开,(等同于多个嵌套for循环)如下:  for (i  0 to 3; j  1 to 4) println(i * j) println(\"-----------------这是分割线-------------------\") //scala支持守卫,以if开头的Boolean表达式(注：if之前没有分号):  for (i  0 to 3; j  1 to 4 if i  j) println(i * j) //scala还支持引入循环中的变量：  for (i  1 to 3; j  n to 3) println(i * j) //for推导式，以yield开始:  val list = for (i  1 to 10) yield i % 3 println(list) } /** * 结构与函数-默认参数与带名参数 */ def lesson13(name: String, n: Int = 18) = { println(s\"你的姓名是：$name,年龄是:$n\") } /** * 懒值，只需要在需要懒加载的值或函数前面加 lazy关键字即可,如： * 只有在调用的时候才执行，不调用的时候不执行 */ lazy val m = System.currentTimeMillis() /** * 结构与函数-异常处理 */ def lesson14(n: Int): Unit = { //scala异常的工作原理与java的一样，区别在于scala没有受体异常--不需要声明函数或者方法可能会抛出某种异常  // throw new XXException(xxx)  //捕抓异常采用模式匹配  val a = try { 10 / n } catch { case ex: Exception = println(ex.getMessage) } } /** * 数组操作 */ def lesson15() = { import scala.collection.mutable.ArrayBuffer //定长数组  val arr1 = new Array[Int](5) println(arr1.toString, arr1.length) //推导数组，类型根据推导出来，提供初始值的时候不需要new  val arr2 = Array(\"Hello\", \"world\") println(arr2.toString, arr2.length) //根据角标获取值时采用()而不是java的[]  println(arr2(0)) //变长数组：数组缓冲  //创建空的数组缓冲，准备存放整数  val arr3 = ArrayBuffer[Int]() //用 += 在尾端添加元素  arr3 += 1 //得到ArrayBuffer(1)  arr3 += (1, 3, 4, 8, 2) //得到ArrayBuffer(1,1,3,4,8,2)  arr3 ++= Array(9, 3, 5) // 可以用 ++= 操作符追加任何的集合  //得到ArrayBuffer(1,1,3,4,8,2,9,3,5)  arr3.trimEnd(2) //移除最后2个元素  arr3.trimStart(2) //移除最前2个元素  //可以在任意位置插入元素(低效)  arr3.insert(1, 3) //可以在任意地方移除多少个元素(低效)  arr3.remove(1, 2) //数组缓冲转成Array  arr3.toArray //数组转数组缓冲  arr1.toBuffer } /** * 数组操作-遍历 */ def lesson16() = { val arr1 = Array(1, 2, 6, 3, 8, 4) //需要下标时  for (i  0 until arr1.length) println(i + \" : \" + arr1(i)) println(\"-----------------这是分割线-------------------\") //不需要下标时  for (e  arr1) println(e) println(\"-----------------这是分割线-------------------\") //数组转换,采用yield关键字  val r = for (e  arr1) yield 2 * e println(r.toList) } /** * 数组操作-常用算法 */ def lesson17() = { val arr1 = Array(1, 2, 6, 3, 8, 4) //求和  println(arr1.sum) //获取最大值  println(arr1.max) //获取最小值  println(arr1.min) //获取平均值  println(if (arr1.nonEmpty) arr1.sum / arr1.length else 0) //从小到大排序(注:排序得到的是一个新数组缓冲，原数组不会改变)  val r = arr1.sorted //指定排序  val r1 = arr1.sortWith(_  _) println(r.toList) println(r1.toList) //数组拼接成字符串  println(r1.toString) println(r1.mkString) println(r1.mkString(\",\")) } /** * 数组操作-多维数组 */ def lesson18(): Unit = { //与java一样，多维数组是通过数组的数组来实现的。Double的二维数组类型为Array[Array[Double]]  //要构造这样函数可以采用ofDim方法：  val matrix = Array.ofDim[Double](3, 4) //三行四列  //访问这样的数组，使用两对圆括号(row)(column):  matrix(1)(2) } /** * 数组操作-与java的相互操作 */ def lesson19(): Unit = { //引入相应的包  import scala.collection.JavaConversions.bufferAsJavaList import scala.collection.mutable.ArrayBuffer val command = ArrayBuffer(\"ls\", \"-al\", \"/home/cay\") val pb = new ProcessBuilder(command) //Scala转java  import scala.collection.JavaConversions.asScalaBuffer import scala.collection.mutable.Buffer val cmd: Buffer[String] = pb.command() //java转Scala  } /** * 映射与元组-映射 */ def lesson20(): Unit = { //构建一个不可变的映射(建议)  val map = Map(\"张三\" - 98, \"李四\" - 83, \"王五\" - 100) //构建一个可变的映射(不建议)  val map1 = mutable.Map(\"张三\" - 98, \"李四\" - 83, \"王五\" - 100) //构建一个空的映射，需要指定类型参数  val map2 = new mutable.HashMap[String, Int]() // - 操作符用来创建对偶  // (\"张三\" - 98) 等同于 (\"张三\" , 98)，所以也可以用以下方式定义映射:  val map3 = Map((\"张三\", 98), (\"李四\", 83), (\"王五\", 100)) //获取映射中的值，直接使用(),相当于java中的map.get(\"张三\")  println(map(\"张三\")) //如果key不存在，则会抛异常，检查映射中是否存在某个key，可以使用contains方法:  val value = if (map.contains(\"张三\")) map(\"张三\") else 0 //可以简写成getOrElse(key,result):  println(map.getOrElse(\"张三\", 0)) //更新可变映射中的值  map1(\"张三\") = 67 //增加可变映射中的值  map1(\"赵六\") = 74 //可以使用 += 增加多个关系  map1 += (\"王七\" - 35, \"蔡八\" - 86) //可以使用 -= 移除对应的键值  map1 -= \"王五\" //可以使用 + 操作符生成新的映射  val map4 = map + (\"王七\" - 35, \"蔡八\" - 86) //映射遍历 for((k,v)  } /** * 映射与元组-元组 */ def lesson21() = { //映射是键值对的集合，对偶则是元组（tuple）的最简单形态--元组是不同类型的值的聚集，元组的值是通过将单个的值包含在()构成的,如：  val t = (2, \"张三\", 4d) //类型分别为 Tuple[Int, String, Double]  //元组的访问可以使用_1、_2、_3这样  println(t._1) println(t._2) println(t._3) //也可以在返回值的时候就定义下来，通常使用这种,这样更为直观的表达出返回的结果分别代表什么  val (first, second, third) = t println(first) println(second) println(third) } /** * 映射与元组-拉链操作 */ def lesson22(): Unit = { //使用元组的原因之一是吧多个值绑定在一起，以方便它们能够被一起处理，这个通常可以使用zip方法来完成，如下：  val a1 = Array(\"张三\", \"李四\", \"王五\") val a2 = Array(55, 26, 96) val p = a1.zip(a2) //得到的对偶数组为Array((\"张三\",55),(\"李四\",26),(\"王五\",96))  //还可以把对偶数组转成映射  println(p.toMap) //得到结果 Map(张三 - 55, 李四 - 26, 王五 - 96)  } /** * 对象-单例对象 * 在Scala中没有静态方法或者静态字段，可以通过object语法结构来定义 * */ object Accounts { //伴生对象  private var lastNumber = 0 def newUniqueNumber() = { lastNumber += 1; lastNumber } } /** * 对象-伴生对象 * 在Scala中没有静态方法或者静态字段，可以通过object语法结构来定义 * */ class Accounts { val id = Accounts.newUniqueNumber() } /** * 对象-扩展类或特质对象 */ abstract class UndoableAction(val desc: String) { def undo(): Unit def redo(): Unit } object DoNothingAction extends UndoableAction(\"Do nothing\") { override def undo(): Unit = {} override def redo(): Unit = {} } //DoNothingAction可以被所有所需要这个缺省行为的地方共用  val actions = Map(\"open\" - DoNothingAction, \"save\" - DoNothingAction) /** * 对象-应用程序对象 * 每个Scala程序都必须从一个对象main方法开始，也可以扩展App特质 * object Hello{ * def main(args:Array[String]) { * println(\"Hello World\") * } * } */ /** * 对象-枚举 * scala中并没有枚举类型，不过提供了一个Enumeration助手类，可以用于产出枚举 */ object TrafficLightColor extends Enumeration { val Red = Value(0, \"Stop\") val Yellow = Value(10) val Green = Value(\"Go\") } def lesson23(): Unit = { println(TrafficLightColor.Red) println(TrafficLightColor.Yellow) println(TrafficLightColor.Green) } /** * 文件操作-读取文件 */ def lesson24(): Unit = { //以指定的GBK字符集读取文件，第一个参数可以是字符串或者是java.io.File  val source = Source.fromFile(\"贪腐词库.txt\", \"GBK\") //获取所有行  val lines = source.getLines() //将所有行放到list中  val list = lines.toList //将文件用逗号串起来(注：旧版采用source.mkString,新版中获取不到值)  val str = list.mkString //println(\"------------\"+str)  //迭代打印集合  //list.foreach(it=println(it))  //关闭流  source.close() } /** * 文件操作-从URL读取文件 */ def lesson25(): Unit = { val source = Source.fromURL(\"https://www.baidu.com\", \"UTF-8\") //获取所有行  val lines = source.getLines() //将所有行放到list中  val list = lines.toList //将文件用逗号串起来(注：旧版采用source.mkString,新版中获取不到值)  val str = list.mkString //println(\"------------\"+str)  //迭代打印集合  list.foreach(it = println(it)) //关闭流  source.close() } /** * 文件操作-读取二进制文件 */ def lesson26(): Unit = { val file = File(\"其他词库.txt\") val in = file.inputStream() val bytes = new Array[Byte](file.length.toInt) in.read(bytes) println(bytes.mkString(\",\")) in.close() } /** * 文件操作-写入文件 */ def lesson27() = { //scala中没有内建对文件的支持，所以使用java.io.PrintWriter  val out = new PrintWriter(\"test.txt\") for (i  1 to 100) out.println(i) } /** * 正则表达式 */ def lesson28() = { //采用String中的r方法  val pattern = \"[0-9]+\".r println(pattern findAllIn \"02,2\") } /** * 操作符 */ def lesson29() = { //在scala中可以使用任意序列的操作字符作为定义,如:  val * = \"ere\" val \u0026 = \"ere\" val ! = \"ere\" //一旦遇到命名定义是scala关键字的还可以采用反引号来拯救(当然平时还是注意少用scala的关键字来命名)  val `type` = 354 //还可以使用 a 标识符 b 这样写  //1 to 10 //实际上是调用了 1.to(10) 的方法  //1- 10 //等同调用 1.—(10) 的方法  //1 toString //等同于 1.toString ，以上均为一元操作符，点号可以省略  //赋值操作符 a 操作符= b 等同于 a = a + b  //1 += 2 //等同于 1 = 1 + 2  //结合性,已冒号结束，操作符是右结合  //1::2::Nil //等同于 1::(2::Nil)  } import math._ /** * 高阶函数-值函数 */ def lesson30() = { val num = 3.14 //把 ceil函数赋值给fun  val fun = ceil _ val a = Array(2.14, 1.42, 2.0).map(fun) println(a.mkString(\",\")) } /** * 高阶函数-匿名函数 */ def lesson31() = { val s = (x: Double) = 3 * x //等同于 def s(x:Double) = 3 * x  println(s(3)) } /** * 高阶函数-带函数参数的函数 */ def lesson32(f: (Double) = Double) = { f(0.25) } //对于只出现一次的参数，可以使用_替代  //lesson32(ceil _)  /** * 高阶函数-一些有用的高阶函数 */ def lesson33() = { val list = List(\"张三\", \"李四\", \"王五\") //map方法，遍历应用到集合中的所有元素，并返回全新的结果集合  println(list.map(it = it - \"你好\")) //foreach方法,遍历集合的所有元素，但不返回结果(对于只出现一次的参数，可以使用_替代)  list.foreach(println(_)) //filter方法,根据条件过滤生成全新的集合  val f = list.filter(_ != \"张三\") println(f) //sortWith方法,指定参数排序，返回全新的集合  println(list.sortWith(_  _)) //sorted方法,从低到高排序，返回全新的集合  println(list.sortWith(_  _).sorted) //groupBy方法,根据指定参数进行合并分组，返回map[object,List[object]]集合  val userList = List(Person(1, \"张三\", 23), Person(2, \"李四\", 45), Person(1, \"王五\", 30)) val map: Map[Int, List[Person]] = userList.groupBy(_.id) //Map遍历,_1代表key,_2代表value  map.foreach(it = { println(it._1) println(it._2) }) //exists方法,遍历判断条件是否成立  println(list.exists(_ == \"张三\")) //distinct方法,去除重复的元素  println(list.distinct) } /** * 集合之间的操作 */ def lesson34() = { //注：在scala中不可变集合进行操作生成的都为新的集合，原有集合不发生改变  val list = List(1, 2, 3) val map = Map(1 - \"java\", 2 - \"scala\", 3 - \"php\") //List追加元素, 后面追加采用 :+ 前面追加采用 +:  println(list :+ 2) //List移除元素  println(list.toSet - 2) //List第一位置增加元素  println(5 +: list) //2个List合并，采用:::或者 ++ 或者 | 或者++:  println(list ++ List(6)) println(list ::: List(6)) println(list ++: List(6)) println(list.toSet | List(7).toSet) //list中移除另外一个List中所有包含的元素,采用 -- 或者 \u0026~  println(list.toSet -- List(2)) println(list.toSet \u0026~ List(2).toSet) //俩个list的交集  println(list.toSet \u0026 List(2).toSet) } /** * 模式匹配-更好的switch */ def lesson35(n: Int) = { //scala的switch更优雅的处理方式，在c和类C语言中，模式匹配必须在末尾显式的使用break语句进行退出switch，scala不会有这样的问题  //match与if类似，都是使用表达式。在很多时候match的使用更优雅与if/else if，这样不会出现多层嵌套的情况  val result = n match { case 1 = \"张三\" case 2 = \"李四\" case _ = \"王五\" } println(result) //模式用还可以使用守卫，如下：  val r = n match { case 1 = \"张三\" case a if (a  5) = \"李四\" case _ = \"王五\" } println(r) //类型匹配，如下：  val ar: Any = if (n  0) 1 else \"Hello\" val s = ar match { case i: Int = \"张三\" case s: String = \"李四\" case _ = \"王五\" } println(s) } /** * 模式匹配-Option类型 */ def lesson36() = { //生成Option带值的元素  val o: Option[String] = Some(\"张三\") println(o) //生成不带值的Option元素  val o1: Option[Nothing] = None println(o1) //Option元素获取值，采用get方法  println(o.get) //但是直接采用get方法很容易出现 java.util.NoSuchElementException: None.get异常，scala提供了组合方法getOrElse  println(o1.getOrElse(\"\")) } /** * 模式匹配-断言 */ def lesson37(n: Int) = { //在scala中与java一样使用断言，格式 assert(条件,提示语)  assert(n  1, \"参数不能小于2\") } def lesson38() = { (0 to 10).map(println(_)) } lesson38() } ","wordCount":"6869","inLanguage":"zh","datePublished":"2022-02-13T15:14:19+08:00","dateModified":"2022-02-13T15:14:19+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/scala%E5%9F%BA%E7%A1%80%E7%BB%83%E4%B9%A0/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
+</head>
+<body id=top>
+<script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
+<header class=header>
+<nav class=nav>
+<div class=logo>
+<a href=http://euthpic.github.io/ accesskey=h title="🏡 乱花渐欲迷人眼 (Alt + H)">🏡 乱花渐欲迷人眼</a>
+<span class=logo-switches>
+<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+</span>
+</div>
+<ul id=menu>
+<li>
+<a href=http://euthpic.github.io/categories/ title="📔 系列">
+<span>📔 系列</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/tags/ title="🏷️ 标签">
+<span>🏷️ 标签</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/search/ title="🔍 搜索 (Alt + /)" accesskey=/>
+<span>🔍 搜索</span>
+</a>
+</li>
+<li>
+<a href=https://travellings.link title=🚇>
+<span>🚇</span>
+</a>
+</li>
+</ul>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-header>
+<div class=breadcrumbs><a href=http://euthpic.github.io/>主页</a>&nbsp;»&nbsp;<a href=http://euthpic.github.io/tech/>Teches</a></div>
+<h1 class=post-title>
+Scala基础练习
+</h1>
+<div class=post-meta><span title="2022-02-13 15:14:19 +0800 CST">February 13, 2022</span>&nbsp;·&nbsp;14 分钟&nbsp;·&nbsp;Guangfa&nbsp;|&nbsp;<a href=https://github.com/euthpic/euthpic.github.io/edit/main/content/tech/Scala%e5%9f%ba%e7%a1%80%e7%bb%83%e4%b9%a0.md rel="noopener noreferrer" target=_blank>PR</a>
+</div>
+</header>
+<div class=post-content><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-scala data-lang=scala>
+<span style=color:#66d9ef>import</span> java.io.<span style=color:#f92672>{</span><span style=color:#a6e22e>PrintWriter</span><span style=color:#f92672>}</span>
+
+<span style=color:#66d9ef>import</span> scala.collection.mutable
+<span style=color:#66d9ef>import</span> scala.io.<span style=color:#f92672>{</span><span style=color:#a6e22e>Source</span><span style=color:#f92672>,</span> <span style=color:#a6e22e>StdIn</span><span style=color:#f92672>}</span>
+<span style=color:#66d9ef>import</span> scala.reflect.io.File
+
+<span style=color:#66d9ef>case</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Person</span><span style=color:#f92672>(</span>id<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Int</span><span style=color:#f92672>,</span> name<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>String</span><span style=color:#f92672>,</span> age<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Int</span><span style=color:#f92672>)</span>
+
+<span style=color:#75715e>/**
+</span><span style=color:#75715e> * Scala 基本笔记
+</span><span style=color:#75715e> */</span>
+<span style=color:#66d9ef>object</span> <span style=color:#a6e22e>ScalaLesson</span> <span style=color:#66d9ef>extends</span> <span style=color:#a6e22e>App</span> <span style=color:#f92672>{</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 基础-算术
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson1<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    println<span style=color:#f92672>(</span><span style=color:#ae81ff>1.</span><span style=color:#f92672>+(</span><span style=color:#ae81ff>2</span><span style=color:#f92672>))</span>
+    println<span style=color:#f92672>(</span><span style=color:#ae81ff>2.</span><span style=color:#f92672>-(</span><span style=color:#ae81ff>2</span><span style=color:#f92672>))</span>
+    println<span style=color:#f92672>(</span><span style=color:#ae81ff>2.</span><span style=color:#f92672>*(</span><span style=color:#ae81ff>2</span><span style=color:#f92672>))</span>
+    println<span style=color:#f92672>(</span><span style=color:#ae81ff>2.</span><span style=color:#f92672>/(</span><span style=color:#ae81ff>2</span><span style=color:#f92672>))</span>
+    println<span style=color:#f92672>(</span><span style=color:#ae81ff>10</span> max <span style=color:#ae81ff>2</span><span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 基础-重载
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson2<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>val</span> str <span style=color:#66d9ef>=</span> <span style=color:#e6db74>&#34;Hello&#34;</span><span style=color:#f92672>(</span><span style=color:#ae81ff>2</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//等同于java中的”Hello“.charAt(2)
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>str<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//实现原理为StringOps包中的一个apply方法：def apply(n:Int): Char
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> s <span style=color:#66d9ef>=</span> <span style=color:#e6db74>&#34;Hello&#34;</span><span style=color:#f92672>.</span>apply<span style=color:#f92672>(</span><span style=color:#ae81ff>2</span><span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>s<span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 基础-字符串操作
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson3<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>val</span> str <span style=color:#66d9ef>=</span> <span style=color:#e6db74>&#34;Hello World&#34;</span>
+    <span style=color:#75715e>//获取字符串的第一个字符
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>str<span style=color:#f92672>.</span>head<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//获取字符串的最后一个字符
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>str<span style=color:#f92672>.</span>last<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//获取字符串前3个字符
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>str<span style=color:#f92672>.</span>take<span style=color:#f92672>(</span><span style=color:#ae81ff>3</span><span style=color:#f92672>))</span>
+    <span style=color:#75715e>//获取字符串后3个字符
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>str<span style=color:#f92672>.</span>takeRight<span style=color:#f92672>(</span><span style=color:#ae81ff>3</span><span style=color:#f92672>))</span>
+    <span style=color:#75715e>//删除字符串前3个字符
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>str<span style=color:#f92672>.</span>drop<span style=color:#f92672>(</span><span style=color:#ae81ff>3</span><span style=color:#f92672>))</span>
+    <span style=color:#75715e>//删除字符串后3个字符
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>str<span style=color:#f92672>.</span>dropRight<span style=color:#f92672>(</span><span style=color:#ae81ff>3</span><span style=color:#f92672>))</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 结构与函数-条件判断
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson4<span style=color:#f92672>(</span>n<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Int</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//if/else语法结构与java结构一致，在scala中表达式是有值的，这个值就是跟在if/else之后的表达式的值
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> s <span style=color:#66d9ef>=</span> <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>n <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1</span><span style=color:#f92672>)</span> <span style=color:#ae81ff>1</span> <span style=color:#66d9ef>else</span> <span style=color:#ae81ff>0</span>
+    <span style=color:#75715e>//等同于以下方式,不过在scala中推荐使用val而尽量不使用var可变量
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//注：scala中不支持三目运算，scala把java的三目运算结合在了if/else中
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>var</span> a <span style=color:#66d9ef>=</span> <span style=color:#ae81ff>0</span>
+    <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>n <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1</span><span style=color:#f92672>)</span> a <span style=color:#66d9ef>=</span> <span style=color:#ae81ff>1</span> <span style=color:#66d9ef>else</span> a <span style=color:#66d9ef>=</span> <span style=color:#ae81ff>0</span>
+    println<span style=color:#f92672>(</span>s<span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>a<span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 结构与函数-公共超类
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson5<span style=color:#f92672>(</span>n<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Int</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//在scala中存在一个公共超类Any，java中只能返回指定类型，scala可以返回不指定的类型,支持混合型表达式
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> s <span style=color:#66d9ef>=</span> <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>n <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span><span style=color:#f92672>)</span> <span style=color:#e6db74>&#34;Hello World&#34;</span> <span style=color:#66d9ef>else</span> <span style=color:#ae81ff>1</span>
+    println<span style=color:#f92672>(</span>s<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//在scala中如果if/else中缺失了else后部分，如：
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> a <span style=color:#66d9ef>=</span> <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>n <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span><span style=color:#f92672>)</span> <span style=color:#e6db74>&#34;Hello World&#34;</span>
+    <span style=color:#75715e>//在scala中每个表达式都是有值的，如果缺失了else后部分，为了解决这个问题，在java的基础上引入了一个Unit类，写作()，这样就等同于if(n&gt;0) &#34;Hello World&#34; else ()
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//这个()相当于一个无用值，Unit与java中的void相当，区别在于void没有值，Unit有一个“无用”的值。
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>a<span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 结构与函数-终止语句
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson6<span style=color:#f92672>(</span>n<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Int</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//scala中不需要加分号结束,如果是多行写成1行则需要分号结束，但不建议这样写,如：
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> s <span style=color:#66d9ef>=</span> <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>n <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+      <span style=color:#66d9ef>var</span> r <span style=color:#66d9ef>=</span> <span style=color:#ae81ff>1</span> <span style=color:#f92672>*</span> n
+      r <span style=color:#f92672>-=</span> <span style=color:#ae81ff>1</span>
+    <span style=color:#f92672>}</span> <span style=color:#66d9ef>else</span> <span style=color:#ae81ff>1</span>
+    <span style=color:#75715e>//
+</span><span style=color:#75715e></span>  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 结构与函数-块表达式
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson7<span style=color:#f92672>(</span>n<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Int</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//与java中的{}一致，但scala的块是一种表达式，所以有值，值为表达式的最后语句返回值
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> s <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+      <span style=color:#66d9ef>val</span> a <span style=color:#66d9ef>=</span> <span style=color:#ae81ff>5</span>
+      a <span style=color:#f92672>*</span> n
+    <span style=color:#f92672>}</span>
+    println<span style=color:#f92672>(</span>s<span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 结构与函数-输入与输出
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson8<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//不换行打印
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//print(&#34;Scala&#34;)
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//换行打印
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//println(&#34;你好&#34;)
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//上面2个打印等同于下面语句
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//println(&#34;Scala&#34; + &#34;你好&#34;)
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//带C风格格式化字符串的函数
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//printf(&#34;Hello,%s! 你是一款很好的语言,你存在有 %y 年了吗？&#34;,&#34;Scala&#34;,10)
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//读取控制台一行输入(2.11.0以后的版本使用StdIn)
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> name <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>StdIn</span><span style=color:#f92672>.</span>readLine<span style=color:#f92672>()</span>
+    println<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;你输入的姓名是:&#34;</span> <span style=color:#f92672>+</span> name<span style=color:#f92672>)</span>
+    <span style=color:#66d9ef>val</span> age <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>StdIn</span><span style=color:#f92672>.</span>readInt<span style=color:#f92672>()</span>
+    println<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;你输入的年龄是:&#34;</span> <span style=color:#f92672>+</span> age<span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 结构与函数-while循环
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson9<span style=color:#f92672>(</span>n<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Int</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//与java中的while和do循环一致
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>var</span> i <span style=color:#66d9ef>=</span> n
+    <span style=color:#66d9ef>while</span> <span style=color:#f92672>(</span>i <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+      println<span style=color:#f92672>(</span>i <span style=color:#f92672>*</span> <span style=color:#ae81ff>3</span><span style=color:#f92672>)</span>
+      i <span style=color:#f92672>-=</span> <span style=color:#ae81ff>1</span>
+    <span style=color:#f92672>}</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 结构与函数-for循环
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson10<span style=color:#f92672>(</span>n<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Int</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//scala中的for循环与java的结构不一样,scala的结构为 for(i &lt;- 表达式)
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>i <span style=color:#66d9ef>&lt;-</span> <span style=color:#ae81ff>0</span> to n<span style=color:#f92672>)</span> println<span style=color:#f92672>(</span>i <span style=color:#f92672>*</span> <span style=color:#ae81ff>3</span><span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;-----------------这是分割线-------------------&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//在RichInt类中存在 to 这个方法。0 to n 代表的是 0到n的区间（包含n），如果只是0到n-1的话这采用until方法，如下:
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>i <span style=color:#66d9ef>&lt;-</span> <span style=color:#ae81ff>0</span> until n<span style=color:#f92672>)</span> println<span style=color:#f92672>(</span>i <span style=color:#f92672>*</span> <span style=color:#ae81ff>3</span><span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;-----------------这是分割线-------------------&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#66d9ef>val</span> str <span style=color:#66d9ef>=</span> <span style=color:#e6db74>&#34;Hello&#34;</span>
+    <span style=color:#66d9ef>var</span> sum <span style=color:#66d9ef>=</span> <span style=color:#ae81ff>0</span>
+    <span style=color:#75715e>//在循环中不仅可以对数字区间进行遍历，也可以对字符串进行遍历
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>ch <span style=color:#66d9ef>&lt;-</span> str<span style=color:#f92672>)</span> sum <span style=color:#f92672>+=</span> ch
+    println<span style=color:#f92672>(</span>sum<span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 结构与函数-退出循环
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson11<span style=color:#f92672>(</span>n<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Int</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//scala中的并没有提供break或者continue语句来退出循环，如果需要break该怎么做，如下：
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//1：需要引入import util.control.Breaks._包
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>import</span> util.control.Breaks._
+    <span style=color:#75715e>//break例子
+</span><span style=color:#75715e></span>    breakable<span style=color:#f92672>(</span>
+      <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>i <span style=color:#66d9ef>&lt;-</span> <span style=color:#ae81ff>0</span> to <span style=color:#ae81ff>5</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        println<span style=color:#f92672>(</span>i<span style=color:#f92672>)</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>i <span style=color:#f92672>==</span> n<span style=color:#f92672>)</span> break
+      <span style=color:#f92672>}</span>
+    <span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;-----------------这是分割线-------------------&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//continue例子,需要注意判断要放在最前面
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>i <span style=color:#66d9ef>&lt;-</span> <span style=color:#ae81ff>0</span> to <span style=color:#ae81ff>5</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+      breakable <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>i <span style=color:#f92672>==</span> n<span style=color:#f92672>)</span> break
+        println<span style=color:#f92672>(</span>i<span style=color:#f92672>)</span>
+      <span style=color:#f92672>}</span>
+    <span style=color:#f92672>}</span>
+    println<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;-----------------这是分割线-------------------&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//中断嵌套循环
+</span><span style=color:#75715e></span>    breakable<span style=color:#f92672>(</span>
+      <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>i <span style=color:#66d9ef>&lt;-</span> <span style=color:#ae81ff>0</span> to <span style=color:#ae81ff>5</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        println<span style=color:#f92672>(</span>i<span style=color:#f92672>)</span>
+        breakable<span style=color:#f92672>(</span>
+          <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>a <span style=color:#66d9ef>&lt;-</span> <span style=color:#ae81ff>1</span> to <span style=color:#ae81ff>3</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            println<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;i * a = &#34;</span> <span style=color:#f92672>+</span> i <span style=color:#f92672>*</span> a<span style=color:#f92672>)</span>
+            <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>i <span style=color:#f92672>*</span> a <span style=color:#f92672>==</span> <span style=color:#ae81ff>1</span><span style=color:#f92672>)</span> break
+          <span style=color:#f92672>}</span>
+        <span style=color:#f92672>)</span>
+      <span style=color:#f92672>}</span>
+    <span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 结构与函数-高级循环
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson12<span style=color:#f92672>(</span>n<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Int</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//scala支持多个生成器,之间用分号隔开,(等同于多个嵌套for循环)如下:
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>i <span style=color:#66d9ef>&lt;-</span> <span style=color:#ae81ff>0</span> to <span style=color:#ae81ff>3</span><span style=color:#f92672>;</span> j <span style=color:#66d9ef>&lt;-</span> <span style=color:#ae81ff>1</span> to <span style=color:#ae81ff>4</span><span style=color:#f92672>)</span> println<span style=color:#f92672>(</span>i <span style=color:#f92672>*</span> j<span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;-----------------这是分割线-------------------&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//scala支持守卫,以if开头的Boolean表达式(注：if之前没有分号):
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>i <span style=color:#66d9ef>&lt;-</span> <span style=color:#ae81ff>0</span> to <span style=color:#ae81ff>3</span><span style=color:#f92672>;</span> j <span style=color:#66d9ef>&lt;-</span> <span style=color:#ae81ff>1</span> to <span style=color:#ae81ff>4</span> <span style=color:#66d9ef>if</span> i <span style=color:#f92672>&lt;</span> j<span style=color:#f92672>)</span> println<span style=color:#f92672>(</span>i <span style=color:#f92672>*</span> j<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//scala还支持引入循环中的变量：
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>i <span style=color:#66d9ef>&lt;-</span> <span style=color:#ae81ff>1</span> to <span style=color:#ae81ff>3</span><span style=color:#f92672>;</span> j <span style=color:#66d9ef>&lt;-</span> n to <span style=color:#ae81ff>3</span><span style=color:#f92672>)</span> println<span style=color:#f92672>(</span>i <span style=color:#f92672>*</span> j<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//for推导式，以yield开始:
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> list <span style=color:#66d9ef>=</span> <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>i <span style=color:#66d9ef>&lt;-</span> <span style=color:#ae81ff>1</span> to <span style=color:#ae81ff>10</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>yield</span> i <span style=color:#f92672>%</span> <span style=color:#ae81ff>3</span>
+    println<span style=color:#f92672>(</span>list<span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 结构与函数-默认参数与带名参数
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson13<span style=color:#f92672>(</span>name<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>String</span><span style=color:#f92672>,</span> n<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Int</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>18</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    println<span style=color:#f92672>(</span><span style=color:#e6db74>s&#34;你的姓名是：</span><span style=color:#e6db74>$name</span><span style=color:#e6db74>,年龄是:</span><span style=color:#e6db74>$n</span><span style=color:#e6db74>&#34;</span><span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 懒值，只需要在需要懒加载的值或函数前面加 lazy关键字即可,如：
+</span><span style=color:#75715e>   * 只有在调用的时候才执行，不调用的时候不执行
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>lazy</span> <span style=color:#66d9ef>val</span> m <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>System</span><span style=color:#f92672>.</span>currentTimeMillis<span style=color:#f92672>()</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 结构与函数-异常处理
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson14<span style=color:#f92672>(</span>n<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Int</span><span style=color:#f92672>)</span><span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Unit</span> <span style=color:#f92672>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//scala异常的工作原理与java的一样，区别在于scala没有受体异常--不需要声明函数或者方法可能会抛出某种异常
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// throw new XXException(xxx)
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//捕抓异常采用模式匹配
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> a <span style=color:#66d9ef>=</span> <span style=color:#66d9ef>try</span> <span style=color:#f92672>{</span>
+      <span style=color:#ae81ff>10</span> <span style=color:#f92672>/</span> n
+    <span style=color:#f92672>}</span> <span style=color:#66d9ef>catch</span> <span style=color:#f92672>{</span>
+      <span style=color:#66d9ef>case</span> ex<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Exception</span> <span style=color:#f92672>=&gt;</span> println<span style=color:#f92672>(</span>ex<span style=color:#f92672>.</span>getMessage<span style=color:#f92672>)</span>
+    <span style=color:#f92672>}</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 数组操作
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson15<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>import</span> scala.collection.mutable.ArrayBuffer
+    <span style=color:#75715e>//定长数组
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> arr1 <span style=color:#66d9ef>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>Array</span><span style=color:#f92672>[</span><span style=color:#66d9ef>Int</span><span style=color:#f92672>](</span><span style=color:#ae81ff>5</span><span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>arr1<span style=color:#f92672>.</span>toString<span style=color:#f92672>,</span> arr1<span style=color:#f92672>.</span>length<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//推导数组，类型根据推导出来，提供初始值的时候不需要new
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> arr2 <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Array</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;Hello&#34;</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;world&#34;</span><span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>arr2<span style=color:#f92672>.</span>toString<span style=color:#f92672>,</span> arr2<span style=color:#f92672>.</span>length<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//根据角标获取值时采用()而不是java的[]
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>arr2<span style=color:#f92672>(</span><span style=color:#ae81ff>0</span><span style=color:#f92672>))</span>
+
+    <span style=color:#75715e>//变长数组：数组缓冲
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//创建空的数组缓冲，准备存放整数
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> arr3 <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>ArrayBuffer</span><span style=color:#f92672>[</span><span style=color:#66d9ef>Int</span><span style=color:#f92672>]()</span>
+    <span style=color:#75715e>//用 += 在尾端添加元素
+</span><span style=color:#75715e></span>    arr3 <span style=color:#f92672>+=</span> <span style=color:#ae81ff>1</span>
+    <span style=color:#75715e>//得到ArrayBuffer(1)
+</span><span style=color:#75715e></span>    arr3 <span style=color:#f92672>+=</span> <span style=color:#f92672>(</span><span style=color:#ae81ff>1</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>3</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>4</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>8</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>2</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//得到ArrayBuffer(1,1,3,4,8,2)
+</span><span style=color:#75715e></span>    arr3 <span style=color:#f92672>++=</span> <span style=color:#a6e22e>Array</span><span style=color:#f92672>(</span><span style=color:#ae81ff>9</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>3</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>5</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>// 可以用 ++= 操作符追加任何的集合
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//得到ArrayBuffer(1,1,3,4,8,2,9,3,5)
+</span><span style=color:#75715e></span>    arr3<span style=color:#f92672>.</span>trimEnd<span style=color:#f92672>(</span><span style=color:#ae81ff>2</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//移除最后2个元素
+</span><span style=color:#75715e></span>    arr3<span style=color:#f92672>.</span>trimStart<span style=color:#f92672>(</span><span style=color:#ae81ff>2</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//移除最前2个元素
+</span><span style=color:#75715e></span>
+    <span style=color:#75715e>//可以在任意位置插入元素(低效)
+</span><span style=color:#75715e></span>    arr3<span style=color:#f92672>.</span>insert<span style=color:#f92672>(</span><span style=color:#ae81ff>1</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>3</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//可以在任意地方移除多少个元素(低效)
+</span><span style=color:#75715e></span>    arr3<span style=color:#f92672>.</span>remove<span style=color:#f92672>(</span><span style=color:#ae81ff>1</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>2</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//数组缓冲转成Array
+</span><span style=color:#75715e></span>    arr3<span style=color:#f92672>.</span>toArray
+    <span style=color:#75715e>//数组转数组缓冲
+</span><span style=color:#75715e></span>    arr1<span style=color:#f92672>.</span>toBuffer
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 数组操作-遍历
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson16<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>val</span> arr1 <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Array</span><span style=color:#f92672>(</span><span style=color:#ae81ff>1</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>2</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>6</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>3</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>8</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>4</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//需要下标时
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>i <span style=color:#66d9ef>&lt;-</span> <span style=color:#ae81ff>0</span> until arr1<span style=color:#f92672>.</span>length<span style=color:#f92672>)</span> println<span style=color:#f92672>(</span>i <span style=color:#f92672>+</span> <span style=color:#e6db74>&#34; : &#34;</span> <span style=color:#f92672>+</span> arr1<span style=color:#f92672>(</span>i<span style=color:#f92672>))</span>
+    println<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;-----------------这是分割线-------------------&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//不需要下标时
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>e <span style=color:#66d9ef>&lt;-</span> arr1<span style=color:#f92672>)</span> println<span style=color:#f92672>(</span>e<span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;-----------------这是分割线-------------------&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//数组转换,采用yield关键字
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> r <span style=color:#66d9ef>=</span> <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>e <span style=color:#66d9ef>&lt;-</span> arr1<span style=color:#f92672>)</span> <span style=color:#66d9ef>yield</span> <span style=color:#ae81ff>2</span> <span style=color:#f92672>*</span> e
+    println<span style=color:#f92672>(</span>r<span style=color:#f92672>.</span>toList<span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 数组操作-常用算法
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson17<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>val</span> arr1 <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Array</span><span style=color:#f92672>(</span><span style=color:#ae81ff>1</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>2</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>6</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>3</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>8</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>4</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//求和
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>arr1<span style=color:#f92672>.</span>sum<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//获取最大值
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>arr1<span style=color:#f92672>.</span>max<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//获取最小值
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>arr1<span style=color:#f92672>.</span>min<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//获取平均值
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span><span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>arr1<span style=color:#f92672>.</span>nonEmpty<span style=color:#f92672>)</span> arr1<span style=color:#f92672>.</span>sum <span style=color:#f92672>/</span> arr1<span style=color:#f92672>.</span>length <span style=color:#66d9ef>else</span> <span style=color:#ae81ff>0</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//从小到大排序(注:排序得到的是一个新数组缓冲，原数组不会改变)
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> r <span style=color:#66d9ef>=</span> arr1<span style=color:#f92672>.</span>sorted
+    <span style=color:#75715e>//指定排序
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> r1 <span style=color:#66d9ef>=</span> arr1<span style=color:#f92672>.</span>sortWith<span style=color:#f92672>(</span><span style=color:#66d9ef>_</span> <span style=color:#f92672>&lt;</span> <span style=color:#66d9ef>_</span><span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>r<span style=color:#f92672>.</span>toList<span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>r1<span style=color:#f92672>.</span>toList<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//数组拼接成字符串
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>r1<span style=color:#f92672>.</span>toString<span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>r1<span style=color:#f92672>.</span>mkString<span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>r1<span style=color:#f92672>.</span>mkString<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;,&#34;</span><span style=color:#f92672>))</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 数组操作-多维数组
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson18<span style=color:#f92672>()</span><span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Unit</span> <span style=color:#f92672>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//与java一样，多维数组是通过数组的数组来实现的。Double的二维数组类型为Array[Array[Double]]
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//要构造这样函数可以采用ofDim方法：
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> matrix <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Array</span><span style=color:#f92672>.</span>ofDim<span style=color:#f92672>[</span><span style=color:#66d9ef>Double</span><span style=color:#f92672>](</span><span style=color:#ae81ff>3</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>4</span><span style=color:#f92672>)</span> <span style=color:#75715e>//三行四列
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//访问这样的数组，使用两对圆括号(row)(column):
+</span><span style=color:#75715e></span>    matrix<span style=color:#f92672>(</span><span style=color:#ae81ff>1</span><span style=color:#f92672>)(</span><span style=color:#ae81ff>2</span><span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 数组操作-与java的相互操作
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson19<span style=color:#f92672>()</span><span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Unit</span> <span style=color:#f92672>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//引入相应的包
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>import</span> scala.collection.JavaConversions.bufferAsJavaList
+    <span style=color:#66d9ef>import</span> scala.collection.mutable.ArrayBuffer
+    <span style=color:#66d9ef>val</span> command <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>ArrayBuffer</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;ls&#34;</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;-al&#34;</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;/home/cay&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#66d9ef>val</span> pb <span style=color:#66d9ef>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>ProcessBuilder</span><span style=color:#f92672>(</span>command<span style=color:#f92672>)</span> <span style=color:#75715e>//Scala转java
+</span><span style=color:#75715e></span>
+    <span style=color:#66d9ef>import</span> scala.collection.JavaConversions.asScalaBuffer
+    <span style=color:#66d9ef>import</span> scala.collection.mutable.Buffer
+    <span style=color:#66d9ef>val</span> cmd<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Buffer</span><span style=color:#f92672>[</span><span style=color:#66d9ef>String</span><span style=color:#f92672>]</span> <span style=color:#66d9ef>=</span> pb<span style=color:#f92672>.</span>command<span style=color:#f92672>()</span> <span style=color:#75715e>//java转Scala
+</span><span style=color:#75715e></span>  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 映射与元组-映射
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson20<span style=color:#f92672>()</span><span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Unit</span> <span style=color:#f92672>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//构建一个不可变的映射(建议)
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> map <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Map</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;张三&#34;</span> <span style=color:#f92672>-&gt;</span> <span style=color:#ae81ff>98</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;李四&#34;</span> <span style=color:#f92672>-&gt;</span> <span style=color:#ae81ff>83</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;王五&#34;</span> <span style=color:#f92672>-&gt;</span> <span style=color:#ae81ff>100</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//构建一个可变的映射(不建议)
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> map1 <span style=color:#66d9ef>=</span> mutable<span style=color:#f92672>.</span><span style=color:#a6e22e>Map</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;张三&#34;</span> <span style=color:#f92672>-&gt;</span> <span style=color:#ae81ff>98</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;李四&#34;</span> <span style=color:#f92672>-&gt;</span> <span style=color:#ae81ff>83</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;王五&#34;</span> <span style=color:#f92672>-&gt;</span> <span style=color:#ae81ff>100</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//构建一个空的映射，需要指定类型参数
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> map2 <span style=color:#66d9ef>=</span> <span style=color:#66d9ef>new</span> mutable<span style=color:#f92672>.</span><span style=color:#a6e22e>HashMap</span><span style=color:#f92672>[</span><span style=color:#66d9ef>String</span>, <span style=color:#66d9ef>Int</span><span style=color:#f92672>]()</span>
+
+    <span style=color:#75715e>// -&gt; 操作符用来创建对偶
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// (&#34;张三&#34; -&gt; 98) 等同于 (&#34;张三&#34; , 98)，所以也可以用以下方式定义映射:
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> map3 <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Map</span><span style=color:#f92672>((</span><span style=color:#e6db74>&#34;张三&#34;</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>98</span><span style=color:#f92672>),</span> <span style=color:#f92672>(</span><span style=color:#e6db74>&#34;李四&#34;</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>83</span><span style=color:#f92672>),</span> <span style=color:#f92672>(</span><span style=color:#e6db74>&#34;王五&#34;</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>100</span><span style=color:#f92672>))</span>
+    <span style=color:#75715e>//获取映射中的值，直接使用(),相当于java中的map.get(&#34;张三&#34;)
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>map<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;张三&#34;</span><span style=color:#f92672>))</span>
+    <span style=color:#75715e>//如果key不存在，则会抛异常，检查映射中是否存在某个key，可以使用contains方法:
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> value <span style=color:#66d9ef>=</span> <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>map<span style=color:#f92672>.</span>contains<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;张三&#34;</span><span style=color:#f92672>))</span> map<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;张三&#34;</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>else</span> <span style=color:#ae81ff>0</span>
+    <span style=color:#75715e>//可以简写成getOrElse(key,result):
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>map<span style=color:#f92672>.</span>getOrElse<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;张三&#34;</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>0</span><span style=color:#f92672>))</span>
+    <span style=color:#75715e>//更新可变映射中的值
+</span><span style=color:#75715e></span>    map1<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;张三&#34;</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=</span> <span style=color:#ae81ff>67</span>
+    <span style=color:#75715e>//增加可变映射中的值
+</span><span style=color:#75715e></span>    map1<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;赵六&#34;</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=</span> <span style=color:#ae81ff>74</span>
+    <span style=color:#75715e>//可以使用 += 增加多个关系
+</span><span style=color:#75715e></span>    map1 <span style=color:#f92672>+=</span> <span style=color:#f92672>(</span><span style=color:#e6db74>&#34;王七&#34;</span> <span style=color:#f92672>-&gt;</span> <span style=color:#ae81ff>35</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;蔡八&#34;</span> <span style=color:#f92672>-&gt;</span> <span style=color:#ae81ff>86</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//可以使用 -= 移除对应的键值
+</span><span style=color:#75715e></span>    map1 <span style=color:#f92672>-=</span> <span style=color:#e6db74>&#34;王五&#34;</span>
+    <span style=color:#75715e>//可以使用 + 操作符生成新的映射
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> map4 <span style=color:#66d9ef>=</span> map <span style=color:#f92672>+</span> <span style=color:#f92672>(</span><span style=color:#e6db74>&#34;王七&#34;</span> <span style=color:#f92672>-&gt;</span> <span style=color:#ae81ff>35</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;蔡八&#34;</span> <span style=color:#f92672>-&gt;</span> <span style=color:#ae81ff>86</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//映射遍历 for((k,v) &lt;- map)
+</span><span style=color:#75715e></span>  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 映射与元组-元组
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson21<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//映射是键值对的集合，对偶则是元组（tuple）的最简单形态--元组是不同类型的值的聚集，元组的值是通过将单个的值包含在()构成的,如：
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> t <span style=color:#66d9ef>=</span> <span style=color:#f92672>(</span><span style=color:#ae81ff>2</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;张三&#34;</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>4</span>d<span style=color:#f92672>)</span> <span style=color:#75715e>//类型分别为 Tuple[Int, String, Double]
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//元组的访问可以使用_1、_2、_3这样
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>t<span style=color:#f92672>.</span>_1<span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>t<span style=color:#f92672>.</span>_2<span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>t<span style=color:#f92672>.</span>_3<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//也可以在返回值的时候就定义下来，通常使用这种,这样更为直观的表达出返回的结果分别代表什么
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> <span style=color:#f92672>(</span>first<span style=color:#f92672>,</span> second<span style=color:#f92672>,</span> third<span style=color:#f92672>)</span> <span style=color:#66d9ef>=</span> t
+    println<span style=color:#f92672>(</span>first<span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>second<span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>third<span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 映射与元组-拉链操作
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson22<span style=color:#f92672>()</span><span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Unit</span> <span style=color:#f92672>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//使用元组的原因之一是吧多个值绑定在一起，以方便它们能够被一起处理，这个通常可以使用zip方法来完成，如下：
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> a1 <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Array</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;张三&#34;</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;李四&#34;</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;王五&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#66d9ef>val</span> a2 <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Array</span><span style=color:#f92672>(</span><span style=color:#ae81ff>55</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>26</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>96</span><span style=color:#f92672>)</span>
+    <span style=color:#66d9ef>val</span> p <span style=color:#66d9ef>=</span> a1<span style=color:#f92672>.</span>zip<span style=color:#f92672>(</span>a2<span style=color:#f92672>)</span> <span style=color:#75715e>//得到的对偶数组为Array((&#34;张三&#34;,55),(&#34;李四&#34;,26),(&#34;王五&#34;,96))
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//还可以把对偶数组转成映射
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>p<span style=color:#f92672>.</span>toMap<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//得到结果 Map(张三 -&gt; 55, 李四 -&gt; 26, 王五 -&gt; 96)
+</span><span style=color:#75715e></span>  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 对象-单例对象
+</span><span style=color:#75715e>   * 在Scala中没有静态方法或者静态字段，可以通过object语法结构来定义
+</span><span style=color:#75715e>   *
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>object</span> <span style=color:#a6e22e>Accounts</span> <span style=color:#f92672>{</span> <span style=color:#75715e>//伴生对象
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>var</span> lastNumber <span style=color:#66d9ef>=</span> <span style=color:#ae81ff>0</span>
+
+    <span style=color:#66d9ef>def</span> newUniqueNumber<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+      lastNumber <span style=color:#f92672>+=</span> <span style=color:#ae81ff>1</span><span style=color:#f92672>;</span> lastNumber
+    <span style=color:#f92672>}</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 对象-伴生对象
+</span><span style=color:#75715e>   * 在Scala中没有静态方法或者静态字段，可以通过object语法结构来定义
+</span><span style=color:#75715e>   *
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Accounts</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>val</span> id <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Accounts</span><span style=color:#f92672>.</span>newUniqueNumber<span style=color:#f92672>()</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 对象-扩展类或特质对象
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>abstract</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>UndoableAction</span><span style=color:#f92672>(</span><span style=color:#66d9ef>val</span> desc<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>String</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>def</span> undo<span style=color:#f92672>()</span><span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Unit</span>
+
+    <span style=color:#66d9ef>def</span> redo<span style=color:#f92672>()</span><span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Unit</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#66d9ef>object</span> <span style=color:#a6e22e>DoNothingAction</span> <span style=color:#66d9ef>extends</span> <span style=color:#a6e22e>UndoableAction</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;Do nothing&#34;</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>def</span> undo<span style=color:#f92672>()</span><span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Unit</span> <span style=color:#f92672>=</span> <span style=color:#f92672>{}</span>
+
+    <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>def</span> redo<span style=color:#f92672>()</span><span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Unit</span> <span style=color:#f92672>=</span> <span style=color:#f92672>{}</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>//DoNothingAction可以被所有所需要这个缺省行为的地方共用
+</span><span style=color:#75715e></span>  <span style=color:#66d9ef>val</span> actions <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Map</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;open&#34;</span> <span style=color:#f92672>-&gt;</span> <span style=color:#a6e22e>DoNothingAction</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;save&#34;</span> <span style=color:#f92672>-&gt;</span> <span style=color:#a6e22e>DoNothingAction</span><span style=color:#f92672>)</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 对象-应用程序对象
+</span><span style=color:#75715e>   * 每个Scala程序都必须从一个对象main方法开始，也可以扩展App特质
+</span><span style=color:#75715e>   * object Hello{
+</span><span style=color:#75715e>   * def main(args:Array[String]) {
+</span><span style=color:#75715e>   * println(&#34;Hello World&#34;)
+</span><span style=color:#75715e>   * }
+</span><span style=color:#75715e>   * }
+</span><span style=color:#75715e>   */</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 对象-枚举
+</span><span style=color:#75715e>   * scala中并没有枚举类型，不过提供了一个Enumeration助手类，可以用于产出枚举
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>object</span> <span style=color:#a6e22e>TrafficLightColor</span> <span style=color:#66d9ef>extends</span> <span style=color:#a6e22e>Enumeration</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>val</span> <span style=color:#a6e22e>Red</span> <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Value</span><span style=color:#f92672>(</span><span style=color:#ae81ff>0</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;Stop&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#66d9ef>val</span> <span style=color:#a6e22e>Yellow</span> <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Value</span><span style=color:#f92672>(</span><span style=color:#ae81ff>10</span><span style=color:#f92672>)</span>
+    <span style=color:#66d9ef>val</span> <span style=color:#a6e22e>Green</span> <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Value</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;Go&#34;</span><span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#66d9ef>def</span> lesson23<span style=color:#f92672>()</span><span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Unit</span> <span style=color:#f92672>=</span> <span style=color:#f92672>{</span>
+    println<span style=color:#f92672>(</span><span style=color:#a6e22e>TrafficLightColor</span><span style=color:#f92672>.</span><span style=color:#a6e22e>Red</span><span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span><span style=color:#a6e22e>TrafficLightColor</span><span style=color:#f92672>.</span><span style=color:#a6e22e>Yellow</span><span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span><span style=color:#a6e22e>TrafficLightColor</span><span style=color:#f92672>.</span><span style=color:#a6e22e>Green</span><span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 文件操作-读取文件
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson24<span style=color:#f92672>()</span><span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Unit</span> <span style=color:#f92672>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//以指定的GBK字符集读取文件，第一个参数可以是字符串或者是java.io.File
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> source <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Source</span><span style=color:#f92672>.</span>fromFile<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;贪腐词库.txt&#34;</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;GBK&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//获取所有行
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> lines <span style=color:#66d9ef>=</span> source<span style=color:#f92672>.</span>getLines<span style=color:#f92672>()</span>
+    <span style=color:#75715e>//将所有行放到list中
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> list <span style=color:#66d9ef>=</span> lines<span style=color:#f92672>.</span>toList
+    <span style=color:#75715e>//将文件用逗号串起来(注：旧版采用source.mkString,新版中获取不到值)
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> str <span style=color:#66d9ef>=</span> list<span style=color:#f92672>.</span>mkString
+    <span style=color:#75715e>//println(&#34;------------&#34;+str)
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//迭代打印集合
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//list.foreach(it=&gt;println(it))
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//关闭流
+</span><span style=color:#75715e></span>    source<span style=color:#f92672>.</span>close<span style=color:#f92672>()</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 文件操作-从URL读取文件
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson25<span style=color:#f92672>()</span><span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Unit</span> <span style=color:#f92672>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>val</span> source <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Source</span><span style=color:#f92672>.</span>fromURL<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;https://www.baidu.com&#34;</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;UTF-8&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//获取所有行
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> lines <span style=color:#66d9ef>=</span> source<span style=color:#f92672>.</span>getLines<span style=color:#f92672>()</span>
+    <span style=color:#75715e>//将所有行放到list中
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> list <span style=color:#66d9ef>=</span> lines<span style=color:#f92672>.</span>toList
+    <span style=color:#75715e>//将文件用逗号串起来(注：旧版采用source.mkString,新版中获取不到值)
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> str <span style=color:#66d9ef>=</span> list<span style=color:#f92672>.</span>mkString
+    <span style=color:#75715e>//println(&#34;------------&#34;+str)
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//迭代打印集合
+</span><span style=color:#75715e></span>    list<span style=color:#f92672>.</span>foreach<span style=color:#f92672>(</span>it <span style=color:#66d9ef>=&gt;</span> println<span style=color:#f92672>(</span>it<span style=color:#f92672>))</span>
+    <span style=color:#75715e>//关闭流
+</span><span style=color:#75715e></span>    source<span style=color:#f92672>.</span>close<span style=color:#f92672>()</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 文件操作-读取二进制文件
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson26<span style=color:#f92672>()</span><span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Unit</span> <span style=color:#f92672>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>val</span> file <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>File</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;其他词库.txt&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#66d9ef>val</span> in <span style=color:#66d9ef>=</span> file<span style=color:#f92672>.</span>inputStream<span style=color:#f92672>()</span>
+    <span style=color:#66d9ef>val</span> bytes <span style=color:#66d9ef>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>Array</span><span style=color:#f92672>[</span><span style=color:#66d9ef>Byte</span><span style=color:#f92672>](</span>file<span style=color:#f92672>.</span>length<span style=color:#f92672>.</span>toInt<span style=color:#f92672>)</span>
+    in<span style=color:#f92672>.</span>read<span style=color:#f92672>(</span>bytes<span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>bytes<span style=color:#f92672>.</span>mkString<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;,&#34;</span><span style=color:#f92672>))</span>
+    in<span style=color:#f92672>.</span>close<span style=color:#f92672>()</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 文件操作-写入文件
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson27<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//scala中没有内建对文件的支持，所以使用java.io.PrintWriter
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> out <span style=color:#66d9ef>=</span> <span style=color:#66d9ef>new</span> <span style=color:#a6e22e>PrintWriter</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;test.txt&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>i <span style=color:#66d9ef>&lt;-</span> <span style=color:#ae81ff>1</span> to <span style=color:#ae81ff>100</span><span style=color:#f92672>)</span> out<span style=color:#f92672>.</span>println<span style=color:#f92672>(</span>i<span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 正则表达式
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson28<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//采用String中的r方法
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> pattern <span style=color:#66d9ef>=</span> <span style=color:#e6db74>&#34;[0-9]+&#34;</span><span style=color:#f92672>.</span>r
+    println<span style=color:#f92672>(</span>pattern findAllIn <span style=color:#e6db74>&#34;02,2&#34;</span><span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 操作符
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson29<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//在scala中可以使用任意序列的操作字符作为定义,如:
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>=</span> <span style=color:#e6db74>&#34;ere&#34;</span>
+    <span style=color:#66d9ef>val</span> <span style=color:#f92672>&amp;</span> <span style=color:#66d9ef>=</span> <span style=color:#e6db74>&#34;ere&#34;</span>
+    <span style=color:#66d9ef>val</span> <span style=color:#f92672>!</span> <span style=color:#66d9ef>=</span> <span style=color:#e6db74>&#34;ere&#34;</span>
+    <span style=color:#75715e>//一旦遇到命名定义是scala关键字的还可以采用反引号来拯救(当然平时还是注意少用scala的关键字来命名)
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> `type` <span style=color:#66d9ef>=</span> <span style=color:#ae81ff>354</span>
+    <span style=color:#75715e>//还可以使用 a 标识符 b 这样写
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//1 to 10 //实际上是调用了 1.to(10) 的方法
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//1-&gt; 10 //等同调用 1.—&gt;(10) 的方法
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//1 toString //等同于 1.toString ，以上均为一元操作符，点号可以省略
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//赋值操作符 a 操作符= b 等同于 a = a + b
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//1 += 2 //等同于 1 = 1 + 2
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//结合性,已冒号结束，操作符是右结合
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//1::2::Nil //等同于 1::(2::Nil)
+</span><span style=color:#75715e></span>  <span style=color:#f92672>}</span>
+
+  <span style=color:#66d9ef>import</span> math._
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 高阶函数-值函数
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson30<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>val</span> num <span style=color:#66d9ef>=</span> <span style=color:#ae81ff>3.14</span>
+    <span style=color:#75715e>//把 ceil函数赋值给fun
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> fun <span style=color:#66d9ef>=</span> ceil <span style=color:#66d9ef>_</span>
+    <span style=color:#66d9ef>val</span> a <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Array</span><span style=color:#f92672>(</span><span style=color:#ae81ff>2.14</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>1.42</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>2.0</span><span style=color:#f92672>).</span>map<span style=color:#f92672>(</span>fun<span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>a<span style=color:#f92672>.</span>mkString<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;,&#34;</span><span style=color:#f92672>))</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 高阶函数-匿名函数
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson31<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>val</span> s <span style=color:#66d9ef>=</span> <span style=color:#f92672>(</span>x<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Double</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=&gt;</span> <span style=color:#ae81ff>3</span> <span style=color:#f92672>*</span> x
+    <span style=color:#75715e>//等同于 def s(x:Double) = 3 * x
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>s<span style=color:#f92672>(</span><span style=color:#ae81ff>3</span><span style=color:#f92672>))</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 高阶函数-带函数参数的函数
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson32<span style=color:#f92672>(</span>f<span style=color:#66d9ef>:</span> <span style=color:#f92672>(</span><span style=color:#66d9ef>Double</span><span style=color:#f92672>)</span> <span style=color:#f92672>=&gt;</span> <span style=color:#a6e22e>Double</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    f<span style=color:#f92672>(</span><span style=color:#ae81ff>0.25</span><span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+  <span style=color:#75715e>//对于只出现一次的参数，可以使用_替代
+</span><span style=color:#75715e></span>  <span style=color:#75715e>//lesson32(ceil _)
+</span><span style=color:#75715e></span>
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 高阶函数-一些有用的高阶函数
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson33<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>val</span> list <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>List</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;张三&#34;</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;李四&#34;</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;王五&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//map方法，遍历应用到集合中的所有元素，并返回全新的结果集合
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>list<span style=color:#f92672>.</span>map<span style=color:#f92672>(</span>it <span style=color:#66d9ef>=&gt;</span> it <span style=color:#f92672>-&gt;</span> <span style=color:#e6db74>&#34;你好&#34;</span><span style=color:#f92672>))</span>
+    <span style=color:#75715e>//foreach方法,遍历集合的所有元素，但不返回结果(对于只出现一次的参数，可以使用_替代)
+</span><span style=color:#75715e></span>    list<span style=color:#f92672>.</span>foreach<span style=color:#f92672>(</span>println<span style=color:#f92672>(</span><span style=color:#66d9ef>_</span><span style=color:#f92672>))</span>
+    <span style=color:#75715e>//filter方法,根据条件过滤生成全新的集合
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> f <span style=color:#66d9ef>=</span> list<span style=color:#f92672>.</span>filter<span style=color:#f92672>(</span><span style=color:#66d9ef>_</span> <span style=color:#f92672>!=</span> <span style=color:#e6db74>&#34;张三&#34;</span><span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>f<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//sortWith方法,指定参数排序，返回全新的集合
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>list<span style=color:#f92672>.</span>sortWith<span style=color:#f92672>(</span><span style=color:#66d9ef>_</span> <span style=color:#f92672>&gt;</span> <span style=color:#66d9ef>_</span><span style=color:#f92672>))</span>
+    <span style=color:#75715e>//sorted方法,从低到高排序，返回全新的集合
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>list<span style=color:#f92672>.</span>sortWith<span style=color:#f92672>(</span><span style=color:#66d9ef>_</span> <span style=color:#f92672>&gt;</span> <span style=color:#66d9ef>_</span><span style=color:#f92672>).</span>sorted<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//groupBy方法,根据指定参数进行合并分组，返回map[object,List[object]]集合
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> userList <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>List</span><span style=color:#f92672>(</span><span style=color:#a6e22e>Person</span><span style=color:#f92672>(</span><span style=color:#ae81ff>1</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;张三&#34;</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>23</span><span style=color:#f92672>),</span> <span style=color:#a6e22e>Person</span><span style=color:#f92672>(</span><span style=color:#ae81ff>2</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;李四&#34;</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>45</span><span style=color:#f92672>),</span> <span style=color:#a6e22e>Person</span><span style=color:#f92672>(</span><span style=color:#ae81ff>1</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;王五&#34;</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>30</span><span style=color:#f92672>))</span>
+    <span style=color:#66d9ef>val</span> map<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Map</span><span style=color:#f92672>[</span><span style=color:#66d9ef>Int</span>, <span style=color:#66d9ef>List</span><span style=color:#f92672>[</span><span style=color:#66d9ef>Person</span><span style=color:#f92672>]]</span> <span style=color:#66d9ef>=</span> userList<span style=color:#f92672>.</span>groupBy<span style=color:#f92672>(</span><span style=color:#66d9ef>_</span><span style=color:#f92672>.</span>id<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//Map遍历,_1代表key,_2代表value
+</span><span style=color:#75715e></span>    map<span style=color:#f92672>.</span>foreach<span style=color:#f92672>(</span>it <span style=color:#66d9ef>=&gt;</span> <span style=color:#f92672>{</span>
+      println<span style=color:#f92672>(</span>it<span style=color:#f92672>.</span>_1<span style=color:#f92672>)</span>
+      println<span style=color:#f92672>(</span>it<span style=color:#f92672>.</span>_2<span style=color:#f92672>)</span>
+    <span style=color:#f92672>})</span>
+    <span style=color:#75715e>//exists方法,遍历判断条件是否成立
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>list<span style=color:#f92672>.</span>exists<span style=color:#f92672>(</span><span style=color:#66d9ef>_</span> <span style=color:#f92672>==</span> <span style=color:#e6db74>&#34;张三&#34;</span><span style=color:#f92672>))</span>
+    <span style=color:#75715e>//distinct方法,去除重复的元素
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>list<span style=color:#f92672>.</span>distinct<span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 集合之间的操作
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson34<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//注：在scala中不可变集合进行操作生成的都为新的集合，原有集合不发生改变
+</span><span style=color:#75715e></span>
+    <span style=color:#66d9ef>val</span> list <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>List</span><span style=color:#f92672>(</span><span style=color:#ae81ff>1</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>2</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>3</span><span style=color:#f92672>)</span>
+    <span style=color:#66d9ef>val</span> map <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Map</span><span style=color:#f92672>(</span><span style=color:#ae81ff>1</span> <span style=color:#f92672>-&gt;</span> <span style=color:#e6db74>&#34;java&#34;</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>2</span> <span style=color:#f92672>-&gt;</span> <span style=color:#e6db74>&#34;scala&#34;</span><span style=color:#f92672>,</span> <span style=color:#ae81ff>3</span> <span style=color:#f92672>-&gt;</span> <span style=color:#e6db74>&#34;php&#34;</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//List追加元素, 后面追加采用 :+ 前面追加采用 +:
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>list <span style=color:#66d9ef>:</span><span style=color:#66d9ef>+</span> <span style=color:#960050;background-color:#1e0010>2</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//List移除元素
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>list<span style=color:#f92672>.</span>toSet <span style=color:#f92672>-</span> <span style=color:#ae81ff>2</span><span style=color:#f92672>)</span>
+    <span style=color:#75715e>//List第一位置增加元素
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span><span style=color:#ae81ff>5</span> <span style=color:#f92672>+:</span> list<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//2个List合并，采用:::或者 ++ 或者 | 或者++:
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>list <span style=color:#f92672>++</span> <span style=color:#a6e22e>List</span><span style=color:#f92672>(</span><span style=color:#ae81ff>6</span><span style=color:#f92672>))</span>
+    println<span style=color:#f92672>(</span>list <span style=color:#66d9ef>:</span><span style=color:#66d9ef>::</span> <span style=color:#66d9ef>List</span><span style=color:#f92672>(</span><span style=color:#960050;background-color:#1e0010>6</span><span style=color:#f92672>))</span>
+    println<span style=color:#f92672>(</span>list <span style=color:#f92672>++:</span> <span style=color:#a6e22e>List</span><span style=color:#f92672>(</span><span style=color:#ae81ff>6</span><span style=color:#f92672>))</span>
+    println<span style=color:#f92672>(</span>list<span style=color:#f92672>.</span>toSet <span style=color:#f92672>|</span> <span style=color:#a6e22e>List</span><span style=color:#f92672>(</span><span style=color:#ae81ff>7</span><span style=color:#f92672>).</span>toSet<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//list中移除另外一个List中所有包含的元素,采用 -- 或者 &amp;~
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>list<span style=color:#f92672>.</span>toSet <span style=color:#f92672>--</span> <span style=color:#a6e22e>List</span><span style=color:#f92672>(</span><span style=color:#ae81ff>2</span><span style=color:#f92672>))</span>
+    println<span style=color:#f92672>(</span>list<span style=color:#f92672>.</span>toSet <span style=color:#f92672>&amp;~</span> <span style=color:#a6e22e>List</span><span style=color:#f92672>(</span><span style=color:#ae81ff>2</span><span style=color:#f92672>).</span>toSet<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//俩个list的交集
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>list<span style=color:#f92672>.</span>toSet <span style=color:#f92672>&amp;</span> <span style=color:#a6e22e>List</span><span style=color:#f92672>(</span><span style=color:#ae81ff>2</span><span style=color:#f92672>).</span>toSet<span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 模式匹配-更好的switch
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson35<span style=color:#f92672>(</span>n<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Int</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//scala的switch更优雅的处理方式，在c和类C语言中，模式匹配必须在末尾显式的使用break语句进行退出switch，scala不会有这样的问题
+</span><span style=color:#75715e></span>    <span style=color:#75715e>//match与if类似，都是使用表达式。在很多时候match的使用更优雅与if/else if，这样不会出现多层嵌套的情况
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> result <span style=color:#66d9ef>=</span> n <span style=color:#66d9ef>match</span> <span style=color:#f92672>{</span>
+      <span style=color:#66d9ef>case</span> <span style=color:#ae81ff>1</span> <span style=color:#66d9ef>=&gt;</span> <span style=color:#e6db74>&#34;张三&#34;</span>
+      <span style=color:#66d9ef>case</span> <span style=color:#ae81ff>2</span> <span style=color:#66d9ef>=&gt;</span> <span style=color:#e6db74>&#34;李四&#34;</span>
+      <span style=color:#66d9ef>case</span> <span style=color:#66d9ef>_</span> <span style=color:#66d9ef>=&gt;</span> <span style=color:#e6db74>&#34;王五&#34;</span>
+    <span style=color:#f92672>}</span>
+    println<span style=color:#f92672>(</span>result<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//模式用还可以使用守卫，如下：
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> r <span style=color:#66d9ef>=</span> n <span style=color:#66d9ef>match</span> <span style=color:#f92672>{</span>
+      <span style=color:#66d9ef>case</span> <span style=color:#ae81ff>1</span> <span style=color:#66d9ef>=&gt;</span> <span style=color:#e6db74>&#34;张三&#34;</span>
+      <span style=color:#66d9ef>case</span> a <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>a <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>5</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=&gt;</span> <span style=color:#e6db74>&#34;李四&#34;</span>
+      <span style=color:#66d9ef>case</span> <span style=color:#66d9ef>_</span> <span style=color:#66d9ef>=&gt;</span> <span style=color:#e6db74>&#34;王五&#34;</span>
+    <span style=color:#f92672>}</span>
+    println<span style=color:#f92672>(</span>r<span style=color:#f92672>)</span>
+
+    <span style=color:#75715e>//类型匹配，如下：
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> ar<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Any</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>n <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>0</span><span style=color:#f92672>)</span> <span style=color:#ae81ff>1</span> <span style=color:#66d9ef>else</span> <span style=color:#e6db74>&#34;Hello&#34;</span>
+    <span style=color:#66d9ef>val</span> s <span style=color:#66d9ef>=</span> ar <span style=color:#66d9ef>match</span> <span style=color:#f92672>{</span>
+      <span style=color:#66d9ef>case</span> i<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Int</span> <span style=color:#f92672>=&gt;</span> <span style=color:#e6db74>&#34;张三&#34;</span>
+      <span style=color:#66d9ef>case</span> s<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>String</span> <span style=color:#f92672>=&gt;</span> <span style=color:#e6db74>&#34;李四&#34;</span>
+      <span style=color:#66d9ef>case</span> <span style=color:#66d9ef>_</span> <span style=color:#66d9ef>=&gt;</span> <span style=color:#e6db74>&#34;王五&#34;</span>
+    <span style=color:#f92672>}</span>
+    println<span style=color:#f92672>(</span>s<span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 模式匹配-Option类型
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson36<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//生成Option带值的元素
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> o<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Option</span><span style=color:#f92672>[</span><span style=color:#66d9ef>String</span><span style=color:#f92672>]</span> <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>Some</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;张三&#34;</span><span style=color:#f92672>)</span>
+    println<span style=color:#f92672>(</span>o<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//生成不带值的Option元素
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>val</span> o1<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Option</span><span style=color:#f92672>[</span><span style=color:#66d9ef>Nothing</span><span style=color:#f92672>]</span> <span style=color:#66d9ef>=</span> <span style=color:#a6e22e>None</span>
+    println<span style=color:#f92672>(</span>o1<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//Option元素获取值，采用get方法
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>o<span style=color:#f92672>.</span>get<span style=color:#f92672>)</span>
+    <span style=color:#75715e>//但是直接采用get方法很容易出现 java.util.NoSuchElementException: None.get异常，scala提供了组合方法getOrElse
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>(</span>o1<span style=color:#f92672>.</span>getOrElse<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;&#34;</span><span style=color:#f92672>))</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#75715e>/**
+</span><span style=color:#75715e>   * 模式匹配-断言
+</span><span style=color:#75715e>   */</span>
+  <span style=color:#66d9ef>def</span> lesson37<span style=color:#f92672>(</span>n<span style=color:#66d9ef>:</span> <span style=color:#66d9ef>Int</span><span style=color:#f92672>)</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#75715e>//在scala中与java一样使用断言，格式 assert(条件,提示语)
+</span><span style=color:#75715e></span>    assert<span style=color:#f92672>(</span>n <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;参数不能小于2&#34;</span><span style=color:#f92672>)</span>
+  <span style=color:#f92672>}</span>
+
+  <span style=color:#66d9ef>def</span> lesson38<span style=color:#f92672>()</span> <span style=color:#66d9ef>=</span> <span style=color:#f92672>{</span>
+    <span style=color:#f92672>(</span><span style=color:#ae81ff>0</span> to <span style=color:#ae81ff>10</span><span style=color:#f92672>).</span>map<span style=color:#f92672>(</span>println<span style=color:#f92672>(</span><span style=color:#66d9ef>_</span><span style=color:#f92672>))</span>
+  <span style=color:#f92672>}</span>
+
+  lesson38<span style=color:#f92672>()</span>
+
+<span style=color:#f92672>}</span>
+</code></pre></div>
+</div>
+<footer class=post-footer>
+<nav class=paginav>
+<a class=prev href=http://euthpic.github.io/tech/zookeeper%E6%9C%8D%E5%8A%A1%E9%A2%91%E7%B9%81%E6%97%A0%E5%93%8D%E5%BA%94%E6%88%91%E4%BB%85%E4%BF%AE%E6%94%B9%E4%B8%80%E8%A1%8C%E9%85%8D%E7%BD%AE%E5%B0%B1%E8%A7%A3%E5%86%B3%E5%AE%83%E4%BA%86/>
+<span class=title>« 上一页</span>
+<br>
+<span>zookeeper服务频繁无响应,我仅修改一行配置就解决它了</span>
+</a>
+<a class=next href=http://euthpic.github.io/tech/k8s%E7%AC%94%E8%AE%B0/>
+<span class=title>下一页 »</span>
+<br>
+<span>K8s笔记</span>
+</a>
+</nav>
+<div class=share-buttons>
+<a target=_blank rel="noopener noreferrer" aria-label="share Scala基础练习 on twitter" href="https://twitter.com/intent/tweet/?text=Scala%e5%9f%ba%e7%a1%80%e7%bb%83%e4%b9%a0&url=http%3a%2f%2feuthpic.github.io%2ftech%2fscala%25E5%259F%25BA%25E7%25A1%2580%25E7%25BB%2583%25E4%25B9%25A0%2f&hashtags="><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Scala基础练习 on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2feuthpic.github.io%2ftech%2fscala%25E5%259F%25BA%25E7%25A1%2580%25E7%25BB%2583%25E4%25B9%25A0%2f&title=Scala%e5%9f%ba%e7%a1%80%e7%bb%83%e4%b9%a0&summary=Scala%e5%9f%ba%e7%a1%80%e7%bb%83%e4%b9%a0&source=http%3a%2f%2feuthpic.github.io%2ftech%2fscala%25E5%259F%25BA%25E7%25A1%2580%25E7%25BB%2583%25E4%25B9%25A0%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Scala基础练习 on reddit" href="https://reddit.com/submit?url=http%3a%2f%2feuthpic.github.io%2ftech%2fscala%25E5%259F%25BA%25E7%25A1%2580%25E7%25BB%2583%25E4%25B9%25A0%2f&title=Scala%e5%9f%ba%e7%a1%80%e7%bb%83%e4%b9%a0"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Scala基础练习 on facebook" href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2feuthpic.github.io%2ftech%2fscala%25E5%259F%25BA%25E7%25A1%2580%25E7%25BB%2583%25E4%25B9%25A0%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Scala基础练习 on whatsapp" href="https://api.whatsapp.com/send?text=Scala%e5%9f%ba%e7%a1%80%e7%bb%83%e4%b9%a0%20-%20http%3a%2f%2feuthpic.github.io%2ftech%2fscala%25E5%259F%25BA%25E7%25A1%2580%25E7%25BB%2583%25E4%25B9%25A0%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Scala基础练习 on telegram" href="https://telegram.me/share/url?text=Scala%e5%9f%ba%e7%a1%80%e7%bb%83%e4%b9%a0&url=http%3a%2f%2feuthpic.github.io%2ftech%2fscala%25E5%259F%25BA%25E7%25A1%2580%25E7%25BB%2583%25E4%25B9%25A0%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg>
+</a>
+</div>
+</footer>
+</article>
+</main>
+<footer class=footer>
+<span>&copy; 2022 <a href=http://euthpic.github.io/>乱花渐欲迷人眼</a></span>
+<span>
+Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a>
+</span>
+</footer>
+<a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a>
+<script>let menu=document.getElementById('menu');menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
+<script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script>
+<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
+</body>
+</html>

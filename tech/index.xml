@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>乱花渐欲迷人眼</title>
-    <link>http://euthpic.github.io/</link>
-    <description>Recent content on 乱花渐欲迷人眼</description>
+    <title>Teches on 乱花渐欲迷人眼</title>
+    <link>http://euthpic.github.io/tech/</link>
+    <description>Recent content in Teches on 乱花渐欲迷人眼</description>
     <image>
       <url>http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Wed, 08 Jun 2022 23:42:53 +0800</lastBuildDate><atom:link href="http://euthpic.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 08 Jun 2022 23:42:53 +0800</lastBuildDate><atom:link href="http://euthpic.github.io/tech/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Https,数字证书和数字签名</title>
       <link>http://euthpic.github.io/tech/https%E6%95%B0%E5%AD%97%E8%AF%81%E4%B9%A6%E5%92%8C%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D/</link>
@@ -82,8 +82,6 @@
       <guid>http://euthpic.github.io/tech/%E7%94%A8hugo%E6%90%AD%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E5%8D%9A%E5%AE%A2/</guid>
       <description>为什么是hugo? 其实无所谓hugo还是hexo,我是为了paperMod这个皮肤才搭的这个博客.它排版简洁素雅,让注意力容易集中到内容本身</description>
     </item>
-    
-    
     
   </channel>
 </rss>
