@@ -72,7 +72,17 @@
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
+    <loc>http://euthpic.github.io/posts/</loc>
+    <lastmod>2021-12-02T00:06:10+08:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
     <loc>http://euthpic.github.io/tech/%E7%94%A8hugo%E6%90%AD%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E5%8D%9A%E5%AE%A2/</loc>
+    <lastmod>2021-12-02T00:06:10+08:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>http://euthpic.github.io/posts/%E8%BF%99%E9%87%8C%E5%95%A5%E9%83%BD%E6%B2%A1%E6%9C%89/</loc>
     <lastmod>2021-12-02T00:06:10+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
