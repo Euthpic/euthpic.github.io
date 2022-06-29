@@ -74,63 +74,40 @@
 </header>
 <article class=post-entry>
 <header class=entry-header>
-<h2>Scala简易笔记
+<h2>elasticsearch相似度与排序原理
 </h2>
 </header>
 <section class=entry-content>
-<p>看完&lt;快学scala>的一些笔记. 该书的课后练习参考答案: https://github.com/vybae/scala-hello 类型推断错误有时候ide检测不出来 ide联想到的api不能总是及时展...</p>
-</section>
-<footer class=entry-footer><span title="2022-02-11 14:00:29 +0800 CST">February 11, 2022</span>&nbsp;·&nbsp;9 分钟&nbsp;·&nbsp;Guangfa</footer>
-<a class=entry-link aria-label="post link to Scala简易笔记" href=http://euthpic.github.io/tech/scala%E7%AE%80%E6%98%93%E7%AC%94%E8%AE%B0/></a>
-</article>
-<article class=post-entry>
-<header class=entry-header>
-<h2>部署yapi
-</h2>
-</header>
-<section class=entry-content>
-<p>官方给出的部署教程比较简短,只有两行命令: npm install -g yapi-cli --registry https://registry.npm.taobao.org yapi server 如果是新的Linux机器,跟着操作应该没什么问题,但是我在测试机和wsl上实操发现...</p>
-</section>
-<footer class=entry-footer><span title="2021-12-30 16:32:48 +0800 CST">December 30, 2021</span>&nbsp;·&nbsp;2 分钟&nbsp;·&nbsp;Guangfa</footer>
-<a class=entry-link aria-label="post link to 部署yapi" href=http://euthpic.github.io/tech/%E9%83%A8%E7%BD%B2yapi/></a>
-</article>
-<article class=post-entry>
-<header class=entry-header>
-<h2>elasticsearch内存模型
-</h2>
-</header>
-<section class=entry-content>
-<p>堆内内存 索引缓冲index buffer 节点查询缓存Node Query Cache 分片请求缓存Shard Request Cache 字段缓存Fielddata Cache FST缓存 Segments Cache 堆外内存 Segments Memory 断路器和...</p>
+<p>bm25模型 查询时权重提升 修改查询结构 修改评分 constant_score查询 函数评分 function_score 脚本评分 script_score 更改相似度模型 多字段排序 前面介绍了es的分...</p>
 </section>
 <footer class=entry-footer><span title="2021-12-02 00:06:10 +0800 CST">December 2, 2021</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;Guangfa</footer>
-<a class=entry-link aria-label="post link to elasticsearch内存模型" href=http://euthpic.github.io/tech/elasticsearch%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/></a>
+<a class=entry-link aria-label="post link to elasticsearch相似度与排序原理" href=http://euthpic.github.io/tech/elasticsearch%E7%9B%B8%E4%BC%BC%E5%BA%A6%E4%B8%8E%E6%8E%92%E5%BA%8F%E5%8E%9F%E7%90%86/></a>
 </article>
 <article class=post-entry>
 <header class=entry-header>
-<h2>elasticsearch分词入门
+<h2>elasticsearch读写原理
 </h2>
 </header>
 <section class=entry-content>
-<p>倒排索引 通常提到搜索我们想到的实现都是es,原因是它比MySQL高效得多. 在MySQL中想检索包含特定关键词的数据,比如最近疫情爆发了,有关...</p>
+<p>一次写入过程 一次读取过程 (主要是选择协调节点,不用和倒排索引,排序联系) 一次搜索过程 (主要是排序) 不变性 动态更新索引(与MySQL的插入数据...</p>
+</section>
+<footer class=entry-footer><span title="2021-12-02 00:06:10 +0800 CST">December 2, 2021</span>&nbsp;·&nbsp;7 分钟&nbsp;·&nbsp;Guangfa</footer>
+<a class=entry-link aria-label="post link to elasticsearch读写原理" href=http://euthpic.github.io/tech/elasticsearch%E8%AF%BB%E5%86%99%E5%8E%9F%E7%90%86/></a>
+</article>
+<article class=post-entry>
+<header class=entry-header>
+<h2>用hugo搭建自己的博客
+</h2>
+</header>
+<section class=entry-content>
+<p>为什么是hugo? 其实无所谓hugo还是hexo,我是为了paperMod这个皮肤才搭的这个博客.它排版简洁素雅,让注意力容易集中到内容本身...</p>
 </section>
 <footer class=entry-footer><span title="2021-12-02 00:06:10 +0800 CST">December 2, 2021</span>&nbsp;·&nbsp;3 分钟&nbsp;·&nbsp;Guangfa</footer>
-<a class=entry-link aria-label="post link to elasticsearch分词入门" href=http://euthpic.github.io/tech/elasticsearch%E5%88%86%E8%AF%8D%E5%85%A5%E9%97%A8/></a>
-</article>
-<article class=post-entry>
-<header class=entry-header>
-<h2>elasticsearch基础篇
-</h2>
-</header>
-<section class=entry-content>
-<p>基本背景 官方对es的定位是分布式搜索和分析引擎,它专为海量搜索而生.比如想往自己的网站加入一个搜索框,或者做日志的采集和检索时都可以使用es...</p>
-</section>
-<footer class=entry-footer><span title="2021-12-02 00:06:10 +0800 CST">December 2, 2021</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;Guangfa</footer>
-<a class=entry-link aria-label="post link to elasticsearch基础篇" href=http://euthpic.github.io/tech/elasticsearch%E5%9F%BA%E7%A1%80%E7%AF%87/></a>
+<a class=entry-link aria-label="post link to 用hugo搭建自己的博客" href=http://euthpic.github.io/tech/%E7%94%A8hugo%E6%90%AD%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E5%8D%9A%E5%AE%A2/></a>
 </article>
 <footer class=page-footer>
 <nav class=pagination>
-<a class=prev href=http://euthpic.github.io/tech/>« 上一页</a>
-<a class=next href=http://euthpic.github.io/tech/page/3/>下一页 »</a>
+<a class=prev href=http://euthpic.github.io/tech/page/2/>« 上一页</a>
 </nav>
 </footer>
 </main>

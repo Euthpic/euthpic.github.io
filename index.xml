@@ -30,7 +30,7 @@
     </item>
     
     <item>
-      <title>zookeeper服务频繁无响应,我仅修改一行配置就解决它了</title>
+      <title>一次解决zookeeper服务频繁无响应的经历</title>
       <link>http://euthpic.github.io/tech/zookeeper%E6%9C%8D%E5%8A%A1%E9%A2%91%E7%B9%81%E6%97%A0%E5%93%8D%E5%BA%94%E6%88%91%E4%BB%85%E4%BF%AE%E6%94%B9%E4%B8%80%E8%A1%8C%E9%85%8D%E7%BD%AE%E5%B0%B1%E8%A7%A3%E5%86%B3%E5%AE%83%E4%BA%86/</link>
       <pubDate>Wed, 16 Feb 2022 22:36:36 +0800</pubDate>
       
@@ -72,6 +72,51 @@
       
       <guid>http://euthpic.github.io/tech/%E9%83%A8%E7%BD%B2yapi/</guid>
       <description>官方给出的部署教程比较简短,只有两行命令: npm install -g yapi-cli --registry https://registry.npm.taobao.org yapi server 如果是新的Linux机器,跟着操作应该没什么问题,但是我在测试机和wsl上实操发现</description>
+    </item>
+    
+    <item>
+      <title>elasticsearch内存模型</title>
+      <link>http://euthpic.github.io/tech/elasticsearch%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/</link>
+      <pubDate>Thu, 02 Dec 2021 00:06:10 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/elasticsearch%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/</guid>
+      <description>堆内内存 索引缓冲index buffer 节点查询缓存Node Query Cache 分片请求缓存Shard Request Cache 字段缓存Fielddata Cache FST缓存 Segments Cache 堆外内存 Segments Memory 断路器和</description>
+    </item>
+    
+    <item>
+      <title>elasticsearch分词入门</title>
+      <link>http://euthpic.github.io/tech/elasticsearch%E5%88%86%E8%AF%8D%E5%85%A5%E9%97%A8/</link>
+      <pubDate>Thu, 02 Dec 2021 00:06:10 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/elasticsearch%E5%88%86%E8%AF%8D%E5%85%A5%E9%97%A8/</guid>
+      <description>倒排索引 通常提到搜索我们想到的实现都是es,原因是它比MySQL高效得多. 在MySQL中想检索包含特定关键词的数据,比如最近疫情爆发了,有关</description>
+    </item>
+    
+    <item>
+      <title>elasticsearch基础篇</title>
+      <link>http://euthpic.github.io/tech/elasticsearch%E5%9F%BA%E7%A1%80%E7%AF%87/</link>
+      <pubDate>Thu, 02 Dec 2021 00:06:10 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/elasticsearch%E5%9F%BA%E7%A1%80%E7%AF%87/</guid>
+      <description>基本背景 官方对es的定位是分布式搜索和分析引擎,它专为海量搜索而生.比如想往自己的网站加入一个搜索框,或者做日志的采集和检索时都可以使用es</description>
+    </item>
+    
+    <item>
+      <title>elasticsearch相似度与排序原理</title>
+      <link>http://euthpic.github.io/tech/elasticsearch%E7%9B%B8%E4%BC%BC%E5%BA%A6%E4%B8%8E%E6%8E%92%E5%BA%8F%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Thu, 02 Dec 2021 00:06:10 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/elasticsearch%E7%9B%B8%E4%BC%BC%E5%BA%A6%E4%B8%8E%E6%8E%92%E5%BA%8F%E5%8E%9F%E7%90%86/</guid>
+      <description>bm25模型 查询时权重提升 修改查询结构 修改评分 constant_score查询 函数评分 function_score 脚本评分 script_score 更改相似度模型 多字段排序 前面介绍了es的分</description>
+    </item>
+    
+    <item>
+      <title>elasticsearch读写原理</title>
+      <link>http://euthpic.github.io/tech/elasticsearch%E8%AF%BB%E5%86%99%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Thu, 02 Dec 2021 00:06:10 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/elasticsearch%E8%AF%BB%E5%86%99%E5%8E%9F%E7%90%86/</guid>
+      <description>一次写入过程 一次读取过程 (主要是选择协调节点,不用和倒排索引,排序联系) 一次搜索过程 (主要是排序) 不变性 动态更新索引(与MySQL的插入数据</description>
     </item>
     
     <item>
