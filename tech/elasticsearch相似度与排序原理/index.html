@@ -131,7 +131,7 @@ elasticsearch相似度与排序原理
 <h2 id=bm25算法>BM25算法</h2>
 <p>es在5.0之后默认采用的相似度算法是BM25,而需要注意的是官方中文文档是基于2.x版本写的,当时使用的是tf/idf算法.</p>
 <p>bm25公式如下</p>
-<p><img loading=lazy src=C:%5cspace-X%5cdocument%5cblog%5c%e6%80%9d%e7%bb%b4%e5%af%bc%e5%9b%be%5cbm25%e5%85%ac%e5%bc%8f.png alt=bm25公式>
+<p><img loading=lazy src=https://tvax4.sinaimg.cn/large/006P3Jr6ly1h3plc9brwpj30j202s0t2.jpg alt=bm25公式>
 </p>
 <p>公式的详细介绍可以参考lucene官网</p>
 <p><a href=https://lucene.apache.org/core/8_0_0/core/org/apache/lucene/search/similarities/BM25Similarity.html>https://lucene.apache.org/core/8_0_0/core/org/apache/lucene/search/similarities/BM25Similarity.html</a></p>
@@ -149,7 +149,7 @@ elasticsearch相似度与排序原理
 k1控制着词频结果在词频饱和度中的上升速度.默认值为1.2,值越小饱和度变化越快.</p>
 <p>b控制着字段长度归一化的作用.0表示禁用归一化,1表示完全归一化,默认值是0.75</p>
 <p>下面可以看到在词频上升过程中两种模型的曲线变化</p>
-<p><img loading=lazy src=C:%5cspace-X%5cdocument%5cblog%5c%e6%80%9d%e7%bb%b4%e5%af%bc%e5%9b%be%5cbm25%e6%9b%b2%e7%ba%bf.png alt=bm25曲线>
+<p><img loading=lazy src=https://tva4.sinaimg.cn/large/006P3Jr6ly1h3plcgpwjgj30n60du0um.jpg alt=bm25曲线>
 </p>
 <h2 id=调整排序>调整排序</h2>
 <p>下面介绍一些调整文档最终排序的方法</p>

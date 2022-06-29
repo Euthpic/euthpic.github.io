@@ -205,7 +205,7 @@ elasticsearch读写原理
 <h4 id=fst二级索引>FST二级索引</h4>
 <p>由于 Lucene 会为原始数据中的每个词都生成倒排索引，数据量较大。所以倒排索引对应的倒排表被存放在磁盘上。这样如果每次查询都直接读取磁盘上的倒排表，再查询目标关键词，会有很多次磁盘 IO，严重影响查询性能。</p>
 <p>为了解磁盘 IO 问题，Lucene 引入排索引的二级索引 FST Finite State Transducer 。原理上可以理解为前缀树，加速查询。</p>
-<p><img loading=lazy src=C:%5cspace-X%5cdocument%5cblog%5c%e6%80%9d%e7%bb%b4%e5%af%bc%e5%9b%be%5ces-fst.png alt=es-fst>
+<p><img loading=lazy src=https://tvax4.sinaimg.cn/large/006P3Jr6ly1h3pla1ang2j31900f3drc.jpg alt=es-fst>
 </p>
 <p>其原理如下：</p>
 <ol>
@@ -234,7 +234,7 @@ elasticsearch读写原理
 <li>当合并后新的段提交后,旧的段会被删除(物理删除),合并结束.</li>
 </ul>
 <h2 id=lucene文件>Lucene文件</h2>
-<p><img loading=lazy src=C:%5cspace-X%5cdocument%5cblog%5c%e6%80%9d%e7%bb%b4%e5%af%bc%e5%9b%be%5csegment%e5%86%85%e5%ae%b9.png alt=segment内容>
+<p><img loading=lazy src=https://tvax1.sinaimg.cn/large/006P3Jr6ly1h3plapkknqj30ks0huaed.jpg alt=segment内容>
 </p>
 </div>
 <footer class=post-footer>

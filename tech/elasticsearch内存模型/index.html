@@ -122,7 +122,7 @@ elasticsearch内存模型
 <li>断路器和驱逐线</li>
 </ul>
 <p>Elasticsearch内存分为on heap以及off heap两部分.Elasticsearch能控制的是On Heap内存部分,这部分由JVM管理;Off Heap由Lucene管理,负责缓存倒排索引数据空间(Segment Memory).</p>
-<p><img loading=lazy src=C:%5cspace-X%5cdocument%5cblog%5c%e6%80%9d%e7%bb%b4%e5%af%bc%e5%9b%be%5ces%e5%86%85%e5%ad%98%e6%a8%a1%e5%9e%8b.png alt=es内存模型>
+<p><img loading=lazy src=https://tva1.sinaimg.cn/large/006P3Jr6ly1h3plbh7id4j30jr0ix78i.jpg alt=es内存模型>
 </p>
 <h2 id=堆内内存on-heap>堆内内存On Heap</h2>
 <p>堆内主要由写入缓冲,节点查询缓存,分片查询缓存,字段缓存和FST缓存组成.其中只有写入缓冲能被GC,其它缓存都是常驻内存的,满了之后通过LRU来驱逐.</p>
@@ -205,7 +205,7 @@ elasticsearch内存模型
 </tbody>
 </table>
 <h2 id=断路器circuit-breaker>断路器Circuit Breaker</h2>
-<p><img loading=lazy src=C:%5cspace-X%5cdocument%5cblog%5c%e6%80%9d%e7%bb%b4%e5%af%bc%e5%9b%be%5c%e6%96%ad%e8%b7%af%e5%99%a8%e5%92%8c%e9%a9%b1%e9%80%90%e7%ba%bf.png alt=断路器和驱逐线>
+<p><img loading=lazy src=https://tva4.sinaimg.cn/large/006P3Jr6ly1h3plby8dl4j30lf0go0xf.jpg alt=断路器和驱逐线>
 </p>
 <p>Elasticsearch 在 total，fielddata，request 三个层面上都设计有 circuit breaker 以保护进程不至于发生 OOM 事件。</p>
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-yaml data-lang=yaml><span style=color:#75715e># 针对整个堆内存</span>
