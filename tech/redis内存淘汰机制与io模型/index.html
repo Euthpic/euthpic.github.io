@@ -1,0 +1,481 @@
+<!doctype html><html lang=zh dir=auto>
+<head><meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=robots content="index, follow">
+<title>Redis内存淘汰机制与IO模型 | 乱花渐欲迷人眼</title>
+<meta name=keywords content>
+<meta name=description content="过期key的删除策略 Redis所有的键都可以设置过期时间. 思考一个问题,所有到期的键都一定会被删除吗? 假设同一时间内redis上有大量的ke">
+<meta name=author content="Guangfa">
+<link rel=canonical href=http://euthpic.github.io/tech/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6%E4%B8%8Eio%E6%A8%A1%E5%9E%8B/>
+<meta name=yandex-verification content="73b1a797f62c0e98">
+<link crossorigin=anonymous href=/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css integrity="sha256-yIlj/i15RiAA/Q+xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as=style>
+<script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=http://euthpic.github.io/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=http://euthpic.github.io/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=http://euthpic.github.io/favicon-32x32.png>
+<link rel=apple-touch-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<link rel=mask-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<meta name=theme-color content="#2e2e33">
+<meta name=msapplication-TileColor content="#2e2e33">
+<meta name=generator content="Hugo 0.89.4">
+<noscript>
+<style>#theme-toggle,.top-link{display:none}</style>
+<style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style>
+</noscript>
+<script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(a,e,f,g,b,c,d){a.GoogleAnalyticsObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=1,c.src=g,d.parentNode.insertBefore(c,d)}(window,document,'script','https://www.google-analytics.com/analytics.js','ga'),ga('create','UA-136094326-1','auto'),ga('send','pageview'))</script><meta property="og:title" content="Redis内存淘汰机制与IO模型">
+<meta property="og:description" content="过期key的删除策略 Redis所有的键都可以设置过期时间. 思考一个问题,所有到期的键都一定会被删除吗? 假设同一时间内redis上有大量的ke">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://euthpic.github.io/tech/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6%E4%B8%8Eio%E6%A8%A1%E5%9E%8B/"><meta property="og:image" content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="article:section" content="tech">
+<meta property="article:published_time" content="2020-06-25T21:44:19+08:00">
+<meta property="article:modified_time" content="2020-06-25T21:44:19+08:00"><meta property="og:site_name" content="乱花渐欲迷人眼">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:image content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name=twitter:title content="Redis内存淘汰机制与IO模型">
+<meta name=twitter:description content="过期key的删除策略 Redis所有的键都可以设置过期时间. 思考一个问题,所有到期的键都一定会被删除吗? 假设同一时间内redis上有大量的ke">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Teches","item":"http://euthpic.github.io/tech/"},{"@type":"ListItem","position":2,"name":"Redis内存淘汰机制与IO模型","item":"http://euthpic.github.io/tech/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6%E4%B8%8Eio%E6%A8%A1%E5%9E%8B/"}]}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Redis内存淘汰机制与IO模型","name":"Redis内存淘汰机制与IO模型","description":"过期key的删除策略 Redis所有的键都可以设置过期时间. 思考一个问题,所有到期的键都一定会被删除吗? 假设同一时间内redis上有大量的ke","keywords":[],"articleBody":"过期key的删除策略 Redis所有的键都可以设置过期时间.\n思考一个问题,所有到期的键都一定会被删除吗?\n假设同一时间内redis上有大量的key一起过期,那么这段时间redis用于删除key的时间就会太长,会严重影响到对客户端的请求处理.\n所以答案是 : 不会.Redis对于过期的key有两种删除策略,定时扫描(主动)和惰性删除(被动)\n而对于外部而言,redis过期的键是否删除是不确定的,但如果外部主动去观察(查询)的话,那么过期的键一定会被删除,是不是很像薛定谔的猫呢?\n过期的key集合 设置了过期时间的key,redis会把它们放到一个独立的字典里去,方便删除时的遍历.\n两种策略 定时扫描删除(主动) Redis默认会每秒进行十次过期扫描,考虑到效率的问题,并不会扫描过期字典里全部的key,而是采用了一种简单的贪心策略:\n 从过期字典中随机20个key. 删除这20个key中已经过期的. 如果过期的key比率超过25%,那就重复第一步. 如果本次扫描用时超过25ms,则停止扫描.  可以看到,Redis在过期扫描这里,为了不过分阻塞客户端的请求,在回收过期key的量和时间上都做了限制.有没有觉得,这里和JVM的G1收集器设计很像呢?\n不过即便如此,如果每次扫描都达到了时间上限,那么每秒就会有250ms,也就是25%的时间用于回收key,还是会有很大的性能影响.因此要注意合理设置key的过期时间,防止同时过期.\n惰性删除(被动) 在客户端访问key的时候,redis也会检查它的过期时间,如果过期了就立即删除.\n定时删除是集中,主动处理,而惰性删除是零散,被动处理.\nAOF与RDB对过期key的处理 RDB\n 创建RDB文件时,会对数据库的过期键检查,过期的key不会写入RDB文件里(保留一个疑问,还不确定检查的同时会不会一起把数据库的过期key也删了). 而载入RDB文件时,也同样会检查,过期的key会被忽略.也就是说,无论是写入还是读取RDB文件,都不会存在过期的key.  AOF\n 写入AOF文件时,由于AOF保留的是命令集,键被删除会有del命令,所以不需要额外检查key是否过期,会保留所有过期但未被删除的key. 载入aof文件和aof重写时也会像RDB一样去检查过期的key.  从库的过期策略 从库不会进行过期扫描,从库对过期key的处理是被动的,由主库统一控制.\n主库在key到期时,除了向aof里增加一条del指令,也会同步到所有的从库,从库通过执行这条del指令删除过期的key.\n内存淘汰机制 如果有大量过期的key既没有被定时扫描选中,也没有任何客户端去访问它们,那么它们一直待在内存里,会使得内存爆炸.\n为了解决这个问题,redis设计了内存淘汰机制. 可以通过配置项maxmemory来设置Redis存储数据时限制的内存大小.例如:\nmaxmemory 100mb 设置maxmemory为0代表没有内存限制。对于64位的系统这是个默认值，对于32位的系统默认内存限制为3GB。\n当达到指定的内存限制大小时,Redis有六种内存淘汰策略:\n   noeviction 返回错误（大部分的写入指令，但DEL和几个例外）     allkeys-lru 尝试回收最少使用的键（LRU）   volatile-lru 尝试回收最少使用的键（LRU），但仅限于在过期集合的键   allkeys-random 回收随机的键   volatile-random 回收随机的键，但仅限于在过期集合的键。   volatile-ttl 回收在过期集合的键，并且优先回收存活时间（TTL）较短的键    如果没有键符合回收条件,那么volatile-xxx就和noeviction的效果一样了.而且为key设置过期时间也会消耗内存,当redis的内存有压力时,这显然不是什么好的选择.\n所以一般情况下,allkeys-lru会是更加高效的选择.\ndel指令 由于过期的key与del指令息息相关,这里也顺便提一下.\n删除指令del会直接释放对象的内存,大部分情况下,这个指令非常快,但如果删除的key是非常大的对象,那么实际操作起来可能导致单线程卡顿.\n因此,Redis在4.0后引入了unlink指令,它能对删除操作进行懒处理,丢给后台线程来异步回收内存.\n而且这并不会引发线程安全问题,一旦unlink指令发出,主线程的其它指令就无法访问这个key了.\n可以理解为要删除key的时候,主线程先标记,被标记的key此后无法再被主线程访问,而是交由后台线程去处理.\n通信协议 RESP是Redis序列化协议的简写,是文本协议.\nRedis协议在以下几点之间做出了折衷：\n 简单的实现 快速地被计算机解析 简单得可以能被人工解析  作者认为数据库系统的瓶颈一般不在于网络流量,而是数据库自身内部逻辑处理上.所以即使Redis使用了浪费流量的文本协议,依然可以取得极高的访问性.\n而且解析性能非常好,我们不需要特殊的redis客户端,仅靠telnet或者是文本流就可以跟redis进行通讯.\n客户端的命令格式：\n 简单字符串 Simple Strings, 以 “+“加号 开头 错误 Errors, 以”-“减号 开头 整数型 Integer， 以 “:” 冒号开头 多行字符串类型 Bulk Strings, 以 “$“美元符号开头 数组类型 Arrays，以 “*“星号开头  例如我们想给服务器发送一个set hello abc,使用以下代码即可实现:\nI/O多路复用 前面讲单线程模型的时候提到过, I/O多路复用是提高Redis性能的关键.这部分就来详细介绍一下.\n五种I/O模型 在最原始的I/O(BIO,阻塞IO)里,写过socket相关应用的人都知道,调用read()函数时线程是会被阻塞的.\n假如客户端开始向服务器发送指令,这期间客户端指令没发完,去做别的准备工作了,服务器没收到结束的信号,就只能傻傻等着,白白浪费CPU的资源.\n后来人们为了提高I/O的性能,又相继发明了非阻塞I/O,多路复用I/O,信号驱动I/O和异步I/O等模型.\nRedis使用的就是多路复用I/O.\n文件事件处理器 Redis里的事件分为文件事件和时间事件.\n文件事件是对套接字操作的抽象,也就是Redis服务器和客户端通信所产生的事件,比如我们常见的客户端向服务器发送get请求,或者服务器向客户端发送它请求的结果.也可以把文件事件理解为网络事件.\n而文件事件处理器就专门处理文件事件,它包括四个部分:\n 多个套接字(socket) I/O多路复用程序 文件事件分派器 事件处理器  其工作原理:\n 事件包括accept(连接应答),write(写入),read(读取),close(关闭)等,由socket产生. 由于socket一般会有多个,因此多个事件可能会并发地出现. I/O多路复用程序负责监听多个socket(事件轮询),并向文件事件分派器传送那些产生了事件的socket. I/O多路复用程序维护了一个事件队列,产生了事件的socket会进入此队列,每次只会从该队列里传输一个socket给分派器.通过此队列,I/O多路复用程序保证了到达分派器的socket是有序,同步的. 当上一个socket产生的事件被处理完毕后,I/O多路复用程序才会继续传输下一个socket,保证了事件的处理是串行的,避免了线程安全以及竞态问题. 分派器负责把产生了事件的socket分派到对应的事件处理器.  注意,由于事件是串行处理的,如果某些事件的处理时间过长, 那么就会阻塞到后面的事件,那么Redis就不快了.所以要避免执行一些像keys这样的指令.\nI/O多路复用的实现 前面说过,Redis的I/O多路复用是通过epoll实现的,这其实并不准确.\n事实上,Redis包装了常见的select,epoll,evport和kqueue这些I/O多路复用函数库来实现多路复用.\n由于操作系统各异,不是每个函数都能在所有系统上执行,所以程序会自动选择在系统中性能最高的函数库来作为底层实现.一般选择的就是epoll了.\n关于epoll在性能上领先的地方,这将在讲到网络编程时再详细展开.\n事务 Redis也有事务,不过按照传统的事务定义ACID来看,redis的事务并不具备ACID的全部特性.\n事务相关命令    命令 作用     multi 事务开启的标志,后续的一系列指令都为事务指令,配合exec使用   exec 事务提交/执行的标志,服务器在收到multi命令后,会把后续的命令先入队,但直到收到exec才会一起执行   watch 乐观锁,监视某个key是否在事务提交前被修改了   discard 在exec之前发送,丢弃本次事务.    事务的实现 Redis的事务从开始到结束通常会经历三个阶段:\n 事务开始 — multi 命令入队 事务执行 — exec  事务开始\nmulti命令标志着事务的开始.\n命令入队\n当客户端处于非事务状态时,它发送的命令会被服务器立即执行.\n但当客户端处于事务状态时,服务器会根据命令的不同而执行不同的操作:\n 如果命令为exec,discard,watch,multi中的一个,那么服务器立即执行该命令. 如果命令为其它命令,服务器不会立即执行,而是把命令放入一个事务队列里面,然后向客户端返回queued回复.  事务执行\n当服务器收到exec命令时,就会遍历执行这个事务队列的所有命令,最后将执行命令所得结果全部返回给客户端.\n来看一个事务的例子:\nclient  multi redis  ok client  set a 1234 redis  queued client  get \"a\" redis  queued client  exec redis  ok redis  \"1234\" 乐观锁WATCH watch命令是一个乐观锁,它可以在exec命令执行之前,监视数据库的任意key.\n如果在exec执行时,被watch监视的key至少有一个被修改了,那么服务器将拒绝执行事务,并向客户端返回代表事务执行失败的空回复(nil或null).一般客户端失败后都会选择重试.\n下面就是个失败的例子:\n监视机制的触发\n那么,watch是如何知道哪些键被修改的呢? —改动方主动通知\n所有对数据库进行修改的命令,比如set,lpush,sadd等,在执行完后都会去查看被修改的key是否被某些客户端监视.若有,则会将监视被修改键的客户端的标志(redis_dirty_cas)打开.\n当服务器执行exec时,就会根据该客户端的标志是否打开来决定是否执行事务.\n注意 : Redis禁止在multi和exec之间执行watch指令,否则会报错.\n事务的ACID性质 前面我们提到,redis并不具备ACID的全部特性,接下来就逐一分析下.\n先上结论,根据的说法:\nredis的事务总能保证原子性,一致性和隔离性,且在aof持久化模式下,并且appendfsync选项的值为always时,事务也具备持久性 实际上,如果你用mysql的事务去看这段话,你会发现除了隔离性和持久性,其余的都是在扯犊子.\n原子性 事务具备原子性指的是，数据库将事务中多个操作当作一个整体来执行，服务要么执行事务中所有的操作，要不一个操作也不会执行。 实现原子性的重要前提是能否保证事务可以回滚.\n显然redis不具备回滚事务的能力,因为它是先执行,保存完数据才会去写aof日志.如果执行到后面发现有指令执行错误,前面的指令已经持久化了,根本无法回滚.\n而mysql是先写日志,边写边执行,结果暂不提交.如果写到后面发现有指令执行错误,就可以根据日志内容进行回滚.\n顺便一提,redis之所以不支持事务回滚也是为了性能考虑,者与redis追求简单高效的设计主旨不符.而且作者认为回滚的情况很少会在实际的生产环境中出现,所以也没有去设计的必要.\n那为什么书中会认为redis具有原子性呢?\n因为redis把指令的错误分为两种:\n 入队错误 : 指令语法的错误,例如不存在的指令,或者缺失必要参数的指令.在入队的时候就可以检查出来. 执行错误 : 一般是数据类型的错误,例如对list的键执行了hash的操作.入队的时候无法判断,错误只能在执行时才能暴露出来.  如果是入队错误:\n例如提交了一个不存在的\"YAHOOOO\"指令,那么redis在入队的时候能检查出来,然后整个事务都会被拒绝执行.\n作者认为这种情况体现了\"原子性”.\n但如果错误到了执行阶段才暴露出来,redis无法回滚已经执行的命令,并且会继续执行后续可执行的命令.也就是到了执行阶段,所有命令都会被执行,执行失败的命令不回影响到其他命令的正常执行.\n一致性 对于事务的理解不同,一致性的定义也有两种版本.\n版本1\n如果数据库在事务开始之前是完整的,那么事务结束以后数据库的完整性也没有被破坏。 版本2\n事务使得系统从一个正确的状态到另一个正确的状态 这里的完整性具体是指,数据库是否存在会持续报错的缺陷,例如,存在两个同名的表,又或者类型是int的list却存进了几个字符串.\n书中作者采用了第一种定义,只关注数据库的状态.\n作者认为对于redis的错误操作都会在入队阶段或者执行阶段被检查出来,从而被拒绝执行;\n而当发生宕机的情况后,redis也能通过aof或者rdb文件进行还原,因此事务的一致性可以得到保证.\n但是在传统的ACID概念中,一致性不单单要保证数据库的正确状态,而且在逻辑上也是要正确的.\n来看著名的转账问题:\nA转账给B分为两步:\n A减少10块钱 B增加10块钱.  因为redis不支持回滚,那么当A的钱减少了之后,系统错误,B的钱没有变化,那么A的钱就白白减少了.这在逻辑上是不正确的.\n隔离性和持久性就不单独讨论了,没啥问题.\n从本质上来说,ACID中的AID都是手段/过程,C才是事务的最终目的.也就是说我们是通过事务的原子性,隔离性,持久性来保证一致性.\nredis无法保证原子性,自然也无法保证一致性.\n结论 说了一大堆,并不是想批判redis不遵守事务的规范,从redis的设计思想就可以看出它无意实现传统意义上的ACID,只是想提醒各位使用redis的小伙伴 : redis中的事务和传统意义上的事务还是有很大区别的,使用的时候要注意这点,不要到时候因为无法回滚事务而搞出大问题.\nPipeline pipeline也就是管道,或者说流水线,使用了这条命令后,客户端可以把一连串指令打包,然后一起发送给服务器.\n这可以提高客户端与服务器之间通信的效率.原本需要多次通信,使用管道后只需通信一次.\n使用pipeline之前 :\n使用pipeline之后:\n而且如果这些命令之间执行结果不会相互影响,那么pipeline还可以通过改变指令的执行顺序来合并相关指令,进而进一步提升效率.\n例如原先的指令顺序:\n经过优化合并后,可以视作只有一个write和一个read :\n实现 pipeline有两种实现方法:\n 用multi和exec包裹起这些命令,即使它们没有事务的需求. 像事务一样收集起这些命令,等到命令收集完毕后再一起发送给服务器.这种方法效率更高,可以合并指令.  ","wordCount":"5892","inLanguage":"zh","datePublished":"2020-06-25T21:44:19+08:00","dateModified":"2020-06-25T21:44:19+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6%E4%B8%8Eio%E6%A8%A1%E5%9E%8B/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
+</head>
+<body id=top>
+<script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
+<header class=header>
+<nav class=nav>
+<div class=logo>
+<a href=http://euthpic.github.io/ accesskey=h title="🏡 乱花渐欲迷人眼 (Alt + H)">🏡 乱花渐欲迷人眼</a>
+<span class=logo-switches>
+<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+</span>
+</div>
+<ul id=menu>
+<li>
+<a href=http://euthpic.github.io/categories/ title="📔 系列">
+<span>📔 系列</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/tags/ title="🏷️ 标签">
+<span>🏷️ 标签</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/search/ title="🔍 搜索 (Alt + /)" accesskey=/>
+<span>🔍 搜索</span>
+</a>
+</li>
+<li>
+<a href=https://travellings.link title=🚇>
+<span>🚇</span>
+</a>
+</li>
+</ul>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-header>
+<div class=breadcrumbs><a href=http://euthpic.github.io/>主页</a>&nbsp;»&nbsp;<a href=http://euthpic.github.io/tech/>Teches</a></div>
+<h1 class=post-title>
+Redis内存淘汰机制与IO模型
+</h1>
+<div class=post-meta><span title="2020-06-25 21:44:19 +0800 CST">June 25, 2020</span>&nbsp;·&nbsp;12 分钟&nbsp;·&nbsp;Guangfa&nbsp;|&nbsp;<a href=https://github.com/euthpic/euthpic.github.io/edit/main/content/tech/Redis%e5%86%85%e5%ad%98%e6%b7%98%e6%b1%b0%e6%9c%ba%e5%88%b6%e4%b8%8eIO%e6%a8%a1%e5%9e%8b.md rel="noopener noreferrer" target=_blank>PR</a>
+</div>
+</header> <div class=toc>
+<details open>
+<summary accesskey=c title="(Alt + C)">
+<span class=details>目录</span>
+</summary>
+<div class=inner><ul>
+<li>
+<a href=#%e8%bf%87%e6%9c%9fkey%e7%9a%84%e5%88%a0%e9%99%a4%e7%ad%96%e7%95%a5 aria-label=过期key的删除策略>过期key的删除策略</a></li>
+<li>
+<a href=#%e8%bf%87%e6%9c%9f%e7%9a%84key%e9%9b%86%e5%90%88 aria-label=过期的key集合>过期的key集合</a></li>
+<li>
+<a href=#%e4%b8%a4%e7%a7%8d%e7%ad%96%e7%95%a5 aria-label=两种策略>两种策略</a><ul>
+<li>
+<a href=#%e5%ae%9a%e6%97%b6%e6%89%ab%e6%8f%8f%e5%88%a0%e9%99%a4%e4%b8%bb%e5%8a%a8 aria-label=定时扫描删除(主动)>定时扫描删除(主动)</a></li>
+<li>
+<a href=#%e6%83%b0%e6%80%a7%e5%88%a0%e9%99%a4%e8%a2%ab%e5%8a%a8 aria-label=惰性删除(被动)>惰性删除(被动)</a></li>
+<li>
+<a href=#aof%e4%b8%8erdb%e5%af%b9%e8%bf%87%e6%9c%9fkey%e7%9a%84%e5%a4%84%e7%90%86 aria-label=AOF与RDB对过期key的处理>AOF与RDB对过期key的处理</a></li>
+<li>
+<a href=#%e4%bb%8e%e5%ba%93%e7%9a%84%e8%bf%87%e6%9c%9f%e7%ad%96%e7%95%a5 aria-label=从库的过期策略>从库的过期策略</a></li></ul>
+</li>
+<li>
+<a href=#%e5%86%85%e5%ad%98%e6%b7%98%e6%b1%b0%e6%9c%ba%e5%88%b6 aria-label=内存淘汰机制>内存淘汰机制</a></li>
+<li>
+<a href=#del%e6%8c%87%e4%bb%a4 aria-label=del指令>del指令</a></li>
+<li>
+<a href=#%e9%80%9a%e4%bf%a1%e5%8d%8f%e8%ae%ae aria-label=通信协议>通信协议</a></li>
+<li>
+<a href=#io%e5%a4%9a%e8%b7%af%e5%a4%8d%e7%94%a8 aria-label=I/O多路复用>I/O多路复用</a><ul>
+<li>
+<a href=#%e4%ba%94%e7%a7%8dio%e6%a8%a1%e5%9e%8b aria-label=五种I/O模型>五种I/O模型</a></li>
+<li>
+<a href=#%e6%96%87%e4%bb%b6%e4%ba%8b%e4%bb%b6%e5%a4%84%e7%90%86%e5%99%a8 aria-label=文件事件处理器>文件事件处理器</a></li>
+<li>
+<a href=#io%e5%a4%9a%e8%b7%af%e5%a4%8d%e7%94%a8%e7%9a%84%e5%ae%9e%e7%8e%b0 aria-label=I/O多路复用的实现>I/O多路复用的实现</a></li></ul>
+</li>
+<li>
+<a href=#%e4%ba%8b%e5%8a%a1 aria-label=事务>事务</a><ul>
+<li>
+<a href=#%e4%ba%8b%e5%8a%a1%e7%9b%b8%e5%85%b3%e5%91%bd%e4%bb%a4 aria-label=事务相关命令>事务相关命令</a></li>
+<li>
+<a href=#%e4%ba%8b%e5%8a%a1%e7%9a%84%e5%ae%9e%e7%8e%b0 aria-label=事务的实现>事务的实现</a></li>
+<li>
+<a href=#%e4%b9%90%e8%a7%82%e9%94%81watch aria-label=乐观锁WATCH>乐观锁WATCH</a></li>
+<li>
+<a href=#%e4%ba%8b%e5%8a%a1%e7%9a%84acid%e6%80%a7%e8%b4%a8 aria-label=事务的ACID性质>事务的ACID性质</a><ul>
+<li>
+<a href=#%e5%8e%9f%e5%ad%90%e6%80%a7 aria-label=原子性>原子性</a></li>
+<li>
+<a href=#%e4%b8%80%e8%87%b4%e6%80%a7 aria-label=一致性>一致性</a></li>
+<li>
+<a href=#%e7%bb%93%e8%ae%ba aria-label=结论>结论</a></li></ul>
+</li></ul>
+</li>
+<li>
+<a href=#pipeline aria-label=Pipeline>Pipeline</a><ul>
+<li>
+<a href=#%e5%ae%9e%e7%8e%b0 aria-label=实现>实现</a>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</details>
+</div>
+<div class=post-content><h2 id=过期key的删除策略>过期key的删除策略</h2>
+<p>Redis所有的键都可以设置过期时间.</p>
+<p>思考一个问题,<strong>所有到期的键都一定会被删除吗?</strong></p>
+<p>假设同一时间内redis上有大量的key一起过期,那么这段时间redis用于删除key的时间就会太长,会严重影响到对客户端的请求处理.</p>
+<p>所以答案是 : <strong>不会</strong>.Redis对于过期的key有两种删除策略,<strong>定时扫描</strong>(主动)和<strong>惰性删除</strong>(被动)</p>
+<p>而对于外部而言,redis过期的键是否删除是不确定的,但如果外部主动去观察(查询)的话,那么过期的键一定会被删除,是不是很像薛定谔的猫呢?</p>
+<h2 id=过期的key集合>过期的key集合</h2>
+<p>设置了过期时间的key,redis会把它们放到一个<strong>独立的字典</strong>里去,方便删除时的遍历.</p>
+<h2 id=两种策略>两种策略</h2>
+<h3 id=定时扫描删除主动>定时扫描删除(主动)</h3>
+<p>Redis默认会每秒进行十次过期扫描,考虑到效率的问题,<strong>并不会扫描过期字典里全部的key</strong>,而是采用了一种简单的贪心策略:</p>
+<ul>
+<li>从过期字典中随机20个key.</li>
+<li>删除这20个key中已经过期的.</li>
+<li>如果过期的key比率超过25%,那就重复第一步.</li>
+<li>如果本次扫描用时超过25ms,则停止扫描.</li>
+</ul>
+<p>可以看到,Redis在过期扫描这里,为了不过分阻塞客户端的请求,<strong>在回收过期key的量和时间上都做了限制</strong>.有没有觉得,这里和JVM的G1收集器设计很像呢?</p>
+<p>不过即便如此,如果每次扫描都达到了时间上限,那么每秒就会有250ms,也就是25%的时间用于回收key,还是会有很大的性能影响.因此要注意合理设置key的过期时间,防止同时过期.</p>
+<h3 id=惰性删除被动>惰性删除(被动)</h3>
+<p>在客户端访问key的时候,redis也会检查它的过期时间,如果过期了就立即删除.</p>
+<p>定时删除是<strong>集中,主动</strong>处理,而惰性删除是<strong>零散,被动</strong>处理.</p>
+<h3 id=aof与rdb对过期key的处理>AOF与RDB对过期key的处理</h3>
+<p><strong>RDB</strong></p>
+<ul>
+<li>创建RDB文件时,会对数据库的过期键检查,<strong>过期的key不会写入RDB文件</strong>里(保留一个疑问,还不确定检查的同时会不会一起把数据库的过期key也删了).</li>
+<li>而载入RDB文件时,也同样会检查,<strong>过期的key会被忽略</strong>.也就是说,无论是写入还是读取RDB文件,都不会存在过期的key.</li>
+</ul>
+<p><strong>AOF</strong></p>
+<ul>
+<li>写入AOF文件时,由于AOF保留的是命令集,键被删除会有del命令,所以不需要额外检查key是否过期,会<strong>保留所有过期但未被删除的key</strong>.</li>
+<li>载入aof文件和aof重写时也会像RDB一样去检查过期的key.</li>
+</ul>
+<h3 id=从库的过期策略>从库的过期策略</h3>
+<p><strong>从库不会进行过期扫描</strong>,从库对过期key的处理是被动的,<strong>由主库统一控制</strong>.</p>
+<p>主库在key到期时,除了向aof里增加一条del指令,也会同步到所有的从库,<strong>从库通过执行这条del指令删除过期的key</strong>.</p>
+<h2 id=内存淘汰机制>内存淘汰机制</h2>
+<p>如果有大量过期的key既没有被定时扫描选中,也没有任何客户端去访问它们,那么它们一直待在内存里,会使得内存爆炸.</p>
+<p>为了解决这个问题,redis设计了内存淘汰机制.
+可以通过配置项<strong>maxmemory</strong>来设置Redis存储数据时限制的内存大小.例如:</p>
+<pre tabindex=0><code>maxmemory 100mb
+</code></pre><p>设置<code>maxmemory</code>为0代表没有内存限制。对于64位的系统这是个默认值，对于32位的系统默认内存限制为3GB。</p>
+<p>当达到指定的内存限制大小时,Redis有<strong>六</strong>种内存淘汰策略:</p>
+<table>
+<thead>
+<tr>
+<th><strong>noeviction</strong></th>
+<th>返回错误（大部分的写入指令，但DEL和几个例外）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>allkeys-lru</strong></td>
+<td>尝试回收最少使用的键（LRU）</td>
+</tr>
+<tr>
+<td><strong>volatile-lru</strong></td>
+<td>尝试回收最少使用的键（LRU），但仅限于在过期集合的键</td>
+</tr>
+<tr>
+<td><strong>allkeys-random</strong></td>
+<td>回收随机的键</td>
+</tr>
+<tr>
+<td><strong>volatile-random</strong></td>
+<td>回收随机的键，但仅限于在过期集合的键。</td>
+</tr>
+<tr>
+<td><strong>volatile-ttl</strong></td>
+<td>回收在过期集合的键，并且优先回收存活时间（TTL）较短的键</td>
+</tr>
+</tbody>
+</table>
+<p>如果没有键符合回收条件,那么volatile-xxx就和noeviction的效果一样了.而且为key设置过期时间也会消耗内存,当redis的内存有压力时,这显然不是什么好的选择.</p>
+<p>所以一般情况下,<strong>allkeys-lru</strong>会是更加高效的选择.</p>
+<h2 id=del指令>del指令</h2>
+<p>由于过期的key与del指令息息相关,这里也顺便提一下.</p>
+<p>删除指令del会直接释放对象的内存,大部分情况下,这个指令非常快,但如果删除的key是非常大的对象,那么实际操作起来可能导致单线程卡顿.</p>
+<p>因此,Redis在4.0后引入了<strong>unlink</strong>指令,它能对删除操作进行<strong>懒处理</strong>,丢给后台线程来<strong>异步回收内存</strong>.</p>
+<p>而且这并不会引发线程安全问题,一旦unlink指令发出,主线程的其它指令就无法访问这个key了.</p>
+<p>可以理解为要删除key的时候,主线程先标记,被标记的key此后无法再被主线程访问,而是交由后台线程去处理.</p>
+<h2 id=通信协议>通信协议</h2>
+<p><strong>RESP</strong>是Redis序列化协议的简写,是<strong>文本协议</strong>.</p>
+<p>Redis协议在以下几点之间做出了折衷：</p>
+<ul>
+<li><strong>简单</strong>的实现</li>
+<li><strong>快速</strong>地被计算机解析</li>
+<li>简单得可以能被人工解析</li>
+</ul>
+<p>作者认为数据库系统的瓶颈一般不在于网络流量,而是数据库自身内部逻辑处理上.所以即使Redis使用了浪费流量的文本协议,依然可以取得极高的访问性.</p>
+<p>而且解析性能非常好,我们不需要特殊的redis客户端,仅靠telnet或者是文本流就可以跟redis进行通讯.</p>
+<p>客户端的命令格式：</p>
+<ul>
+<li>简单字符串 Simple Strings, 以 &ldquo;+&ldquo;加号 开头</li>
+<li>错误 Errors, 以&rdquo;-&ldquo;减号 开头</li>
+<li>整数型 Integer， 以 &ldquo;:&rdquo; 冒号开头</li>
+<li>多行字符串类型 Bulk Strings, 以 &ldquo;$&ldquo;美元符号开头</li>
+<li>数组类型 Arrays，以 &ldquo;*&ldquo;星号开头</li>
+</ul>
+<p>例如我们想给服务器发送一个<code>set hello abc</code>,使用以下代码即可实现:</p>
+<p><img loading=lazy src=https://tvax2.sinaimg.cn/large/006P3Jr6gy1h3qjx1r3f5j30kt0au77l.jpg alt="set hello abc">
+</p>
+<h2 id=io多路复用>I/O多路复用</h2>
+<p>前面讲单线程模型的时候提到过, I/O多路复用是提高Redis性能的关键.这部分就来详细介绍一下.</p>
+<h3 id=五种io模型>五种I/O模型</h3>
+<p>在最原始的I/O(BIO,<strong>阻塞IO</strong>)里,写过socket相关应用的人都知道,调用read()函数时线程是会被阻塞的.</p>
+<p>假如客户端开始向服务器发送指令,这期间客户端指令没发完,去做别的准备工作了,服务器没收到结束的信号,就只能傻傻等着,白白浪费CPU的资源.</p>
+<p>后来人们为了提高I/O的性能,又相继发明了<strong>非阻塞I/O,多路复用I/O,信号驱动I/O和异步I/O</strong>等模型.</p>
+<p>Redis使用的就是多路复用I/O.</p>
+<h3 id=文件事件处理器>文件事件处理器</h3>
+<p>Redis里的事件分为<strong>文件事件</strong>和<strong>时间事件</strong>.</p>
+<p>文件事件是对套接字操作的抽象,也就是<strong>Redis服务器和客户端通信所产生的事件</strong>,比如我们常见的客户端向服务器发送get请求,或者服务器向客户端发送它请求的结果.也可以把文件事件理解为网络事件.</p>
+<p>而文件事件处理器就专门处理文件事件,它包括四个部分:</p>
+<ul>
+<li>多个套接字(socket)</li>
+<li>I/O多路复用程序</li>
+<li>文件事件分派器</li>
+<li>事件处理器</li>
+</ul>
+<p><img loading=lazy src=https://tvax3.sinaimg.cn/large/006P3Jr6gy1h3qjxen5anj30h70dytbc.jpg alt=文件事件处理器>
+</p>
+<p>其工作原理:</p>
+<ul>
+<li>事件包括<strong>accept</strong>(连接应答),<strong>write</strong>(写入),<strong>read</strong>(读取),<strong>close</strong>(关闭)等,<strong>由socket产生</strong>.</li>
+<li>由于socket一般会有多个,因此<strong>多个事件可能会并发地出现</strong>.</li>
+<li>I/O多路复用程序负责<strong>监听多个socket</strong>(事件轮询),并向文件事件分派器传送那些产生了事件的socket.</li>
+<li>I/O多路复用程序维护了一个<strong>事件队列</strong>,产生了事件的socket会进入此队列,每次只会从该队列里传输一个socket给分派器.通过此队列,I/O多路复用程序<strong>保证了到达分派器的socket是有序,同步的</strong>.</li>
+<li>当上一个socket产生的事件被处理完毕后,I/O多路复用程序才会继续传输下一个socket,<strong>保证了事件的处理是串行的,避免了线程安全以及竞态问题</strong>.</li>
+<li>分派器负责把产生了事件的socket分派到对应的事件处理器.</li>
+</ul>
+<p><img loading=lazy src=https://tva4.sinaimg.cn/large/006P3Jr6gy1h3qjxxk6i6j30kf03pmy3.jpg alt=事件队列>
+</p>
+<p>注意,由于事件是串行处理的,<strong>如果某些事件的处理时间过长, 那么就会阻塞到后面的事件</strong>,那么Redis就不快了.所以要避免执行一些像keys这样的指令.</p>
+<h3 id=io多路复用的实现>I/O多路复用的实现</h3>
+<p>前面说过,Redis的I/O多路复用是通过epoll实现的,这其实并不准确.</p>
+<p>事实上,Redis包装了常见的select,epoll,evport和kqueue这些I/O多路复用函数库来实现多路复用.</p>
+<p>由于操作系统各异,不是每个函数都能在所有系统上执行,所以<strong>程序会自动选择在系统中性能最高的函数库来作为底层实现</strong>.一般选择的就是epoll了.</p>
+<p>关于epoll在性能上领先的地方,这将在讲到网络编程时再详细展开.</p>
+<p><img loading=lazy src=https://tva2.sinaimg.cn/large/006P3Jr6gy1h3qjy9zyw6j30cy06egmk.jpg alt=多路复用>
+</p>
+<h2 id=事务>事务</h2>
+<p>Redis也有事务,不过按照传统的事务定义ACID来看,<strong>redis的事务并不具备ACID的全部特性</strong>.</p>
+<h3 id=事务相关命令>事务相关命令</h3>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>multi</td>
+<td>事务开启的标志,后续的一系列指令都为事务指令,配合exec使用</td>
+</tr>
+<tr>
+<td>exec</td>
+<td>事务提交/执行的标志,服务器在收到multi命令后,会把后续的命令先入队,但直到收到exec才会一起执行</td>
+</tr>
+<tr>
+<td>watch</td>
+<td>乐观锁,监视某个key是否在事务提交前被修改了</td>
+</tr>
+<tr>
+<td>discard</td>
+<td>在exec之前发送,丢弃本次事务.</td>
+</tr>
+</tbody>
+</table>
+<h3 id=事务的实现>事务的实现</h3>
+<p>Redis的事务从开始到结束通常会经历三个阶段:</p>
+<ul>
+<li>事务开始 &mdash; multi</li>
+<li>命令入队</li>
+<li>事务执行 &mdash; exec</li>
+</ul>
+<p><strong>事务开始</strong></p>
+<p>multi命令标志着事务的开始.</p>
+<p><strong>命令入队</strong></p>
+<p>当客户端处于非事务状态时,它发送的命令会被服务器立即执行.</p>
+<p>但当客户端处于事务状态时,服务器会根据命令的不同而执行不同的操作:</p>
+<ul>
+<li>如果命令为<code>exec</code>,<code>discard</code>,<code>watch</code>,<code>multi</code>中的一个,那么服务器立即执行该命令.</li>
+<li>如果命令为其它命令,服务器不会立即执行,而是把命令放入一个<code>事务队列</code>里面,然后向客户端返回<code>queued</code>回复.</li>
+</ul>
+<p><strong>事务执行</strong></p>
+<p>当服务器收到<code>exec</code>命令时,就会遍历执行这个事务队列的所有命令,最后将执行命令所得结果全部返回给客户端.</p>
+<p><img loading=lazy src=https://tvax2.sinaimg.cn/large/006P3Jr6gy1h3qjyyc55qj30h40c0di4.jpg alt=是否执行事务>
+</p>
+<p>来看一个事务的例子:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>client <span style=color:#f92672>&gt;</span> multi
+
+redis <span style=color:#f92672>&gt;</span> ok
+
+client <span style=color:#f92672>&gt;</span> set a 1234
+
+redis <span style=color:#f92672>&gt;</span> queued
+
+client <span style=color:#f92672>&gt;</span> get <span style=color:#e6db74>&#34;a&#34;</span>
+
+redis <span style=color:#f92672>&gt;</span> queued
+
+client <span style=color:#f92672>&gt;</span> exec
+
+redis <span style=color:#f92672>&gt;</span> ok
+
+redis <span style=color:#f92672>&gt;</span> <span style=color:#e6db74>&#34;1234&#34;</span>
+</code></pre></div><h3 id=乐观锁watch>乐观锁WATCH</h3>
+<p>watch命令是一个乐观锁,它可以在exec命令执行之前,监视数据库的任意key.</p>
+<p>如果在exec执行时,被watch监视的key至少有一个被修改了,那么服务器将拒绝执行事务,并向客户端返回代表事务执行失败的空回复(nil或null).一般客户端失败后都会选择重试.</p>
+<p>下面就是个失败的例子:</p>
+<p><img loading=lazy src=https://tva1.sinaimg.cn/large/006P3Jr6gy1h3qjzeekr4j30od07w40a.jpg alt="watch failed">
+</p>
+<p><strong>监视机制的触发</strong></p>
+<p>那么,watch是如何知道哪些键被修改的呢? &mdash;<strong>改动方主动通知</strong></p>
+<p>所有对数据库进行修改的命令,比如set,lpush,sadd等,在执行完后都会去查看被修改的key是否被某些客户端监视.若有,则会将监视被修改键的客户端的标志(<strong>redis_dirty_cas</strong>)打开.</p>
+<p>当服务器执行exec时,就会根据该客户端的标志是否打开来决定是否执行事务.</p>
+<p><img loading=lazy src=https://tva4.sinaimg.cn/large/006P3Jr6gy1h3qk09lh88j30dm07cgms.jpg alt=事务是否安全>
+</p>
+<p>注意 : Redis禁止在multi和exec之间执行watch指令,否则会报错.</p>
+<h3 id=事务的acid性质>事务的ACID性质</h3>
+<p>前面我们提到,redis并不具备ACID的全部特性,接下来就逐一分析下.</p>
+<p>先上结论,根据&lt;Redis设计与实现>的说法:</p>
+<pre tabindex=0><code>redis的事务总能保证原子性,一致性和隔离性,且在aof持久化模式下,并且appendfsync选项的值为always时,事务也具备持久性
+</code></pre><p>实际上,如果你用mysql的事务去看这段话,你会发现除了隔离性和持久性,其余的都是在扯犊子.</p>
+<h4 id=原子性>原子性</h4>
+<pre tabindex=0><code>事务具备原子性指的是，数据库将事务中多个操作当作一个整体来执行，服务要么执行事务中所有的操作，要不一个操作也不会执行。
+</code></pre><p>实现原子性的重要前提是<strong>能否保证事务可以回滚</strong>.</p>
+<p>显然<strong>redis不具备回滚事务的能力</strong>,因为它是先执行,保存完数据才会去写aof日志.如果执行到后面发现有指令执行错误,<strong>前面的指令已经持久化了,根本无法回滚</strong>.</p>
+<p>而mysql是先写日志,边写边执行,结果暂不提交.如果写到后面发现有指令执行错误,就可以根据日志内容进行回滚.</p>
+<p>顺便一提,redis之所以不支持事务回滚也是为了性能考虑,者与redis追求简单高效的设计主旨不符.而且作者认为回滚的情况很少会在实际的生产环境中出现,所以也没有去设计的必要.</p>
+<p><strong>那为什么书中会认为redis具有原子性呢?</strong></p>
+<p>因为redis把指令的错误分为两种:</p>
+<ul>
+<li>入队错误 : 指令语法的错误,例如不存在的指令,或者缺失必要参数的指令.在入队的时候就可以检查出来.</li>
+<li>执行错误 : 一般是数据类型的错误,例如对list的键执行了hash的操作.入队的时候无法判断,错误只能在执行时才能暴露出来.</li>
+</ul>
+<p>如果是入队错误:</p>
+<p><img loading=lazy src=https://tvax3.sinaimg.cn/large/006P3Jr6gy1h3qk0lbbdyj30mp07igmn.jpg alt=入队错误>
+</p>
+<p>例如提交了一个不存在的"YAHOOOO"指令,那么redis在入队的时候能检查出来,然后整个事务都会被拒绝执行.</p>
+<p>作者认为这种情况体现了"原子性&rdquo;.</p>
+<p>但如果错误到了执行阶段才暴露出来,<strong>redis无法回滚已经执行的命令,并且会继续执行后续可执行的命令</strong>.也就是到了执行阶段,所有命令都会被执行,<strong>执行失败的命令不回影响到其他命令的正常执行</strong>.</p>
+<h4 id=一致性>一致性</h4>
+<p>对于事务的理解不同,一致性的定义也有两种版本.</p>
+<p>版本1</p>
+<pre tabindex=0><code>如果数据库在事务开始之前是完整的,那么事务结束以后数据库的完整性也没有被破坏。
+</code></pre><p>版本2</p>
+<pre tabindex=0><code>事务使得系统从一个正确的状态到另一个正确的状态
+</code></pre><p>这里的完整性具体是指,数据库是否存在会<strong>持续报错的缺陷</strong>,例如,存在两个同名的表,又或者类型是int的list却存进了几个字符串.</p>
+<p>书中作者采用了第一种定义,只关注数据库的状态.</p>
+<p>作者认为对于redis的错误操作都会在入队阶段或者执行阶段被检查出来,从而被拒绝执行;</p>
+<p>而当发生宕机的情况后,redis也能通过aof或者rdb文件进行还原,因此事务的一致性可以得到保证.</p>
+<p>但是在传统的ACID概念中,<strong>一致性不单单要保证数据库的正确状态,而且在逻辑上也是要正确的.</strong></p>
+<p>来看著名的转账问题:</p>
+<p>A转账给B分为两步:</p>
+<ul>
+<li>A减少10块钱</li>
+<li>B增加10块钱.</li>
+</ul>
+<p>因为redis不支持回滚,那么当A的钱减少了之后,系统错误,B的钱没有变化,那么A的钱就白白减少了.这在逻辑上是不正确的.</p>
+<p>隔离性和持久性就不单独讨论了,没啥问题.</p>
+<p>从本质上来说,ACID中的AID都是手段/过程,<strong>C才是事务的最终目的</strong>.也就是说我们是<strong>通过事务的原子性,隔离性,持久性来保证一致性</strong>.</p>
+<p>redis无法保证原子性,自然也无法保证一致性.</p>
+<h4 id=结论>结论</h4>
+<p>说了一大堆,并不是想批判redis不遵守事务的规范,从redis的设计思想就可以看出它无意实现传统意义上的ACID,只是想提醒各位使用redis的小伙伴 : <strong>redis中的事务和传统意义上的事务还是有很大区别的</strong>,使用的时候要注意这点,不要到时候因为无法回滚事务而搞出大问题.</p>
+<h2 id=pipeline>Pipeline</h2>
+<p>pipeline也就是<strong>管道</strong>,或者说流水线,使用了这条命令后,客户端可以<strong>把一连串指令打包,然后一起发送给服务器</strong>.</p>
+<p>这可以提高客户端与服务器之间通信的效率.<strong>原本需要多次通信,使用管道后只需通信一次</strong>.</p>
+<p>使用pipeline之前 :</p>
+<p><img loading=lazy src=https://tvax1.sinaimg.cn/large/006P3Jr6gy1h3qk0szkewj30p508yaas.jpg alt=beforepipeline>
+</p>
+<p>使用pipeline之后:</p>
+<p><img loading=lazy src=https://tva3.sinaimg.cn/large/006P3Jr6gy1h3qk13rr7uj30mw05qgm0.jpg alt=afterpipeline>
+</p>
+<p>而且如果这些命令之间执行结果不会相互影响,那么pipeline还可以<strong>通过改变指令的执行顺序来合并相关指令,进而进一步提升效率</strong>.</p>
+<p>例如原先的指令顺序:</p>
+<p><img loading=lazy src=https://tva2.sinaimg.cn/large/006P3Jr6gy1h3qk1gga3lj30fr02a747.jpg alt=指令顺序>
+</p>
+<p>经过优化合并后,可以视作只有一个write和一个read :</p>
+<p><img loading=lazy src=https://tvax1.sinaimg.cn/large/006P3Jr6gy1h3qk1s7laij30gx028q2v.jpg alt=指令顺序优化>
+</p>
+<h3 id=实现>实现</h3>
+<p>pipeline有两种实现方法:</p>
+<ul>
+<li>用multi和exec包裹起这些命令,即使它们没有事务的需求.</li>
+<li>像事务一样收集起这些命令,等到命令收集完毕后再一起发送给服务器.这种方法效率更高,可以合并指令.</li>
+</ul>
+</div>
+<footer class=post-footer>
+<nav class=paginav>
+<a class=prev href=http://euthpic.github.io/tech/redis%E4%B8%BB%E4%BB%8E%E5%90%8C%E6%AD%A5%E5%8E%9F%E7%90%86/>
+<span class=title>« 上一页</span>
+<br>
+<span>Redis主从同步原理</span>
+</a>
+<a class=next href=http://euthpic.github.io/tech/redis%E6%8C%81%E4%B9%85%E5%8C%96%E5%8E%9F%E7%90%86/>
+<span class=title>下一页 »</span>
+<br>
+<span>Redis持久化原理</span>
+</a>
+</nav>
+<div class=share-buttons>
+<a target=_blank rel="noopener noreferrer" aria-label="share Redis内存淘汰机制与IO模型 on twitter" href="https://twitter.com/intent/tweet/?text=Redis%e5%86%85%e5%ad%98%e6%b7%98%e6%b1%b0%e6%9c%ba%e5%88%b6%e4%b8%8eIO%e6%a8%a1%e5%9e%8b&url=http%3a%2f%2feuthpic.github.io%2ftech%2fredis%25E5%2586%2585%25E5%25AD%2598%25E6%25B7%2598%25E6%25B1%25B0%25E6%259C%25BA%25E5%2588%25B6%25E4%25B8%258Eio%25E6%25A8%25A1%25E5%259E%258B%2f&hashtags="><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Redis内存淘汰机制与IO模型 on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2feuthpic.github.io%2ftech%2fredis%25E5%2586%2585%25E5%25AD%2598%25E6%25B7%2598%25E6%25B1%25B0%25E6%259C%25BA%25E5%2588%25B6%25E4%25B8%258Eio%25E6%25A8%25A1%25E5%259E%258B%2f&title=Redis%e5%86%85%e5%ad%98%e6%b7%98%e6%b1%b0%e6%9c%ba%e5%88%b6%e4%b8%8eIO%e6%a8%a1%e5%9e%8b&summary=Redis%e5%86%85%e5%ad%98%e6%b7%98%e6%b1%b0%e6%9c%ba%e5%88%b6%e4%b8%8eIO%e6%a8%a1%e5%9e%8b&source=http%3a%2f%2feuthpic.github.io%2ftech%2fredis%25E5%2586%2585%25E5%25AD%2598%25E6%25B7%2598%25E6%25B1%25B0%25E6%259C%25BA%25E5%2588%25B6%25E4%25B8%258Eio%25E6%25A8%25A1%25E5%259E%258B%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Redis内存淘汰机制与IO模型 on reddit" href="https://reddit.com/submit?url=http%3a%2f%2feuthpic.github.io%2ftech%2fredis%25E5%2586%2585%25E5%25AD%2598%25E6%25B7%2598%25E6%25B1%25B0%25E6%259C%25BA%25E5%2588%25B6%25E4%25B8%258Eio%25E6%25A8%25A1%25E5%259E%258B%2f&title=Redis%e5%86%85%e5%ad%98%e6%b7%98%e6%b1%b0%e6%9c%ba%e5%88%b6%e4%b8%8eIO%e6%a8%a1%e5%9e%8b"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Redis内存淘汰机制与IO模型 on facebook" href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2feuthpic.github.io%2ftech%2fredis%25E5%2586%2585%25E5%25AD%2598%25E6%25B7%2598%25E6%25B1%25B0%25E6%259C%25BA%25E5%2588%25B6%25E4%25B8%258Eio%25E6%25A8%25A1%25E5%259E%258B%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Redis内存淘汰机制与IO模型 on whatsapp" href="https://api.whatsapp.com/send?text=Redis%e5%86%85%e5%ad%98%e6%b7%98%e6%b1%b0%e6%9c%ba%e5%88%b6%e4%b8%8eIO%e6%a8%a1%e5%9e%8b%20-%20http%3a%2f%2feuthpic.github.io%2ftech%2fredis%25E5%2586%2585%25E5%25AD%2598%25E6%25B7%2598%25E6%25B1%25B0%25E6%259C%25BA%25E5%2588%25B6%25E4%25B8%258Eio%25E6%25A8%25A1%25E5%259E%258B%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Redis内存淘汰机制与IO模型 on telegram" href="https://telegram.me/share/url?text=Redis%e5%86%85%e5%ad%98%e6%b7%98%e6%b1%b0%e6%9c%ba%e5%88%b6%e4%b8%8eIO%e6%a8%a1%e5%9e%8b&url=http%3a%2f%2feuthpic.github.io%2ftech%2fredis%25E5%2586%2585%25E5%25AD%2598%25E6%25B7%2598%25E6%25B1%25B0%25E6%259C%25BA%25E5%2588%25B6%25E4%25B8%258Eio%25E6%25A8%25A1%25E5%259E%258B%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg>
+</a>
+</div>
+</footer>
+</article>
+</main>
+<footer class=footer>
+<span>&copy; 2022 <a href=http://euthpic.github.io/>乱花渐欲迷人眼</a></span>
+<span>
+Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a>
+</span>
+</footer>
+<a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a>
+<script>let menu=document.getElementById('menu');menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
+<script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script>
+<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
+</body>
+</html>

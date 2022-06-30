@@ -1,0 +1,756 @@
+<!doctype html><html lang=zh dir=auto>
+<head><meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=robots content="index, follow">
+<title>设计模式 | 乱花渐欲迷人眼</title>
+<meta name=keywords content>
+<meta name=description content="一. 前言 设计模式是解决问题的方案，学习现有的设计模式可以做到经验复用。拥有设计模式词汇，在沟通时就能用更少的词汇来讨论，并且不需要了解底层细">
+<meta name=author content="Guangfa">
+<link rel=canonical href=http://euthpic.github.io/tech/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/>
+<meta name=yandex-verification content="73b1a797f62c0e98">
+<link crossorigin=anonymous href=/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css integrity="sha256-yIlj/i15RiAA/Q+xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as=style>
+<script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=http://euthpic.github.io/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=http://euthpic.github.io/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=http://euthpic.github.io/favicon-32x32.png>
+<link rel=apple-touch-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<link rel=mask-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<meta name=theme-color content="#2e2e33">
+<meta name=msapplication-TileColor content="#2e2e33">
+<meta name=generator content="Hugo 0.89.4">
+<noscript>
+<style>#theme-toggle,.top-link{display:none}</style>
+<style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style>
+</noscript>
+<script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(a,e,f,g,b,c,d){a.GoogleAnalyticsObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=1,c.src=g,d.parentNode.insertBefore(c,d)}(window,document,'script','https://www.google-analytics.com/analytics.js','ga'),ga('create','UA-136094326-1','auto'),ga('send','pageview'))</script><meta property="og:title" content="设计模式">
+<meta property="og:description" content="一. 前言 设计模式是解决问题的方案，学习现有的设计模式可以做到经验复用。拥有设计模式词汇，在沟通时就能用更少的词汇来讨论，并且不需要了解底层细">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://euthpic.github.io/tech/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"><meta property="og:image" content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="article:section" content="tech">
+<meta property="article:published_time" content="2020-05-02T19:27:19+08:00">
+<meta property="article:modified_time" content="2020-05-02T19:27:19+08:00"><meta property="og:site_name" content="乱花渐欲迷人眼">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:image content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name=twitter:title content="设计模式">
+<meta name=twitter:description content="一. 前言 设计模式是解决问题的方案，学习现有的设计模式可以做到经验复用。拥有设计模式词汇，在沟通时就能用更少的词汇来讨论，并且不需要了解底层细">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Teches","item":"http://euthpic.github.io/tech/"},{"@type":"ListItem","position":2,"name":"设计模式","item":"http://euthpic.github.io/tech/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"}]}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"设计模式","name":"设计模式","description":"一. 前言 设计模式是解决问题的方案，学习现有的设计模式可以做到经验复用。拥有设计模式词汇，在沟通时就能用更少的词汇来讨论，并且不需要了解底层细","keywords":[],"articleBody":"一.\t前言 设计模式是解决问题的方案，学习现有的设计模式可以做到经验复用。拥有设计模式词汇，在沟通时就能用更少的词汇来讨论，并且不需要了解底层细节。\n二.\t设计原则   开闭原则\n一个软件实体如类,模块,和函数应该对拓展开放,对修改关闭\n  依赖倒置原则\n高层模块不应该依赖低层模块,二者都应该依赖其抽象.\n抽象不应该依赖细节,细节应该依赖抽象.\n针对接口编程,不要针对实现编程.\n尽量抽象出接口,拓展其实现子类而非拓展原有类的方法,传参用接口,这样完成什么功能由客户端自己传入的子类类型决定,服务方不用修改.\n  单一职责原则\n不要存在多于一个导致类变更的原因.\n一个类/接口/方法只负责一项职责,不要承担过多的任务.比如更新用户信息可以拆分成更新用户名,用户密码,地址等等.\n该原则目的在于降低当需求变更时修改代码导致的BUG风险.修改代码时容易因为新情况的加入而忽略旧情况或者新旧边界值等.\n  接口隔离原则\n用多个专门的接口,而不使用单一的总接口,客户端不应该依赖它不需要的接口\n一个类对一个类的依赖应该建立在最小的接口上\n建立单一接口,不要建立庞大臃肿的接口\n尽量细化接口,接口中的方法尽量少.细粒度可以组装,但是粗粒度不能拆分.\n例如,animal接口中有eat,fly,swim三个方法,dog类实现该接口,就不得不实现一个空的fly方法,所以应该将接口拆分,让dog类去实现其所需要的接口方法.\n  迪米特法则(最少知道原则)\n一个对象应该对其他对象保持最少的了解,尽量降低类与类之间的耦合\nA找B买东西,B需要C进货,但是A不需要了解C,他只需要和B交互即可\n  里氏替换原则\n子类对象替换父类对象时,程序的功能不受影响.也就是子类可以拓展父类,但不得改变或者削弱父类原有的功能\n 子类可以实现父类的抽象方法，但不能覆盖父类的非抽象方法。 子类中可以增加自己特有的方法。 当子类的方法重载父类的方法时，方法的前置条件（即方法的形参）要比父类方法的输入参数更宽松。 当子类的方法实现父类的抽象方法时，方法的后置条件（即方法的返回值）要比父类更严格。  举这么一个例子,父类中的A方法被B方法引用,子类重写了A方法,并且只调用了A方法,完全无视B方法,如果此时有另外一个类会扫描该父类的所有子类并调用其B方法,那么B方法的行为可能就会改变而导致BUG\n  合成/复用原则(组合/复用原则)\n新对象需要使用已有对象,使之成为新对象的一部分,此时组合关系应优先于继承关系,因为继承受到里氏替换原则和其他的约束\n  三.\t分类   创建型\n 单例 简单工厂 工厂方法 抽象工厂 生成器 原型    行为型\n 责任链 命令 解释器 迭代器 中介者 备忘录 观察者 状态 策略 模版方法 访问者 空对象    结构型\n 适配器 桥接 组合 装饰 外观 享元 代理    单例（Singleton） Intent 确保一个类只有一个实例，并提供该实例的全局访问点。\nClass Diagram 使用一个私有构造函数、一个私有静态变量以及一个公有静态函数来实现。\n私有构造函数保证了不能通过构造函数来创建对象实例，只能通过公有静态函数返回唯一的私有静态变量。\n\nImplementation Ⅰ 懒汉式-线程不安全 以下实现中，私有静态变量 uniqueInstance 被延迟实例化，这样做的好处是，如果没有用到该类，那么就不会实例化 uniqueInstance，从而节约资源。\n这个实现在多线程环境下是不安全的，如果多个线程能够同时进入 if (uniqueInstance == null) ，并且此时 uniqueInstance 为 null，那么会有多个线程执行 uniqueInstance = new Singleton(); 语句，这将导致实例化多次 uniqueInstance。\npublic class Singleton { private static Singleton uniqueInstance; private Singleton() { } public static Singleton getUniqueInstance() { if (uniqueInstance == null) { uniqueInstance = new Singleton(); } return uniqueInstance; } } Ⅱ 饿汉式-线程安全 线程不安全问题主要是由于 uniqueInstance 被实例化多次，采取直接实例化 uniqueInstance 的方式就不会产生线程不安全问题。\n但是直接实例化的方式也丢失了延迟实例化带来的节约资源的好处。\nprivate static Singleton uniqueInstance = new Singleton(); Ⅲ 懒汉式-线程安全 只需要对 getUniqueInstance() 方法加锁，那么在一个时间点只能有一个线程能够进入该方法，从而避免了实例化多次 uniqueInstance。\n但是当一个线程进入该方法之后，其它试图进入该方法的线程都必须等待，即使 uniqueInstance 已经被实例化了。这会让线程阻塞时间过长，因此该方法有性能问题，不推荐使用。\npublic static synchronized Singleton getUniqueInstance() { if (uniqueInstance == null) { uniqueInstance = new Singleton(); } return uniqueInstance; } Ⅳ 双重校验锁-线程安全(double check) uniqueInstance 只需要被实例化一次，之后就可以直接使用了。加锁操作只需要对实例化那部分的代码进行，只有当 uniqueInstance 没有被实例化时，才需要进行加锁。\n双重校验锁先判断 uniqueInstance 是否已经被实例化，如果没有被实例化，那么才对实例化语句进行加锁。\npublic class Singleton { private volatile static Singleton uniqueInstance; private Singleton() { } public static Singleton getUniqueInstance() { if (uniqueInstance == null) { synchronized (Singleton.class) { if (uniqueInstance == null) { uniqueInstance = new Singleton(); } } } return uniqueInstance; } } double check的改进在于,第一个if判断的作用为分流,只有首次调用时对象未实例化才会进入if里面,当对象已经实例化后访问不会遭到阻塞,第二个if判断才进行加锁保证安全.\n不过,由于指令重排序的原因,单纯的double check无法百分百保证线程安全.例如， uniqueInstance = new Singleton(); 这段代码其实是分为三步执行：\n 为 uniqueInstance 分配内存空间 初始化 uniqueInstance 将 uniqueInstance 指向分配的内存地址  由于 JVM 具有指令重排的特性，执行顺序有可能变成 132。指令重排在单线程环境下不会出现问题，但是在多线程环境下会导致一个线程获得还没有初始化的实例导致空指针异常。例如，线程 T1 执行了 1 和 3(此时uniqueInstance != null)，此时 T2 调用 getUniqueInstance() 后发现 uniqueInstance 不为空，因此返回 uniqueInstance，但此时 uniqueInstance 还未被初始化。\n使用 volatile 可以禁止 JVM 的指令重排，保证在多线程环境下也能正常运行。\nⅤ 静态内部类实现 当 Singleton 类被加载时，静态内部类 SingletonHolder 没有被加载进内存。只有当调用 getUniqueInstance() 方法从而触发 SingletonHolder.INSTANCE 时 SingletonHolder 才会被加载，此时初始化 INSTANCE 实例，并且 JVM 能确保 INSTANCE 只被实例化一次。\n这种方式不仅具有延迟初始化的好处，而且由 JVM 提供了对线程安全的支持。\npublic class Singleton { private Singleton() { } private static class SingletonHolder { private static final Singleton INSTANCE = new Singleton(); } public static Singleton getUniqueInstance() { return SingletonHolder.INSTANCE; } } Ⅵ 枚举实现 public enum Singleton { INSTANCE; private String objName; public String getObjName() { return objName; } public void setObjName(String objName) { this.objName = objName; } public static void main(String[] args) { // 单例测试  Singleton firstSingleton = Singleton.INSTANCE; firstSingleton.setObjName(\"firstName\"); System.out.println(firstSingleton.getObjName()); Singleton secondSingleton = Singleton.INSTANCE; secondSingleton.setObjName(\"secondName\"); System.out.println(firstSingleton.getObjName()); System.out.println(secondSingleton.getObjName()); // 反射获取实例测试  try { Singleton[] enumConstants = Singleton.class.getEnumConstants(); for (Singleton enumConstant : enumConstants) { System.out.println(enumConstant.getObjName()); } } catch (Exception e) { e.printStackTrace(); } } } firstName secondName secondName secondName 关于枚举的拓展:\n枚举类的每一个枚举量在编译的时候都会编译成一个单独的final类,与静态内部类一样,该类的加载安全由JVM的类加载机制来保证.\n该实现可以防止反射攻击。在其它实现中，通过 setAccessible() 方法可以将私有构造函数的访问级别设置为 public，然后调用构造函数从而实例化对象，如果要防止这种攻击，需要在构造函数中添加防止多次实例化的代码(如果尝试再次实例化对象则抛出异常)。该实现是由 JVM 保证只会实例化一次，因此不会出现上述的反射攻击。\n该实现在多次序列化和序列化之后，不会得到多个实例。而其它实现需要使用 transient 修饰所有字段，并且实现序列化和反序列化的方法。\n反序列化攻击:\n​\t如果单例类实现了Serializable接口,那么调用readObject()方法再到newInstance()方法会调用无参构造方法实例化新的对象,要防止该攻击,要么单例类不实现该接口,要么在Singleton类中定义readResolve()方法就可以解决该问题\nprivate Object readResolve() { return singleton;\t//直接返回对象而非创建对象  } Examples  Logger Classes Configuration Classes Accesing resources in shared mode Factories implemented as Singletons   JDK  java.lang.Runtime#getRuntime() –饿汉式 java.awt.Desktop#getDesktop() [java.lang.System#getSecurityManager()](  Spring  AbstractFactoryBean.getObect()  AbstractBeanFactory的作用  api里是这样说的,是抽象BeanFactory的基类,同时实现了ConfigurableBeanFactory的SPI,提供了所有的功能  也可以从我们定义的资源中resource中来获取bean的定义.\n 也提供了单例bean的缓存通过他的爷爷如图中的DefaultSingletonBeanRegistry,同时提供了单例和多例和别名的定义等操作.  上述只是其中的一部分,总之来说它的作用还是挺大的.\n生成器（Builder） Intent 将一个复杂对象的构建与它的表示分离,使得同样的构建过程可以创建不同的表示.\n封装一个对象的构造过程，并允许按步骤构造.\n生成器模式生产的是一个可定制化的产品,可通过调用Builder类的多个方法来设置产品的属性.与工厂方法相比,工厂方法的产品是模型已经固定好了的.\nClass Diagram \nJDK  java.lang.StringBuilder.append() java.nio.ByteBuffer java.lang.StringBuffer java.lang.Appendable Apache Camel builders  Guava  CacheBuilder.newBuilder()  生成器模式\n生成器模式可以改进成链式调用(在guava中大力提倡),Builder类中赋值的方法返回类型不是void而是它本身,这样就可以链式调用起来,最后再通过builder()方法返回定制化的Product\n可以这样简单理解:\n 简单工厂只有一个工厂,这个工厂生产多种产品,新增产品时需要增加方法.(一对多) 工厂方法拓展了工厂类,有多个工厂类,每个工厂生产一种产品,新增产品时新增工厂类.(一对一) 抽象工厂结合两者,生产产品族(二维),有多个工厂类,每个工厂类又是一个简单工厂.(一对多)  简单工厂（Simple Factory） Intent 在创建一个对象时不向客户暴露内部细节，并提供一个创建对象的通用接口。\nClass Diagram 简单工厂把实例化的操作单独放到一个类中，这个类就成为简单工厂类，让简单工厂类来决定应该用哪个具体子类来实例化。\n这样做能把客户类和具体子类的实现解耦，客户类不再需要知道有哪些子类以及应当实例化哪个子类。客户类往往有多个，如果不使用简单工厂，那么所有的客户类都要知道所有子类的细节。而且一旦子类发生改变，例如增加子类，那么所有的客户类都要进行修改。\n\nImplementation public interface Product { } public class ConcreteProduct implements Product { } public class ConcreteProduct1 implements Product { } public class ConcreteProduct2 implements Product { } 以下的 Client 类包含了实例化的代码，这是一种错误的实现。如果在客户类中存在这种实例化代码，就需要考虑将代码放到简单工厂中。\npublic class Client { public static void main(String[] args) { int type = 1; Product product; if (type == 1) { product = new ConcreteProduct1(); } else if (type == 2) { product = new ConcreteProduct2(); } else { product = new ConcreteProduct(); } // do something with the product  } } 以下的 SimpleFactory 是简单工厂实现，它被所有需要进行实例化的客户类调用。\npublic class SimpleFactory { public Product createProduct(int type) { if (type == 1) { return new ConcreteProduct1(); } else if (type == 2) { return new ConcreteProduct2(); } return new ConcreteProduct(); } } public class Client { public static void main(String[] args) { SimpleFactory simpleFactory = new SimpleFactory(); Product product = simpleFactory.createProduct(1); // do something with the product  } } 工厂方法（Factory Method） Intent 定义了一个创建对象的接口，但由子类决定要实例化哪个类。工厂方法把实例化操作推迟到子类。\nClass Diagram 在简单工厂中，创建对象的是另一个类，而在工厂方法中，是由子类来创建对象。\n下图中，Factory 有一个 doSomething() 方法，这个方法需要用到一个产品对象，这个产品对象由 factoryMethod() 方法创建。该方法是抽象的，需要由子类去实现。\n\nImplementation public abstract class Factory { abstract public Product factoryMethod(); public void doSomething() { Product product = factoryMethod(); // do something with the product  } } public class ConcreteFactory extends Factory { public Product factoryMethod() { return new ConcreteProduct(); } } public class ConcreteFactory1 extends Factory { public Product factoryMethod() { return new ConcreteProduct1(); } } public class ConcreteFactory2 extends Factory { public Product factoryMethod() { return new ConcreteProduct2(); } } JDK  Collection.iterator() 产品为内部类Itr  抽象工厂（Abstract Factory） Intent 提供一个接口，用于创建 相关的对象家族 。\nClass Diagram 抽象工厂模式创建的是对象家族，也就是很多对象而不是一个对象，并且这些对象是相关的，也就是说必须一起创建出来。而工厂方法模式只是用于创建一个对象，这和抽象工厂模式有很大不同。\n抽象工厂模式用到了工厂方法模式来创建单一对象，AbstractFactory 中的 createProductA() 和 createProductB() 方法都是让子类来实现，这两个方法单独来看就是在创建一个对象，这符合工厂方法模式的定义。\n至于创建对象的家族这一概念是在 Client 体现，Client 要通过 AbstractFactory 同时调用两个方法来创建出两个对象，在这里这两个对象就有很大的相关性，Client 需要同时创建出这两个对象。\n从高层次来看，抽象工厂使用了组合，即 Cilent 组合了 AbstractFactory，而工厂方法模式使用了继承。\n\nImplementation public class AbstractProductA { } public class AbstractProductB { } public class ProductA1 extends AbstractProductA { } public class ProductA2 extends AbstractProductA { } public class ProductB1 extends AbstractProductB { } public class ProductB2 extends AbstractProductB { } public abstract class AbstractFactory { abstract AbstractProductA createProductA(); abstract AbstractProductB createProductB(); } public class ConcreteFactory1 extends AbstractFactory { AbstractProductA createProductA() { return new ProductA1(); } AbstractProductB createProductB() { return new ProductB1(); } } public class ConcreteFactory2 extends AbstractFactory { AbstractProductA createProductA() { return new ProductA2(); } AbstractProductB createProductB() { return new ProductB2(); } } public class Client { public static void main(String[] args) { AbstractFactory abstractFactory = new ConcreteFactory1(); AbstractProductA productA = abstractFactory.createProductA(); AbstractProductB productB = abstractFactory.createProductB(); // do something with productA and productB  } } JDK  数据库连接Connection.prepareStatement() 产品为Statement类  外观（Facade）(门面模式) Intent 提供了一个统一的接口，用来访问子系统中的一群接口，从而让子系统更容易使用。\n某个功能,需要调用多个接口,逻辑固定,因此可以封装成一个接口,通过该接口完成该功能.\nClass Diagram \nImplementation 观看电影需要操作很多电器，使用外观模式实现一键看电影功能。\npublic class SubSystem { public void turnOnTV() { System.out.println(\"turnOnTV()\"); } public void setCD(String cd) { System.out.println(\"setCD( \" + cd + \" )\"); } public void startWatching(){ System.out.println(\"startWatching()\"); } } public class Facade { private SubSystem subSystem = new SubSystem(); public void watchMovie() { subSystem.turnOnTV(); subSystem.setCD(\"a movie\"); subSystem.startWatching(); } } public class Client { public static void main(String[] args) { Facade facade = new Facade(); facade.watchMovie(); } } 设计原则 最少知识原则：只和你的密友谈话。也就是说客户对象所需要交互的对象应当尽可能少。\n原型模式（Prototype） Intent 使用原型实例指定要创建对象的类型，通过赋值这个原型来创建新对象。\n不需要知道任何创建的细节,不调用构造函数.核心是clone()方法,需要实现Cloneable接口,因此需要注意浅克隆(复制基本值)和深克隆(复制复杂对象)的区别.\n核心作用是节省资源,复制的开销小于创建一个新的对象.\n如果复制的对象包含复杂的成员对象,则需要重写clone方法,将这些对象也一起克隆.\nClass Diagram \nImplementation public abstract class Prototype { abstract Prototype myClone(); } public class ConcretePrototype extends Prototype { private String filed; public ConcretePrototype(String filed) { this.filed = filed; } @Override Prototype myClone() { return new ConcretePrototype(filed); } @Override public String toString() { return filed; } } public class Client { public static void main(String[] args) { Prototype prototype = new ConcretePrototype(\"abc\"); Prototype clone = prototype.myClone(); System.out.println(clone.toString()); } } abc 克隆破坏单例 如果克隆的是一个单例对象,那么clone()方法会返回一个新的对象,从而破坏了单例.因此需要重写clone方法,让它也通过单一入口来获取单例对象.\n@Override protected Object clone() throws CloneNotSupportedException { return getInstance(); } JDK  java.lang.Object#clone()  ","wordCount":"5311","inLanguage":"zh","datePublished":"2020-05-02T19:27:19+08:00","dateModified":"2020-05-02T19:27:19+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
+</head>
+<body id=top>
+<script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
+<header class=header>
+<nav class=nav>
+<div class=logo>
+<a href=http://euthpic.github.io/ accesskey=h title="🏡 乱花渐欲迷人眼 (Alt + H)">🏡 乱花渐欲迷人眼</a>
+<span class=logo-switches>
+<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+</span>
+</div>
+<ul id=menu>
+<li>
+<a href=http://euthpic.github.io/categories/ title="📔 系列">
+<span>📔 系列</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/tags/ title="🏷️ 标签">
+<span>🏷️ 标签</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/search/ title="🔍 搜索 (Alt + /)" accesskey=/>
+<span>🔍 搜索</span>
+</a>
+</li>
+<li>
+<a href=https://travellings.link title=🚇>
+<span>🚇</span>
+</a>
+</li>
+</ul>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-header>
+<div class=breadcrumbs><a href=http://euthpic.github.io/>主页</a>&nbsp;»&nbsp;<a href=http://euthpic.github.io/tech/>Teches</a></div>
+<h1 class=post-title>
+设计模式
+</h1>
+<div class=post-meta><span title="2020-05-02 19:27:19 +0800 CST">May 2, 2020</span>&nbsp;·&nbsp;11 分钟&nbsp;·&nbsp;Guangfa&nbsp;|&nbsp;<a href=https://github.com/euthpic/euthpic.github.io/edit/main/content/tech/%e8%ae%be%e8%ae%a1%e6%a8%a1%e5%bc%8f.md rel="noopener noreferrer" target=_blank>PR</a>
+</div>
+</header> <div class=toc>
+<details open>
+<summary accesskey=c title="(Alt + C)">
+<span class=details>目录</span>
+</summary>
+<div class=inner><ul>
+<li>
+<a href=#%e4%b8%80%e5%89%8d%e8%a8%80 aria-label="一.	前言">一. 前言</a></li>
+<li>
+<a href=#%e4%ba%8c%e8%ae%be%e8%ae%a1%e5%8e%9f%e5%88%99 aria-label="二.	设计原则">二. 设计原则</a></li>
+<li>
+<a href=#%e4%b8%89%e5%88%86%e7%b1%bb aria-label="三.	分类">三. 分类</a></li>
+<li>
+<a href=#%e5%8d%95%e4%be%8bsingleton aria-label=单例（Singleton）>单例（Singleton）</a><ul>
+<li>
+<a href=#intent aria-label=Intent>Intent</a></li>
+<li>
+<a href=#class-diagram aria-label="Class Diagram">Class Diagram</a></li>
+<li>
+<a href=#implementation aria-label=Implementation>Implementation</a><ul>
+<li>
+<a href=#-%e6%87%92%e6%b1%89%e5%bc%8f-%e7%ba%bf%e7%a8%8b%e4%b8%8d%e5%ae%89%e5%85%a8 aria-label="Ⅰ 懒汉式-线程不安全">Ⅰ 懒汉式-线程不安全</a></li>
+<li>
+<a href=#-%e9%a5%bf%e6%b1%89%e5%bc%8f-%e7%ba%bf%e7%a8%8b%e5%ae%89%e5%85%a8 aria-label="Ⅱ 饿汉式-线程安全">Ⅱ 饿汉式-线程安全</a></li>
+<li>
+<a href=#-%e6%87%92%e6%b1%89%e5%bc%8f-%e7%ba%bf%e7%a8%8b%e5%ae%89%e5%85%a8 aria-label="Ⅲ 懒汉式-线程安全">Ⅲ 懒汉式-线程安全</a></li>
+<li>
+<a href=#-%e5%8f%8c%e9%87%8d%e6%a0%a1%e9%aa%8c%e9%94%81-%e7%ba%bf%e7%a8%8b%e5%ae%89%e5%85%a8double-check aria-label="Ⅳ 双重校验锁-线程安全(double check)">Ⅳ 双重校验锁-线程安全(double check)</a></li>
+<li>
+<a href=#-%e9%9d%99%e6%80%81%e5%86%85%e9%83%a8%e7%b1%bb%e5%ae%9e%e7%8e%b0 aria-label="Ⅴ 静态内部类实现">Ⅴ 静态内部类实现</a></li>
+<li>
+<a href=#-%e6%9e%9a%e4%b8%be%e5%ae%9e%e7%8e%b0 aria-label="Ⅵ 枚举实现">Ⅵ 枚举实现</a></li></ul>
+</li>
+<li>
+<a href=#examples aria-label=Examples>Examples</a></li>
+<li>
+<a href=#jdk aria-label=JDK>JDK</a></li>
+<li>
+<a href=#spring aria-label=Spring>Spring</a><ul>
+<li>
+<a href=#abstractbeanfactory%e7%9a%84%e4%bd%9c%e7%94%a8 aria-label=AbstractBeanFactory的作用>AbstractBeanFactory的作用</a></li></ul>
+</li></ul>
+</li>
+<li>
+<a href=#%e7%94%9f%e6%88%90%e5%99%a8builder aria-label=生成器（Builder）>生成器（Builder）</a><ul>
+<li>
+<a href=#intent-1 aria-label=Intent>Intent</a></li>
+<li>
+<a href=#class-diagram-1 aria-label="Class Diagram">Class Diagram</a></li>
+<li>
+<a href=#jdk-1 aria-label=JDK>JDK</a></li>
+<li>
+<a href=#guava aria-label=Guava>Guava</a></li></ul>
+</li>
+<li>
+<a href=#%e7%ae%80%e5%8d%95%e5%b7%a5%e5%8e%82simple-factory aria-label="简单工厂（Simple Factory）">简单工厂（Simple Factory）</a><ul>
+<li>
+<a href=#intent-2 aria-label=Intent>Intent</a></li>
+<li>
+<a href=#class-diagram-2 aria-label="Class Diagram">Class Diagram</a></li>
+<li>
+<a href=#implementation-1 aria-label=Implementation>Implementation</a></li></ul>
+</li>
+<li>
+<a href=#%e5%b7%a5%e5%8e%82%e6%96%b9%e6%b3%95factory-method aria-label="工厂方法（Factory Method）">工厂方法（Factory Method）</a><ul>
+<li>
+<a href=#intent-3 aria-label=Intent>Intent</a></li>
+<li>
+<a href=#class-diagram-3 aria-label="Class Diagram">Class Diagram</a></li>
+<li>
+<a href=#implementation-2 aria-label=Implementation>Implementation</a></li>
+<li>
+<a href=#jdk-2 aria-label=JDK>JDK</a></li></ul>
+</li>
+<li>
+<a href=#%e6%8a%bd%e8%b1%a1%e5%b7%a5%e5%8e%82abstract-factory aria-label="抽象工厂（Abstract Factory）">抽象工厂（Abstract Factory）</a><ul>
+<li>
+<a href=#intent-4 aria-label=Intent>Intent</a></li>
+<li>
+<a href=#class-diagram-4 aria-label="Class Diagram">Class Diagram</a></li>
+<li>
+<a href=#implementation-3 aria-label=Implementation>Implementation</a></li>
+<li>
+<a href=#jdk-3 aria-label=JDK>JDK</a></li></ul>
+</li>
+<li>
+<a href=#%e5%a4%96%e8%a7%82facade%e9%97%a8%e9%9d%a2%e6%a8%a1%e5%bc%8f aria-label=外观（Facade）(门面模式)>外观（Facade）(门面模式)</a><ul>
+<li>
+<a href=#intent-5 aria-label=Intent>Intent</a></li>
+<li>
+<a href=#class-diagram-5 aria-label="Class Diagram">Class Diagram</a></li>
+<li>
+<a href=#implementation-4 aria-label=Implementation>Implementation</a></li>
+<li>
+<a href=#%e8%ae%be%e8%ae%a1%e5%8e%9f%e5%88%99 aria-label=设计原则>设计原则</a></li></ul>
+</li>
+<li>
+<a href=#%e5%8e%9f%e5%9e%8b%e6%a8%a1%e5%bc%8fprototype aria-label=原型模式（Prototype）>原型模式（Prototype）</a><ul>
+<li>
+<a href=#intent-6 aria-label=Intent>Intent</a></li>
+<li>
+<a href=#class-diagram-6 aria-label="Class Diagram">Class Diagram</a></li>
+<li>
+<a href=#implementation-5 aria-label=Implementation>Implementation</a></li>
+<li>
+<a href=#%e5%85%8b%e9%9a%86%e7%a0%b4%e5%9d%8f%e5%8d%95%e4%be%8b aria-label=克隆破坏单例>克隆破坏单例</a></li>
+<li>
+<a href=#jdk-4 aria-label=JDK>JDK</a>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</details>
+</div>
+<div class=post-content><h2 id=一前言>一. 前言</h2>
+<p>设计模式是解决问题的方案，学习现有的设计模式可以做到经验复用。拥有设计模式词汇，在沟通时就能用更少的词汇来讨论，并且不需要了解底层细节。</p>
+<h2 id=二设计原则>二. 设计原则</h2>
+<ul>
+<li>
+<p>开闭原则</p>
+<p>一个软件实体如类,模块,和函数应该对拓展开放,对修改关闭</p>
+</li>
+<li>
+<p>依赖倒置原则</p>
+<p>高层模块不应该依赖低层模块,二者都应该依赖其抽象.</p>
+<p>抽象不应该依赖细节,细节应该依赖抽象.</p>
+<p>针对接口编程,不要针对实现编程.</p>
+<p>尽量抽象出接口,拓展其实现子类而非拓展原有类的方法,传参用接口,这样完成什么功能由客户端自己传入的子类类型决定,服务方不用修改.</p>
+</li>
+<li>
+<p>单一职责原则</p>
+<p>不要存在多于一个导致类变更的原因.</p>
+<p>一个类/接口/方法只负责一项职责,不要承担过多的任务.比如更新用户信息可以拆分成更新用户名,用户密码,地址等等.</p>
+<p>该原则目的在于降低当需求变更时修改代码导致的BUG风险.修改代码时容易因为新情况的加入而忽略旧情况或者新旧边界值等.</p>
+</li>
+<li>
+<p>接口隔离原则</p>
+<p>用多个专门的接口,而不使用单一的总接口,客户端不应该依赖它不需要的接口</p>
+<p>一个类对一个类的依赖应该建立在最小的接口上</p>
+<p>建立单一接口,不要建立庞大臃肿的接口</p>
+<p>尽量细化接口,接口中的方法尽量少.细粒度可以组装,但是粗粒度不能拆分.</p>
+<p>例如,animal接口中有eat,fly,swim三个方法,dog类实现该接口,就不得不实现一个空的fly方法,所以应该将接口拆分,让dog类去实现其所需要的接口方法.</p>
+</li>
+<li>
+<p>迪米特法则(最少知道原则)</p>
+<p>一个对象应该对其他对象保持最少的了解,尽量降低类与类之间的耦合</p>
+<p>A找B买东西,B需要C进货,但是A不需要了解C,他只需要和B交互即可</p>
+</li>
+<li>
+<p>里氏替换原则</p>
+<p>子类对象替换父类对象时,程序的功能不受影响.也就是子类可以拓展父类,但不得改变或者削弱父类原有的功能</p>
+<ul>
+<li>子类可以实现父类的抽象方法，但不能覆盖父类的非抽象方法。</li>
+<li>子类中可以增加自己特有的方法。</li>
+<li>当子类的方法重载父类的方法时，方法的前置条件（即方法的形参）要比父类方法的输入参数更宽松。</li>
+<li>当子类的方法实现父类的抽象方法时，方法的后置条件（即方法的返回值）要比父类更严格。</li>
+</ul>
+<p>举这么一个例子,父类中的A方法被B方法引用,子类重写了A方法,并且只调用了A方法,完全无视B方法,如果此时有另外一个类会扫描该父类的所有子类并调用其B方法,那么B方法的行为可能就会改变而导致BUG</p>
+</li>
+<li>
+<p>合成/复用原则(组合/复用原则)</p>
+<p>新对象需要使用已有对象,使之成为新对象的一部分,此时组合关系应优先于继承关系,因为继承受到里氏替换原则和其他的约束</p>
+</li>
+</ul>
+<h2 id=三分类>三. 分类</h2>
+<ul>
+<li>
+<p>创建型</p>
+<ul>
+<li>单例</li>
+<li>简单工厂</li>
+<li>工厂方法</li>
+<li>抽象工厂</li>
+<li>生成器</li>
+<li>原型</li>
+</ul>
+</li>
+<li>
+<p>行为型</p>
+<ul>
+<li>责任链</li>
+<li>命令</li>
+<li>解释器</li>
+<li>迭代器</li>
+<li>中介者</li>
+<li>备忘录</li>
+<li>观察者</li>
+<li>状态</li>
+<li>策略</li>
+<li>模版方法</li>
+<li>访问者</li>
+<li>空对象</li>
+</ul>
+</li>
+<li>
+<p>结构型</p>
+<ul>
+<li>适配器</li>
+<li>桥接</li>
+<li>组合</li>
+<li>装饰</li>
+<li>外观</li>
+<li>享元</li>
+<li>代理</li>
+</ul>
+</li>
+</ul>
+<h2 id=单例singleton>单例（Singleton）</h2>
+<h3 id=intent>Intent</h3>
+<p>确保一个类只有一个实例，并提供该实例的全局访问点。</p>
+<h3 id=class-diagram>Class Diagram</h3>
+<p>使用一个私有构造函数、一个私有静态变量以及一个公有静态函数来实现。</p>
+<p><strong>私有构造函数保证了不能通过构造函数来创建对象实例，只能通过公有静态函数返回唯一的私有静态变量。</strong></p>
+<div align=center> <img src=https://cs-notes-1256109796.cos.ap-guangzhou.myqcloud.com/eca1f422-8381-409b-ad04-98ef39ae38ba.png> </div><br>
+<h3 id=implementation>Implementation</h3>
+<h4 id=-懒汉式-线程不安全>Ⅰ 懒汉式-线程不安全</h4>
+<p>以下实现中，私有静态变量 uniqueInstance 被延迟实例化，这样做的好处是，如果没有用到该类，那么就不会实例化 uniqueInstance，从而节约资源。</p>
+<p>这个实现在多线程环境下是不安全的，如果多个线程能够同时进入 <code>if (uniqueInstance == null)</code> ，并且此时 uniqueInstance 为 null，那么会有多个线程执行 <code>uniqueInstance = new Singleton();</code> 语句，这将导致实例化多次 uniqueInstance。</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Singleton</span> <span style=color:#f92672>{</span>
+
+    <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>static</span> Singleton uniqueInstance<span style=color:#f92672>;</span>
+
+    <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>Singleton</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> Singleton <span style=color:#a6e22e>getUniqueInstance</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>uniqueInstance <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            uniqueInstance <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Singleton<span style=color:#f92672>();</span>
+        <span style=color:#f92672>}</span>
+        <span style=color:#66d9ef>return</span> uniqueInstance<span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+</code></pre></div><h4 id=-饿汉式-线程安全>Ⅱ 饿汉式-线程安全</h4>
+<p>线程不安全问题主要是由于 uniqueInstance 被实例化多次，采取直接实例化 uniqueInstance 的方式就不会产生线程不安全问题。</p>
+<p>但是直接实例化的方式也丢失了延迟实例化带来的节约资源的好处。</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#66d9ef>private</span> <span style=color:#66d9ef>static</span> Singleton uniqueInstance <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Singleton<span style=color:#f92672>();</span>
+</code></pre></div><h4 id=-懒汉式-线程安全>Ⅲ 懒汉式-线程安全</h4>
+<p>只需要对 getUniqueInstance() 方法加锁，那么在一个时间点只能有一个线程能够进入该方法，从而避免了实例化多次 uniqueInstance。</p>
+<p>但是当一个线程进入该方法之后，其它试图进入该方法的线程都必须等待，即使 uniqueInstance 已经被实例化了。这会让线程阻塞时间过长，因此该方法有性能问题，不推荐使用。</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>synchronized</span> Singleton <span style=color:#a6e22e>getUniqueInstance</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>uniqueInstance <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        uniqueInstance <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Singleton<span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+    <span style=color:#66d9ef>return</span> uniqueInstance<span style=color:#f92672>;</span>
+<span style=color:#f92672>}</span>
+</code></pre></div><h4 id=-双重校验锁-线程安全double-check>Ⅳ 双重校验锁-线程安全(double check)</h4>
+<p>uniqueInstance 只需要被实例化一次，之后就可以直接使用了。加锁操作只需要对实例化那部分的代码进行，只有当 uniqueInstance 没有被实例化时，才需要进行加锁。</p>
+<p>双重校验锁先判断 uniqueInstance 是否已经被实例化，如果没有被实例化，那么才对实例化语句进行加锁。</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Singleton</span> <span style=color:#f92672>{</span>
+
+    <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>volatile</span> <span style=color:#66d9ef>static</span> Singleton uniqueInstance<span style=color:#f92672>;</span>
+
+    <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>Singleton</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> Singleton <span style=color:#a6e22e>getUniqueInstance</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>uniqueInstance <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            <span style=color:#66d9ef>synchronized</span> <span style=color:#f92672>(</span>Singleton<span style=color:#f92672>.</span><span style=color:#a6e22e>class</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+                <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>uniqueInstance <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+                    uniqueInstance <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Singleton<span style=color:#f92672>();</span>
+                <span style=color:#f92672>}</span>
+            <span style=color:#f92672>}</span>
+        <span style=color:#f92672>}</span>
+        <span style=color:#66d9ef>return</span> uniqueInstance<span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+</code></pre></div><p>double check的改进在于,第一个if判断的作用为分流,只有首次调用时对象未实例化才会进入if里面,当对象已经实例化后访问不会遭到阻塞,第二个if判断才进行加锁保证安全.</p>
+<p>不过,由于指令重排序的原因,单纯的double check无法百分百保证线程安全.例如， <code>uniqueInstance = new Singleton();</code> 这段代码其实是分为三步执行：</p>
+<ol>
+<li>为 uniqueInstance 分配内存空间</li>
+<li>初始化 uniqueInstance</li>
+<li>将 uniqueInstance 指向分配的内存地址</li>
+</ol>
+<p>由于 JVM 具有指令重排的特性，执行顺序有可能变成 1>3>2。指令重排在单线程环境下不会出现问题，但是在多线程环境下会导致一个线程获得还没有初始化的实例导致空指针异常。例如，线程 T<sub>1</sub> 执行了 1 和 3(此时uniqueInstance != null)，此时 T<sub>2</sub> 调用 getUniqueInstance() 后发现 uniqueInstance 不为空，因此返回 uniqueInstance，但此时 uniqueInstance 还未被初始化。</p>
+<p>使用 volatile 可以禁止 JVM 的指令重排，保证在多线程环境下也能正常运行。</p>
+<h4 id=-静态内部类实现>Ⅴ 静态内部类实现</h4>
+<p>当 Singleton 类被加载时，静态内部类 SingletonHolder 没有被加载进内存。只有当调用 <code>getUniqueInstance()</code> 方法从而触发 <code>SingletonHolder.INSTANCE</code> 时 SingletonHolder 才会被加载，此时初始化 INSTANCE 实例，并且 JVM 能确保 INSTANCE 只被实例化一次。</p>
+<p>这种方式不仅具有延迟初始化的好处，而且由 JVM 提供了对线程安全的支持。</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Singleton</span> <span style=color:#f92672>{</span>
+
+    <span style=color:#66d9ef>private</span> <span style=color:#a6e22e>Singleton</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>SingletonHolder</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>final</span> Singleton INSTANCE <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Singleton<span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> Singleton <span style=color:#a6e22e>getUniqueInstance</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>return</span> SingletonHolder<span style=color:#f92672>.</span><span style=color:#a6e22e>INSTANCE</span><span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+</code></pre></div><h4 id=-枚举实现>Ⅵ 枚举实现</h4>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>enum</span> Singleton <span style=color:#f92672>{</span>
+
+    INSTANCE<span style=color:#f92672>;</span>
+
+    <span style=color:#66d9ef>private</span> String objName<span style=color:#f92672>;</span>
+
+
+    <span style=color:#66d9ef>public</span> String <span style=color:#a6e22e>getObjName</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>return</span> objName<span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>setObjName</span><span style=color:#f92672>(</span>String objName<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>objName</span> <span style=color:#f92672>=</span> objName<span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>main</span><span style=color:#f92672>(</span>String<span style=color:#f92672>[]</span> args<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+
+        <span style=color:#75715e>// 单例测试
+</span><span style=color:#75715e></span>        Singleton firstSingleton <span style=color:#f92672>=</span> Singleton<span style=color:#f92672>.</span><span style=color:#a6e22e>INSTANCE</span><span style=color:#f92672>;</span>
+        firstSingleton<span style=color:#f92672>.</span><span style=color:#a6e22e>setObjName</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;firstName&#34;</span><span style=color:#f92672>);</span>
+        System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>println</span><span style=color:#f92672>(</span>firstSingleton<span style=color:#f92672>.</span><span style=color:#a6e22e>getObjName</span><span style=color:#f92672>());</span>
+        Singleton secondSingleton <span style=color:#f92672>=</span> Singleton<span style=color:#f92672>.</span><span style=color:#a6e22e>INSTANCE</span><span style=color:#f92672>;</span>
+        secondSingleton<span style=color:#f92672>.</span><span style=color:#a6e22e>setObjName</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;secondName&#34;</span><span style=color:#f92672>);</span>
+        System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>println</span><span style=color:#f92672>(</span>firstSingleton<span style=color:#f92672>.</span><span style=color:#a6e22e>getObjName</span><span style=color:#f92672>());</span>
+        System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>println</span><span style=color:#f92672>(</span>secondSingleton<span style=color:#f92672>.</span><span style=color:#a6e22e>getObjName</span><span style=color:#f92672>());</span>
+
+        <span style=color:#75715e>// 反射获取实例测试
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>try</span> <span style=color:#f92672>{</span>
+            Singleton<span style=color:#f92672>[]</span> enumConstants <span style=color:#f92672>=</span> Singleton<span style=color:#f92672>.</span><span style=color:#a6e22e>class</span><span style=color:#f92672>.</span><span style=color:#a6e22e>getEnumConstants</span><span style=color:#f92672>();</span>
+            <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>Singleton enumConstant <span style=color:#f92672>:</span> enumConstants<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+                System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>println</span><span style=color:#f92672>(</span>enumConstant<span style=color:#f92672>.</span><span style=color:#a6e22e>getObjName</span><span style=color:#f92672>());</span>
+            <span style=color:#f92672>}</span>
+        <span style=color:#f92672>}</span> <span style=color:#66d9ef>catch</span> <span style=color:#f92672>(</span>Exception e<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            e<span style=color:#f92672>.</span><span style=color:#a6e22e>printStackTrace</span><span style=color:#f92672>();</span>
+        <span style=color:#f92672>}</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-html data-lang=html>firstName
+secondName
+secondName
+secondName
+</code></pre></div><p>关于枚举的拓展:</p>
+<p>枚举类的每一个枚举量在编译的时候都会编译成一个单独的final类,与静态内部类一样,该类的加载安全由JVM的类加载机制来保证.</p>
+<p>该实现可以防止反射攻击。在其它实现中，通过 setAccessible() 方法可以将私有构造函数的访问级别设置为 public，然后调用构造函数从而实例化对象，如果要防止这种攻击，需要在构造函数中添加防止多次实例化的代码(如果尝试再次实例化对象则抛出异常)。该实现是由 JVM 保证只会实例化一次，因此不会出现上述的反射攻击。</p>
+<p>该实现在多次序列化和序列化之后，不会得到多个实例。而其它实现需要使用 transient 修饰所有字段，并且实现序列化和反序列化的方法。</p>
+<p>反序列化攻击:</p>
+<p>​ 如果单例类实现了Serializable接口,那么调用readObject()方法再到newInstance()方法会调用无参构造方法实例化新的对象,要防止该攻击,要么单例类不实现该接口,要么在Singleton类中定义readResolve()方法就可以解决该问题</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java> <span style=color:#66d9ef>private</span> Object <span style=color:#a6e22e>readResolve</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>return</span> singleton<span style=color:#f92672>;</span>	<span style=color:#75715e>//直接返回对象而非创建对象
+</span><span style=color:#75715e></span>    <span style=color:#f92672>}</span>
+</code></pre></div><h3 id=examples>Examples</h3>
+<ul>
+<li>Logger Classes</li>
+<li>Configuration Classes</li>
+<li>Accesing resources in shared mode</li>
+<li>Factories implemented as Singletons</li>
+<li></li>
+</ul>
+<h3 id=jdk>JDK</h3>
+<ul>
+<li><a href=http://docs.oracle.com/javase/8/docs/api/java/lang/Runtime.html#getRuntime%28%29>java.lang.Runtime#getRuntime()</a> &ndash;饿汉式</li>
+<li><a href=http://docs.oracle.com/javase/8/docs/api/java/awt/Desktop.html#getDesktop-->java.awt.Desktop#getDesktop()</a></li>
+<li>[java.lang.System#getSecurityManager()](</li>
+</ul>
+<h3 id=spring>Spring</h3>
+<ul>
+<li>AbstractFactoryBean.getObect()</li>
+</ul>
+<h4 id=abstractbeanfactory的作用>AbstractBeanFactory的作用</h4>
+<ul>
+<li>api里是这样说的,是抽象BeanFactory的基类,同时实现了ConfigurableBeanFactory的SPI,提供了所有的功能</li>
+</ul>
+<p>也可以从我们定义的资源中resource中来获取bean的定义.</p>
+<ul>
+<li>也提供了单例bean的缓存通过他的爷爷如图中的DefaultSingletonBeanRegistry,同时提供了单例和多例和别名的定义等操作.</li>
+</ul>
+<p>上述只是其中的一部分,总之来说它的作用还是挺大的.</p>
+<h2 id=生成器builder>生成器（Builder）</h2>
+<h3 id=intent-1>Intent</h3>
+<p>将一个复杂对象的构建与它的表示分离,使得同样的构建过程可以创建不同的表示.</p>
+<p>封装一个对象的构造过程，并允许按步骤构造.</p>
+<p>生成器模式生产的是一个可定制化的产品,可通过调用Builder类的多个方法来设置产品的属性.与工厂方法相比,工厂方法的产品是模型已经固定好了的.</p>
+<h3 id=class-diagram-1>Class Diagram</h3>
+<p><a href=https://camo.githubusercontent.com/dede3cfca795b3a4a4bce1011531a6ab4f74387c/68747470733a2f2f63732d6e6f7465732d313235363130393739362e636f732e61702d6775616e677a686f752e6d7971636c6f75642e636f6d2f64623565333736642d306233652d343930652d613433612d3332333139313462363636382e706e67><img loading=lazy src=https://camo.githubusercontent.com/dede3cfca795b3a4a4bce1011531a6ab4f74387c/68747470733a2f2f63732d6e6f7465732d313235363130393739362e636f732e61702d6775616e677a686f752e6d7971636c6f75642e636f6d2f64623565333736642d306233652d343930652d613433612d3332333139313462363636382e706e67 alt=img>
+</a></p>
+<h3 id=jdk-1>JDK</h3>
+<ul>
+<li>java.lang.StringBuilder.append()</li>
+<li><a href=http://docs.oracle.com/javase/8/docs/api/java/nio/ByteBuffer.html#put-byte->java.nio.ByteBuffer</a></li>
+<li><a href=http://docs.oracle.com/javase/8/docs/api/java/lang/StringBuffer.html#append-boolean->java.lang.StringBuffer</a></li>
+<li><a href=http://docs.oracle.com/javase/8/docs/api/java/lang/Appendable.html>java.lang.Appendable</a></li>
+<li><a href=https://github.com/apache/camel/tree/0e195428ee04531be27a0b659005e3aa8d159d23/camel-core/src/main/java/org/apache/camel/builder>Apache Camel builders</a></li>
+</ul>
+<h3 id=guava>Guava</h3>
+<ul>
+<li>CacheBuilder.newBuilder()</li>
+</ul>
+<p>生成器模式</p>
+<p>生成器模式可以改进成链式调用(在guava中大力提倡),Builder类中赋值的方法返回类型不是void而是它本身,这样就可以链式调用起来,最后再通过builder()方法返回定制化的Product</p>
+<p>可以这样简单理解:</p>
+<ul>
+<li>简单工厂只有一个工厂,这个工厂生产多种产品,新增产品时需要增加方法.(一对多)</li>
+<li>工厂方法拓展了工厂类,有多个工厂类,每个工厂生产一种产品,新增产品时新增工厂类.(一对一)</li>
+<li>抽象工厂结合两者,生产产品族(二维),有多个工厂类,每个工厂类又是一个简单工厂.(一对多)</li>
+</ul>
+<h2 id=简单工厂simple-factory>简单工厂（Simple Factory）</h2>
+<h3 id=intent-2>Intent</h3>
+<p>在创建一个对象时不向客户暴露内部细节，并提供一个创建对象的通用接口。</p>
+<h3 id=class-diagram-2>Class Diagram</h3>
+<p>简单工厂把实例化的操作单独放到一个类中，这个类就成为简单工厂类，让简单工厂类来决定应该用哪个具体子类来实例化。</p>
+<p>这样做能把客户类和具体子类的实现解耦，客户类不再需要知道有哪些子类以及应当实例化哪个子类。客户类往往有多个，如果不使用简单工厂，那么所有的客户类都要知道所有子类的细节。而且一旦子类发生改变，例如增加子类，那么所有的客户类都要进行修改。</p>
+<p><a href=https://camo.githubusercontent.com/cfb54856532663e0f330aabf1c826e1bf0d99b8a/68747470733a2f2f63732d6e6f7465732d313235363130393739362e636f732e61702d6775616e677a686f752e6d7971636c6f75642e636f6d2f34306330633137652d626261362d343439332d393835372d3134376330303434613031382e706e67><img loading=lazy src=https://camo.githubusercontent.com/cfb54856532663e0f330aabf1c826e1bf0d99b8a/68747470733a2f2f63732d6e6f7465732d313235363130393739362e636f732e61702d6775616e677a686f752e6d7971636c6f75642e636f6d2f34306330633137652d626261362d343439332d393835372d3134376330303434613031382e706e67 alt=img>
+</a></p>
+<h3 id=implementation-1>Implementation</h3>
+<pre tabindex=0><code>public interface Product {
+}
+public class ConcreteProduct implements Product {
+}
+public class ConcreteProduct1 implements Product {
+}
+public class ConcreteProduct2 implements Product {
+}
+</code></pre><p>以下的 Client 类包含了实例化的代码，这是一种错误的实现。如果在客户类中存在这种实例化代码，就需要考虑将代码放到简单工厂中。</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Client</span> <span style=color:#f92672>{</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>main</span><span style=color:#f92672>(</span>String<span style=color:#f92672>[]</span> args<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>int</span> type <span style=color:#f92672>=</span> 1<span style=color:#f92672>;</span>
+        Product product<span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>type <span style=color:#f92672>==</span> 1<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            product <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> ConcreteProduct1<span style=color:#f92672>();</span>
+        <span style=color:#f92672>}</span> <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>type <span style=color:#f92672>==</span> 2<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            product <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> ConcreteProduct2<span style=color:#f92672>();</span>
+        <span style=color:#f92672>}</span> <span style=color:#66d9ef>else</span> <span style=color:#f92672>{</span>
+            product <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> ConcreteProduct<span style=color:#f92672>();</span>
+        <span style=color:#f92672>}</span>
+        <span style=color:#75715e>// do something with the product
+</span><span style=color:#75715e></span>    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+</code></pre></div><p>以下的 SimpleFactory 是简单工厂实现，它被所有需要进行实例化的客户类调用。</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>SimpleFactory</span> <span style=color:#f92672>{</span>
+
+    <span style=color:#66d9ef>public</span> Product <span style=color:#a6e22e>createProduct</span><span style=color:#f92672>(</span><span style=color:#66d9ef>int</span> type<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>type <span style=color:#f92672>==</span> 1<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> ConcreteProduct1<span style=color:#f92672>();</span>
+        <span style=color:#f92672>}</span> <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>type <span style=color:#f92672>==</span> 2<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> ConcreteProduct2<span style=color:#f92672>();</span>
+        <span style=color:#f92672>}</span>
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> ConcreteProduct<span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Client</span> <span style=color:#f92672>{</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>main</span><span style=color:#f92672>(</span>String<span style=color:#f92672>[]</span> args<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        SimpleFactory simpleFactory <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> SimpleFactory<span style=color:#f92672>();</span>
+        Product product <span style=color:#f92672>=</span> simpleFactory<span style=color:#f92672>.</span><span style=color:#a6e22e>createProduct</span><span style=color:#f92672>(</span>1<span style=color:#f92672>);</span>
+        <span style=color:#75715e>// do something with the product
+</span><span style=color:#75715e></span>    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+</code></pre></div><h2 id=工厂方法factory-method>工厂方法（Factory Method）</h2>
+<h3 id=intent-3>Intent</h3>
+<p>定义了一个创建对象的接口，但由子类决定要实例化哪个类。工厂方法把实例化操作推迟到子类。</p>
+<h3 id=class-diagram-3>Class Diagram</h3>
+<p>在简单工厂中，创建对象的是另一个类，而在工厂方法中，是由子类来创建对象。</p>
+<p>下图中，Factory 有一个 doSomething() 方法，这个方法需要用到一个产品对象，这个产品对象由 factoryMethod() 方法创建。该方法是抽象的，需要由子类去实现。</p>
+<p><a href=https://camo.githubusercontent.com/678755dc29f757844465b3f32a156b7c585e8e76/68747470733a2f2f63732d6e6f7465732d313235363130393739362e636f732e61702d6775616e677a686f752e6d7971636c6f75642e636f6d2f66346430616664302d386537382d343931342d396536302d3433363665616630363562352e706e67><img loading=lazy src=https://camo.githubusercontent.com/678755dc29f757844465b3f32a156b7c585e8e76/68747470733a2f2f63732d6e6f7465732d313235363130393739362e636f732e61702d6775616e677a686f752e6d7971636c6f75642e636f6d2f66346430616664302d386537382d343931342d396536302d3433363665616630363562352e706e67 alt=img>
+</a></p>
+<h3 id=implementation-2>Implementation</h3>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>abstract</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Factory</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>abstract</span> <span style=color:#66d9ef>public</span> Product <span style=color:#a6e22e>factoryMethod</span><span style=color:#f92672>();</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>doSomething</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        Product product <span style=color:#f92672>=</span> factoryMethod<span style=color:#f92672>();</span>
+        <span style=color:#75715e>// do something with the product
+</span><span style=color:#75715e></span>    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ConcreteFactory</span> <span style=color:#66d9ef>extends</span> Factory <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>public</span> Product <span style=color:#a6e22e>factoryMethod</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> ConcreteProduct<span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ConcreteFactory1</span> <span style=color:#66d9ef>extends</span> Factory <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>public</span> Product <span style=color:#a6e22e>factoryMethod</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> ConcreteProduct1<span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ConcreteFactory2</span> <span style=color:#66d9ef>extends</span> Factory <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>public</span> Product <span style=color:#a6e22e>factoryMethod</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> ConcreteProduct2<span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+</code></pre></div><h3 id=jdk-2>JDK</h3>
+<ul>
+<li>Collection.iterator() 产品为内部类Itr</li>
+</ul>
+<h2 id=抽象工厂abstract-factory>抽象工厂（Abstract Factory）</h2>
+<h3 id=intent-4>Intent</h3>
+<p>提供一个接口，用于创建 <strong>相关的对象家族</strong> 。</p>
+<h3 id=class-diagram-4>Class Diagram</h3>
+<p>抽象工厂模式创建的是对象家族，也就是很多对象而不是一个对象，并且这些对象是相关的，也就是说必须一起创建出来。而工厂方法模式只是用于创建一个对象，这和抽象工厂模式有很大不同。</p>
+<p>抽象工厂模式用到了工厂方法模式来创建单一对象，AbstractFactory 中的 createProductA() 和 createProductB() 方法都是让子类来实现，这两个方法单独来看就是在创建一个对象，这符合工厂方法模式的定义。</p>
+<p>至于创建对象的家族这一概念是在 Client 体现，Client 要通过 AbstractFactory 同时调用两个方法来创建出两个对象，在这里这两个对象就有很大的相关性，Client 需要同时创建出这两个对象。</p>
+<p>从高层次来看，抽象工厂使用了组合，即 Cilent 组合了 AbstractFactory，而工厂方法模式使用了继承。</p>
+<p><a href=https://camo.githubusercontent.com/f9efa7c267cc2b5374280bd86ad90009374947ed/68747470733a2f2f63732d6e6f7465732d313235363130393739362e636f732e61702d6775616e677a686f752e6d7971636c6f75642e636f6d2f65323139306333362d386232372d343639302d626465352d3939313130323061313239342e706e67><img loading=lazy src=https://camo.githubusercontent.com/f9efa7c267cc2b5374280bd86ad90009374947ed/68747470733a2f2f63732d6e6f7465732d313235363130393739362e636f732e61702d6775616e677a686f752e6d7971636c6f75642e636f6d2f65323139306333362d386232372d343639302d626465352d3939313130323061313239342e706e67 alt=img>
+</a></p>
+<h3 id=implementation-3>Implementation</h3>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>AbstractProductA</span> <span style=color:#f92672>{</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>AbstractProductB</span> <span style=color:#f92672>{</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ProductA1</span> <span style=color:#66d9ef>extends</span> AbstractProductA <span style=color:#f92672>{</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ProductA2</span> <span style=color:#66d9ef>extends</span> AbstractProductA <span style=color:#f92672>{</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ProductB1</span> <span style=color:#66d9ef>extends</span> AbstractProductB <span style=color:#f92672>{</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ProductB2</span> <span style=color:#66d9ef>extends</span> AbstractProductB <span style=color:#f92672>{</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>abstract</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>AbstractFactory</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>abstract</span> AbstractProductA <span style=color:#a6e22e>createProductA</span><span style=color:#f92672>();</span>
+    <span style=color:#66d9ef>abstract</span> AbstractProductB <span style=color:#a6e22e>createProductB</span><span style=color:#f92672>();</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ConcreteFactory1</span> <span style=color:#66d9ef>extends</span> AbstractFactory <span style=color:#f92672>{</span>
+    AbstractProductA <span style=color:#a6e22e>createProductA</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> ProductA1<span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+
+    AbstractProductB <span style=color:#a6e22e>createProductB</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> ProductB1<span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ConcreteFactory2</span> <span style=color:#66d9ef>extends</span> AbstractFactory <span style=color:#f92672>{</span>
+    AbstractProductA <span style=color:#a6e22e>createProductA</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> ProductA2<span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+
+    AbstractProductB <span style=color:#a6e22e>createProductB</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> ProductB2<span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Client</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>main</span><span style=color:#f92672>(</span>String<span style=color:#f92672>[]</span> args<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        AbstractFactory abstractFactory <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> ConcreteFactory1<span style=color:#f92672>();</span>
+        AbstractProductA productA <span style=color:#f92672>=</span> abstractFactory<span style=color:#f92672>.</span><span style=color:#a6e22e>createProductA</span><span style=color:#f92672>();</span>
+        AbstractProductB productB <span style=color:#f92672>=</span> abstractFactory<span style=color:#f92672>.</span><span style=color:#a6e22e>createProductB</span><span style=color:#f92672>();</span>
+        <span style=color:#75715e>// do something with productA and productB
+</span><span style=color:#75715e></span>    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+</code></pre></div><h3 id=jdk-3>JDK</h3>
+<ul>
+<li>数据库连接Connection.prepareStatement() 产品为Statement类</li>
+</ul>
+<h2 id=外观facade门面模式>外观（Facade）(门面模式)</h2>
+<h3 id=intent-5>Intent</h3>
+<p>提供了一个统一的接口，用来访问子系统中的一群接口，从而让子系统更容易使用。</p>
+<p>某个功能,需要调用多个接口,逻辑固定,因此可以封装成一个接口,通过该接口完成该功能.</p>
+<h3 id=class-diagram-5>Class Diagram</h3>
+<p><a href=https://camo.githubusercontent.com/da9b6e5e81898f97e2b3dc17c6532db2a99faf48/68747470733a2f2f63732d6e6f7465732d313235363130393739362e636f732e61702d6775616e677a686f752e6d7971636c6f75642e636f6d2f66393937386661362d396634392d346130662d383534302d3032643236396163343438662e706e67><img loading=lazy src=https://camo.githubusercontent.com/da9b6e5e81898f97e2b3dc17c6532db2a99faf48/68747470733a2f2f63732d6e6f7465732d313235363130393739362e636f732e61702d6775616e677a686f752e6d7971636c6f75642e636f6d2f66393937386661362d396634392d346130662d383534302d3032643236396163343438662e706e67 alt=img>
+</a></p>
+<h3 id=implementation-4>Implementation</h3>
+<p>观看电影需要操作很多电器，使用外观模式实现一键看电影功能。</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>SubSystem</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>turnOnTV</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>println</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;turnOnTV()&#34;</span><span style=color:#f92672>);</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>setCD</span><span style=color:#f92672>(</span>String cd<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>println</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;setCD( &#34;</span> <span style=color:#f92672>+</span> cd <span style=color:#f92672>+</span> <span style=color:#e6db74>&#34; )&#34;</span><span style=color:#f92672>);</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>startWatching</span><span style=color:#f92672>(){</span>
+        System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>println</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;startWatching()&#34;</span><span style=color:#f92672>);</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Facade</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>private</span> SubSystem subSystem <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> SubSystem<span style=color:#f92672>();</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>watchMovie</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        subSystem<span style=color:#f92672>.</span><span style=color:#a6e22e>turnOnTV</span><span style=color:#f92672>();</span>
+        subSystem<span style=color:#f92672>.</span><span style=color:#a6e22e>setCD</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;a movie&#34;</span><span style=color:#f92672>);</span>
+        subSystem<span style=color:#f92672>.</span><span style=color:#a6e22e>startWatching</span><span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Client</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>main</span><span style=color:#f92672>(</span>String<span style=color:#f92672>[]</span> args<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        Facade facade <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Facade<span style=color:#f92672>();</span>
+        facade<span style=color:#f92672>.</span><span style=color:#a6e22e>watchMovie</span><span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+</code></pre></div><h3 id=设计原则>设计原则</h3>
+<p>最少知识原则：只和你的密友谈话。也就是说客户对象所需要交互的对象应当尽可能少。</p>
+<h2 id=原型模式prototype>原型模式（Prototype）</h2>
+<h3 id=intent-6>Intent</h3>
+<p>使用原型实例指定要创建对象的类型，通过赋值这个原型来创建新对象。</p>
+<p>不需要知道任何创建的细节,不调用构造函数.核心是clone()方法,需要实现Cloneable接口,因此需要注意浅克隆(复制基本值)和深克隆(复制复杂对象)的区别.</p>
+<p>核心作用是节省资源,复制的开销小于创建一个新的对象.</p>
+<p>如果复制的对象包含复杂的成员对象,则需要重写clone方法,将这些对象也一起克隆.</p>
+<h3 id=class-diagram-6>Class Diagram</h3>
+<p><a href=https://camo.githubusercontent.com/449d0af6ec0ff85bdc7ab6a92d06e5a315bbc9c5/68747470733a2f2f63732d6e6f7465732d313235363130393739362e636f732e61702d6775616e677a686f752e6d7971636c6f75642e636f6d2f62383932326638632d393565362d343138372d626538352d3537326135303961666237312e706e67><img loading=lazy src=https://camo.githubusercontent.com/449d0af6ec0ff85bdc7ab6a92d06e5a315bbc9c5/68747470733a2f2f63732d6e6f7465732d313235363130393739362e636f732e61702d6775616e677a686f752e6d7971636c6f75642e636f6d2f62383932326638632d393565362d343138372d626538352d3537326135303961666237312e706e67 alt=img>
+</a></p>
+<h3 id=implementation-5>Implementation</h3>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#66d9ef>public</span> <span style=color:#66d9ef>abstract</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Prototype</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>abstract</span> Prototype <span style=color:#a6e22e>myClone</span><span style=color:#f92672>();</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ConcretePrototype</span> <span style=color:#66d9ef>extends</span> Prototype <span style=color:#f92672>{</span>
+
+    <span style=color:#66d9ef>private</span> String filed<span style=color:#f92672>;</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#a6e22e>ConcretePrototype</span><span style=color:#f92672>(</span>String filed<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>filed</span> <span style=color:#f92672>=</span> filed<span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#a6e22e>@Override</span>
+    Prototype <span style=color:#a6e22e>myClone</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>new</span> ConcretePrototype<span style=color:#f92672>(</span>filed<span style=color:#f92672>);</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#a6e22e>@Override</span>
+    <span style=color:#66d9ef>public</span> String <span style=color:#a6e22e>toString</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>return</span> filed<span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Client</span> <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>main</span><span style=color:#f92672>(</span>String<span style=color:#f92672>[]</span> args<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        Prototype prototype <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> ConcretePrototype<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;abc&#34;</span><span style=color:#f92672>);</span>
+        Prototype clone <span style=color:#f92672>=</span> prototype<span style=color:#f92672>.</span><span style=color:#a6e22e>myClone</span><span style=color:#f92672>();</span>
+        System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>println</span><span style=color:#f92672>(</span>clone<span style=color:#f92672>.</span><span style=color:#a6e22e>toString</span><span style=color:#f92672>());</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+abc
+</code></pre></div><h3 id=克隆破坏单例>克隆破坏单例</h3>
+<p>如果克隆的是一个单例对象,那么clone()方法会返回一个新的对象,从而破坏了单例.因此需要重写clone方法,让它也通过单一入口来获取单例对象.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#a6e22e>@Override</span>
+<span style=color:#66d9ef>protected</span> Object <span style=color:#a6e22e>clone</span><span style=color:#f92672>()</span> <span style=color:#66d9ef>throws</span> CloneNotSupportedException <span style=color:#f92672>{</span>
+    <span style=color:#66d9ef>return</span> getInstance<span style=color:#f92672>();</span>
+<span style=color:#f92672>}</span>
+</code></pre></div><h3 id=jdk-4>JDK</h3>
+<ul>
+<li><a href=http://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#clone%28%29>java.lang.Object#clone()</a></li>
+</ul>
+</div>
+<footer class=post-footer>
+<nav class=paginav>
+<a class=prev href=http://euthpic.github.io/tech/list%E7%AE%80%E5%8D%95%E5%8E%9F%E7%90%86/>
+<span class=title>« 上一页</span>
+<br>
+<span>List简单原理</span>
+</a>
+</nav>
+<div class=share-buttons>
+<a target=_blank rel="noopener noreferrer" aria-label="share 设计模式 on twitter" href="https://twitter.com/intent/tweet/?text=%e8%ae%be%e8%ae%a1%e6%a8%a1%e5%bc%8f&url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E8%25AE%25BE%25E8%25AE%25A1%25E6%25A8%25A1%25E5%25BC%258F%2f&hashtags="><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 设计模式 on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E8%25AE%25BE%25E8%25AE%25A1%25E6%25A8%25A1%25E5%25BC%258F%2f&title=%e8%ae%be%e8%ae%a1%e6%a8%a1%e5%bc%8f&summary=%e8%ae%be%e8%ae%a1%e6%a8%a1%e5%bc%8f&source=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E8%25AE%25BE%25E8%25AE%25A1%25E6%25A8%25A1%25E5%25BC%258F%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 设计模式 on reddit" href="https://reddit.com/submit?url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E8%25AE%25BE%25E8%25AE%25A1%25E6%25A8%25A1%25E5%25BC%258F%2f&title=%e8%ae%be%e8%ae%a1%e6%a8%a1%e5%bc%8f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 设计模式 on facebook" href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E8%25AE%25BE%25E8%25AE%25A1%25E6%25A8%25A1%25E5%25BC%258F%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 设计模式 on whatsapp" href="https://api.whatsapp.com/send?text=%e8%ae%be%e8%ae%a1%e6%a8%a1%e5%bc%8f%20-%20http%3a%2f%2feuthpic.github.io%2ftech%2f%25E8%25AE%25BE%25E8%25AE%25A1%25E6%25A8%25A1%25E5%25BC%258F%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 设计模式 on telegram" href="https://telegram.me/share/url?text=%e8%ae%be%e8%ae%a1%e6%a8%a1%e5%bc%8f&url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E8%25AE%25BE%25E8%25AE%25A1%25E6%25A8%25A1%25E5%25BC%258F%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg>
+</a>
+</div>
+</footer>
+</article>
+</main>
+<footer class=footer>
+<span>&copy; 2022 <a href=http://euthpic.github.io/>乱花渐欲迷人眼</a></span>
+<span>
+Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a>
+</span>
+</footer>
+<a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a>
+<script>let menu=document.getElementById('menu');menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
+<script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script>
+<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
+</body>
+</html>

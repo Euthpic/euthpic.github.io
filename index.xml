@@ -21,51 +21,6 @@
     </item>
     
     <item>
-      <title>Telepresence</title>
-      <link>http://euthpic.github.io/tech/telepresence/</link>
-      <pubDate>Sun, 24 Apr 2022 06:24:46 +0800</pubDate>
-      
-      <guid>http://euthpic.github.io/tech/telepresence/</guid>
-      <description>需求背景 我们的集群迁移到云上的k8s后,本地无法继续直连调试,需要新的远程调试方案. 同事先调研了阿里出品的kt-connect,给出的结论是</description>
-    </item>
-    
-    <item>
-      <title>一次解决zookeeper服务频繁无响应的经历</title>
-      <link>http://euthpic.github.io/tech/zookeeper%E6%9C%8D%E5%8A%A1%E9%A2%91%E7%B9%81%E6%97%A0%E5%93%8D%E5%BA%94%E6%88%91%E4%BB%85%E4%BF%AE%E6%94%B9%E4%B8%80%E8%A1%8C%E9%85%8D%E7%BD%AE%E5%B0%B1%E8%A7%A3%E5%86%B3%E5%AE%83%E4%BA%86/</link>
-      <pubDate>Wed, 16 Feb 2022 22:36:36 +0800</pubDate>
-      
-      <guid>http://euthpic.github.io/tech/zookeeper%E6%9C%8D%E5%8A%A1%E9%A2%91%E7%B9%81%E6%97%A0%E5%93%8D%E5%BA%94%E6%88%91%E4%BB%85%E4%BF%AE%E6%94%B9%E4%B8%80%E8%A1%8C%E9%85%8D%E7%BD%AE%E5%B0%B1%E8%A7%A3%E5%86%B3%E5%AE%83%E4%BA%86/</guid>
-      <description>在迁移到k8s之前,我们的测试环境是用docker部署到自己的物理机上的.那时常常会发生这样一种情况:过了一晚上或一个周末后,原本在测试环境</description>
-    </item>
-    
-    <item>
-      <title>Scala基础练习</title>
-      <link>http://euthpic.github.io/tech/scala%E5%9F%BA%E7%A1%80%E7%BB%83%E4%B9%A0/</link>
-      <pubDate>Sun, 13 Feb 2022 15:14:19 +0800</pubDate>
-      
-      <guid>http://euthpic.github.io/tech/scala%E5%9F%BA%E7%A1%80%E7%BB%83%E4%B9%A0/</guid>
-      <description>import java.io.{PrintWriter} import scala.collection.mutable import scala.io.{Source, StdIn} import scala.reflect.io.File case class Person(id: Int, name: String, age: Int) /** * Scala 基本笔记 */ object ScalaLesson extends App { /** * 基础-算术 */ def lesson1() = { println(1.+(2)) println(2.-(2)) println(2.*(2)) println(2./(2)) println(10 max 2) } /** * 基础-重载 */ def lesson2() = { val str = &amp;#34;Hello&amp;#34;(2) //等同</description>
-    </item>
-    
-    <item>
-      <title>K8s笔记</title>
-      <link>http://euthpic.github.io/tech/k8s%E7%AC%94%E8%AE%B0/</link>
-      <pubDate>Fri, 11 Feb 2022 14:15:12 +0800</pubDate>
-      
-      <guid>http://euthpic.github.io/tech/k8s%E7%AC%94%E8%AE%B0/</guid>
-      <description>容器本身没有价值,有价值的是容器编排技术 容器(docker)其实是一种沙盒技术,一是可以将应用之间隔离开来,二是方便地将应用&amp;quot;搬来</description>
-    </item>
-    
-    <item>
-      <title>Scala简易笔记</title>
-      <link>http://euthpic.github.io/tech/scala%E7%AE%80%E6%98%93%E7%AC%94%E8%AE%B0/</link>
-      <pubDate>Fri, 11 Feb 2022 14:00:29 +0800</pubDate>
-      
-      <guid>http://euthpic.github.io/tech/scala%E7%AE%80%E6%98%93%E7%AC%94%E8%AE%B0/</guid>
-      <description>看完&amp;lt;快学scala&amp;gt;的一些笔记. 该书的课后练习参考答案: https://github.com/vybae/scala-hello 类型推断错误有时候ide检测不出来 ide联想到的api不能总是及时展</description>
-    </item>
-    
-    <item>
       <title>部署yapi</title>
       <link>http://euthpic.github.io/tech/%E9%83%A8%E7%BD%B2yapi/</link>
       <pubDate>Thu, 30 Dec 2021 16:32:48 +0800</pubDate>
@@ -75,9 +30,27 @@
     </item>
     
     <item>
+      <title>elasticsearch相似度与排序原理</title>
+      <link>http://euthpic.github.io/tech/elasticsearch%E7%9B%B8%E4%BC%BC%E5%BA%A6%E4%B8%8E%E6%8E%92%E5%BA%8F%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Mon, 06 Dec 2021 00:06:10 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/elasticsearch%E7%9B%B8%E4%BC%BC%E5%BA%A6%E4%B8%8E%E6%8E%92%E5%BA%8F%E5%8E%9F%E7%90%86/</guid>
+      <description>bm25模型 查询时权重提升 修改查询结构 修改评分 constant_score查询 函数评分 function_score 脚本评分 script_score 更改相似度模型 多字段排序 前面介绍了es的分</description>
+    </item>
+    
+    <item>
+      <title>elasticsearch读写原理</title>
+      <link>http://euthpic.github.io/tech/elasticsearch%E8%AF%BB%E5%86%99%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Sun, 05 Dec 2021 00:06:10 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/elasticsearch%E8%AF%BB%E5%86%99%E5%8E%9F%E7%90%86/</guid>
+      <description>一次写入过程 一次读取过程 (主要是选择协调节点,不用和倒排索引,排序联系) 一次搜索过程 (主要是排序) 不变性 动态更新索引(与MySQL的插入数据</description>
+    </item>
+    
+    <item>
       <title>elasticsearch内存模型</title>
       <link>http://euthpic.github.io/tech/elasticsearch%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/</link>
-      <pubDate>Thu, 02 Dec 2021 00:06:10 +0800</pubDate>
+      <pubDate>Sat, 04 Dec 2021 00:06:10 +0800</pubDate>
       
       <guid>http://euthpic.github.io/tech/elasticsearch%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/</guid>
       <description>堆内内存 索引缓冲index buffer 节点查询缓存Node Query Cache 分片请求缓存Shard Request Cache 字段缓存Fielddata Cache FST缓存 Segments Cache 堆外内存 Segments Memory 断路器和</description>
@@ -86,7 +59,7 @@
     <item>
       <title>elasticsearch分词入门</title>
       <link>http://euthpic.github.io/tech/elasticsearch%E5%88%86%E8%AF%8D%E5%85%A5%E9%97%A8/</link>
-      <pubDate>Thu, 02 Dec 2021 00:06:10 +0800</pubDate>
+      <pubDate>Fri, 03 Dec 2021 00:06:10 +0800</pubDate>
       
       <guid>http://euthpic.github.io/tech/elasticsearch%E5%88%86%E8%AF%8D%E5%85%A5%E9%97%A8/</guid>
       <description>倒排索引 通常提到搜索我们想到的实现都是es,原因是它比MySQL高效得多. 在MySQL中想检索包含特定关键词的数据,比如最近疫情爆发了,有关</description>
@@ -99,24 +72,6 @@
       
       <guid>http://euthpic.github.io/tech/elasticsearch%E5%9F%BA%E7%A1%80%E7%AF%87/</guid>
       <description>基本背景 官方对es的定位是分布式搜索和分析引擎,它专为海量搜索而生.比如想往自己的网站加入一个搜索框,或者做日志的采集和检索时都可以使用es</description>
-    </item>
-    
-    <item>
-      <title>elasticsearch相似度与排序原理</title>
-      <link>http://euthpic.github.io/tech/elasticsearch%E7%9B%B8%E4%BC%BC%E5%BA%A6%E4%B8%8E%E6%8E%92%E5%BA%8F%E5%8E%9F%E7%90%86/</link>
-      <pubDate>Thu, 02 Dec 2021 00:06:10 +0800</pubDate>
-      
-      <guid>http://euthpic.github.io/tech/elasticsearch%E7%9B%B8%E4%BC%BC%E5%BA%A6%E4%B8%8E%E6%8E%92%E5%BA%8F%E5%8E%9F%E7%90%86/</guid>
-      <description>bm25模型 查询时权重提升 修改查询结构 修改评分 constant_score查询 函数评分 function_score 脚本评分 script_score 更改相似度模型 多字段排序 前面介绍了es的分</description>
-    </item>
-    
-    <item>
-      <title>elasticsearch读写原理</title>
-      <link>http://euthpic.github.io/tech/elasticsearch%E8%AF%BB%E5%86%99%E5%8E%9F%E7%90%86/</link>
-      <pubDate>Thu, 02 Dec 2021 00:06:10 +0800</pubDate>
-      
-      <guid>http://euthpic.github.io/tech/elasticsearch%E8%AF%BB%E5%86%99%E5%8E%9F%E7%90%86/</guid>
-      <description>一次写入过程 一次读取过程 (主要是选择协调节点,不用和倒排索引,排序联系) 一次搜索过程 (主要是排序) 不变性 动态更新索引(与MySQL的插入数据</description>
     </item>
     
     <item>
@@ -135,6 +90,222 @@
       
       <guid>http://euthpic.github.io/posts/%E8%BF%99%E9%87%8C%E5%95%A5%E9%83%BD%E6%B2%A1%E6%9C%89/</guid>
       <description></description>
+    </item>
+    
+    <item>
+      <title>Telepresence</title>
+      <link>http://euthpic.github.io/tech/telepresence/</link>
+      <pubDate>Sat, 24 Jul 2021 16:24:46 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/telepresence/</guid>
+      <description>需求背景 我们的集群迁移到云上的k8s后,本地无法继续直连调试,需要新的远程调试方案. 同事先调研了阿里出品的kt-connect,给出的结论是</description>
+    </item>
+    
+    <item>
+      <title>K8s笔记</title>
+      <link>http://euthpic.github.io/tech/k8s%E7%AC%94%E8%AE%B0/</link>
+      <pubDate>Thu, 11 Mar 2021 18:15:12 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/k8s%E7%AC%94%E8%AE%B0/</guid>
+      <description>容器本身没有价值,有价值的是容器编排技术 容器(docker)其实是一种沙盒技术,一是可以将应用之间隔离开来,二是方便地将应用&amp;quot;搬来</description>
+    </item>
+    
+    <item>
+      <title>Scala简易笔记</title>
+      <link>http://euthpic.github.io/tech/scala%E7%AE%80%E6%98%93%E7%AC%94%E8%AE%B0/</link>
+      <pubDate>Tue, 14 Jul 2020 14:00:29 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/scala%E7%AE%80%E6%98%93%E7%AC%94%E8%AE%B0/</guid>
+      <description>看完&amp;lt;快学scala&amp;gt;的一些笔记. 该书的课后练习参考答案: https://github.com/vybae/scala-hello 类型推断错误有时候ide检测不出来 ide联想到的api不能总是及时展</description>
+    </item>
+    
+    <item>
+      <title>Scala基础练习</title>
+      <link>http://euthpic.github.io/tech/scala%E5%9F%BA%E7%A1%80%E7%BB%83%E4%B9%A0/</link>
+      <pubDate>Mon, 13 Jul 2020 15:14:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/scala%E5%9F%BA%E7%A1%80%E7%BB%83%E4%B9%A0/</guid>
+      <description>import java.io.{PrintWriter} import scala.collection.mutable import scala.io.{Source, StdIn} import scala.reflect.io.File case class Person(id: Int, name: String, age: Int) /** * Scala 基本笔记 */ object ScalaLesson extends App { /** * 基础-算术 */ def lesson1() = { println(1.+(2)) println(2.-(2)) println(2.*(2)) println(2./(2)) println(10 max 2) } /** * 基础-重载 */ def lesson2() = { val str = &amp;#34;Hello&amp;#34;(2) //等同</description>
+    </item>
+    
+    <item>
+      <title>Redis主从同步原理</title>
+      <link>http://euthpic.github.io/tech/redis%E4%B8%BB%E4%BB%8E%E5%90%8C%E6%AD%A5%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Thu, 25 Jun 2020 22:44:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/redis%E4%B8%BB%E4%BB%8E%E5%90%8C%E6%AD%A5%E5%8E%9F%E7%90%86/</guid>
+      <description>前面我们提到的持久化,内存淘汰,管道等机制都是Redis在单个实例上的功能,但是随着系统并发量的不断升高,单个实例的redis就很难继续满足</description>
+    </item>
+    
+    <item>
+      <title>Redis内存淘汰机制与IO模型</title>
+      <link>http://euthpic.github.io/tech/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6%E4%B8%8Eio%E6%A8%A1%E5%9E%8B/</link>
+      <pubDate>Thu, 25 Jun 2020 21:44:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6%E4%B8%8Eio%E6%A8%A1%E5%9E%8B/</guid>
+      <description>过期key的删除策略 Redis所有的键都可以设置过期时间. 思考一个问题,所有到期的键都一定会被删除吗? 假设同一时间内redis上有大量的ke</description>
+    </item>
+    
+    <item>
+      <title>Redis持久化原理</title>
+      <link>http://euthpic.github.io/tech/redis%E6%8C%81%E4%B9%85%E5%8C%96%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Thu, 25 Jun 2020 20:44:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/redis%E6%8C%81%E4%B9%85%E5%8C%96%E5%8E%9F%E7%90%86/</guid>
+      <description>上一次我们介绍了Redis的数据类型,应用场景,单线程模型以及与Memcached的比较.今天继续介绍它的持久化. 持久化 Redis的数据是存</description>
+    </item>
+    
+    <item>
+      <title>Redis概述</title>
+      <link>http://euthpic.github.io/tech/redis%E6%A6%82%E8%BF%B0/</link>
+      <pubDate>Thu, 25 Jun 2020 19:44:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/redis%E6%A6%82%E8%BF%B0/</guid>
+      <description>在分布式系统中,为了应对高并发的情况,有3种主要的手段 : 缓存,异步,分流 今天,我们要讲的就是在缓存中被最广泛使用的中间件 : Redis. 思维导图 Memcached vs. Redis? 为</description>
+    </item>
+    
+    <item>
+      <title>索引优化技巧</title>
+      <link>http://euthpic.github.io/tech/%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96/</link>
+      <pubDate>Sat, 20 Jun 2020 19:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96/</guid>
+      <description>group by可以走索引,但是所有group by列需要引用同一索引的属性,并且顺序正确. order by可以走索引,但是order by的字段必须包含在wher</description>
+    </item>
+    
+    <item>
+      <title>Mysql索引篇</title>
+      <link>http://euthpic.github.io/tech/mysql%E7%B4%A2%E5%BC%95%E7%AF%87/</link>
+      <pubDate>Thu, 18 Jun 2020 22:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/mysql%E7%B4%A2%E5%BC%95%E7%AF%87/</guid>
+      <description>索引为什么能加快检索的速度 很多人回答这个问题时,喜欢用目录作比喻. 的确,当我们查找书中的某些内容时,会先翻目录页,得到目标所在的页数后再翻到</description>
+    </item>
+    
+    <item>
+      <title>MySQL事务篇</title>
+      <link>http://euthpic.github.io/tech/mysql%E4%BA%8B%E5%8A%A1%E7%AF%87/</link>
+      <pubDate>Thu, 18 Jun 2020 21:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/mysql%E4%BA%8B%E5%8A%A1%E7%AF%87/</guid>
+      <description>前言 InnoDB引擎中的事务完全符合ACID的特性.也许ACID的定义很多人倒背如流,可是在我看来,不仅定义要熟悉,而且其各自的意义以及实现</description>
+    </item>
+    
+    <item>
+      <title>MySQL锁篇</title>
+      <link>http://euthpic.github.io/tech/mysql%E9%94%81%E7%AF%87/</link>
+      <pubDate>Thu, 18 Jun 2020 19:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/mysql%E9%94%81%E7%AF%87/</guid>
+      <description>思维导图 前言 我们都知道,事务有ACID四大特性.前面讲Redis时提到过,Redis的隔离性是由单线程模型来实现的,每条命令都是串行化执行,</description>
+    </item>
+    
+    <item>
+      <title>B&#43;树 vs. B-树</title>
+      <link>http://euthpic.github.io/tech/b&#43;%E6%A0%91-vs.-b-%E6%A0%91/</link>
+      <pubDate>Thu, 18 Jun 2020 16:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/b&#43;%E6%A0%91-vs.-b-%E6%A0%91/</guid>
+      <description>前言 MySQL的主要索引是B+树,为了之后能更好地专注MySQL本身的内容,所以把底层存储结构B+树的内容抽出来先单独分析. 为什么MySQL</description>
+    </item>
+    
+    <item>
+      <title>SQL语句是如何执行的</title>
+      <link>http://euthpic.github.io/tech/sql%E8%AF%AD%E5%8F%A5%E6%98%AF%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8C%E7%9A%84/</link>
+      <pubDate>Tue, 16 Jun 2020 10:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/sql%E8%AF%AD%E5%8F%A5%E6%98%AF%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8C%E7%9A%84/</guid>
+      <description>思维导图 前言 整理了MySQL的笔记后,我做了上面这张图.不过看了林晓斌老师的专栏后,我在这篇文章里并不打算直接陷入这些细节中了,而是从各个常</description>
+    </item>
+    
+    <item>
+      <title>队列同步器AQS</title>
+      <link>http://euthpic.github.io/tech/%E9%98%9F%E5%88%97%E5%90%8C%E6%AD%A5%E5%99%A8aqs/</link>
+      <pubDate>Tue, 02 Jun 2020 20:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/%E9%98%9F%E5%88%97%E5%90%8C%E6%AD%A5%E5%99%A8aqs/</guid>
+      <description>概念: 队列同步器AQS是AbstractQueuedSynchronizer的简称,是JUC的核心类.AQS使用了一个int类型的变量表示同</description>
+    </item>
+    
+    <item>
+      <title>并发容器Collections</title>
+      <link>http://euthpic.github.io/tech/%E5%B9%B6%E5%8F%91%E5%AE%B9%E5%99%A8collections/</link>
+      <pubDate>Tue, 02 Jun 2020 19:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/%E5%B9%B6%E5%8F%91%E5%AE%B9%E5%99%A8collections/</guid>
+      <description>含义: JUC是java.util.concurrent工具包的简称,专门负责处理线程 ArrayList -&amp;gt; CopyOnWriteArrayList 内部持有一个可重入锁ReentrantLock,增</description>
+    </item>
+    
+    <item>
+      <title>关于并发</title>
+      <link>http://euthpic.github.io/tech/%E5%85%B3%E4%BA%8E%E5%B9%B6%E5%8F%91/</link>
+      <pubDate>Tue, 02 Jun 2020 18:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/%E5%85%B3%E4%BA%8E%E5%B9%B6%E5%8F%91/</guid>
+      <description>前面我们介绍map和list的时候说过,它们是线程不安全的. 在并发环境下,线程安全是必须要关注的问题,所以今天这篇文章就围绕线程安全这个话题</description>
+    </item>
+    
+    <item>
+      <title>线程池Executors</title>
+      <link>http://euthpic.github.io/tech/%E7%BA%BF%E7%A8%8B%E6%B1%A0executors/</link>
+      <pubDate>Tue, 02 Jun 2020 17:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/%E7%BA%BF%E7%A8%8B%E6%B1%A0executors/</guid>
+      <description>线程池好处 重用存在的线程,减少对象创建,销毁的开销 可有效控制最大并发线程数 提供定时执行,定期执行等功能. ThreadPoolExecutor 线程池可以通过ThreadPool</description>
+    </item>
+    
+    <item>
+      <title>线程安全</title>
+      <link>http://euthpic.github.io/tech/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/</link>
+      <pubDate>Tue, 02 Jun 2020 16:37:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/</guid>
+      <description>线程安全性包括以下三点: 原子性：提供互斥访问，同一时刻只能有一个线程对数据进行操作（Atomic、CAS算法、synchronized、Lo</description>
+    </item>
+    
+    <item>
+      <title>关于缓存</title>
+      <link>http://euthpic.github.io/tech/%E7%BC%93%E5%AD%98/</link>
+      <pubDate>Tue, 02 Jun 2020 16:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/%E7%BC%93%E5%AD%98/</guid>
+      <description>何时该用缓存 某些应用消耗大量CPU去计算,例如正则表达式,就可以考虑将结果缓存下来 数据库连接池比较繁忙,经常报出连接不够的报警,也该考虑缓存</description>
+    </item>
+    
+    <item>
+      <title>JVM原理</title>
+      <link>http://euthpic.github.io/tech/jvm%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Sun, 10 May 2020 19:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/jvm%E5%8E%9F%E7%90%86/</guid>
+      <description>思维导图 前排友情提示 : 周志明的那本深入理解JVM去年已经出第3版了,主要更新了GC工作的详细过程,包括&amp;quot;三色标记法&amp;quot;等.</description>
+    </item>
+    
+    <item>
+      <title>Hashmap简单原理</title>
+      <link>http://euthpic.github.io/tech/hashmap%E7%AE%80%E5%8D%95%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Wed, 06 May 2020 18:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/hashmap%E7%AE%80%E5%8D%95%E5%8E%9F%E7%90%86/</guid>
+      <description>思维导图 集合框架 Java集合是Java提供的工具包，包含了常用的数据结构：集合、链表、队列、栈、数组、映射等。 Java集合工具包的位置是Ja</description>
+    </item>
+    
+    <item>
+      <title>List简单原理</title>
+      <link>http://euthpic.github.io/tech/list%E7%AE%80%E5%8D%95%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Wed, 06 May 2020 14:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/list%E7%AE%80%E5%8D%95%E5%8E%9F%E7%90%86/</guid>
+      <description>上一篇文章我们介绍了Hashmap,今天来看一看List接口下最主要的两个类 : ArrayList和LinkedList 思维导图 ArrayList 链表与数组 从</description>
+    </item>
+    
+    <item>
+      <title>设计模式</title>
+      <link>http://euthpic.github.io/tech/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</link>
+      <pubDate>Sat, 02 May 2020 19:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</guid>
+      <description>一. 前言 设计模式是解决问题的方案，学习现有的设计模式可以做到经验复用。拥有设计模式词汇，在沟通时就能用更少的词汇来讨论，并且不需要了解底层细</description>
     </item>
     
     

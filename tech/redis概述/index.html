@@ -1,0 +1,348 @@
+<!doctype html><html lang=zh dir=auto>
+<head><meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=robots content="index, follow">
+<title>Redis概述 | 乱花渐欲迷人眼</title>
+<meta name=keywords content>
+<meta name=description content="在分布式系统中,为了应对高并发的情况,有3种主要的手段 : 缓存,异步,分流 今天,我们要讲的就是在缓存中被最广泛使用的中间件 : Redis. 思维导图 Memcached vs. Redis? 为">
+<meta name=author content="Guangfa">
+<link rel=canonical href=http://euthpic.github.io/tech/redis%E6%A6%82%E8%BF%B0/>
+<meta name=yandex-verification content="73b1a797f62c0e98">
+<link crossorigin=anonymous href=/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css integrity="sha256-yIlj/i15RiAA/Q+xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as=style>
+<script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=http://euthpic.github.io/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=http://euthpic.github.io/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=http://euthpic.github.io/favicon-32x32.png>
+<link rel=apple-touch-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<link rel=mask-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<meta name=theme-color content="#2e2e33">
+<meta name=msapplication-TileColor content="#2e2e33">
+<meta name=generator content="Hugo 0.89.4">
+<noscript>
+<style>#theme-toggle,.top-link{display:none}</style>
+<style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style>
+</noscript>
+<script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(a,e,f,g,b,c,d){a.GoogleAnalyticsObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=1,c.src=g,d.parentNode.insertBefore(c,d)}(window,document,'script','https://www.google-analytics.com/analytics.js','ga'),ga('create','UA-136094326-1','auto'),ga('send','pageview'))</script><meta property="og:title" content="Redis概述">
+<meta property="og:description" content="在分布式系统中,为了应对高并发的情况,有3种主要的手段 : 缓存,异步,分流 今天,我们要讲的就是在缓存中被最广泛使用的中间件 : Redis. 思维导图 Memcached vs. Redis? 为">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://euthpic.github.io/tech/redis%E6%A6%82%E8%BF%B0/"><meta property="og:image" content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="article:section" content="tech">
+<meta property="article:published_time" content="2020-06-25T19:44:19+08:00">
+<meta property="article:modified_time" content="2020-06-25T19:44:19+08:00"><meta property="og:site_name" content="乱花渐欲迷人眼">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:image content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name=twitter:title content="Redis概述">
+<meta name=twitter:description content="在分布式系统中,为了应对高并发的情况,有3种主要的手段 : 缓存,异步,分流 今天,我们要讲的就是在缓存中被最广泛使用的中间件 : Redis. 思维导图 Memcached vs. Redis? 为">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Teches","item":"http://euthpic.github.io/tech/"},{"@type":"ListItem","position":2,"name":"Redis概述","item":"http://euthpic.github.io/tech/redis%E6%A6%82%E8%BF%B0/"}]}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Redis概述","name":"Redis概述","description":"在分布式系统中,为了应对高并发的情况,有3种主要的手段 : 缓存,异步,分流 今天,我们要讲的就是在缓存中被最广泛使用的中间件 : Redis. 思维导图 Memcached vs. Redis? 为","keywords":[],"articleBody":"在分布式系统中,为了应对高并发的情况,有3种主要的手段 : 缓存,异步,分流\n今天,我们要讲的就是在缓存中被最广泛使用的中间件 : Redis.\n思维导图 Memcached vs. Redis? 为什么会有这个问题?\n在大名鼎鼎的stackoverflow上搜索’redis',可以看到排名第一,最高赞的问答就是这个\n这已经是2012年的问题了,虽然时过境迁,但这几年我在很多文章中还会看到对这个问题的讨论.\n与Memcached的比较对于我们认识redis还是大有裨益的,可以更加了解redis的特色.\n在这里就直接把一问一答都贴出来了.\n名为Sagiv Ofek的用户需要在Memcached和Redis中做出抉择,他希望了解的是:\n哪一个拥有更好的性能?Memcached和Redis彼此都有哪些优点,哪些缺点?比较的范围可以包括:\n 读写的速率 内存的使用 持久化 可拓展性  最高赞Carl Zulauf的回答(最后更新于2017年)很全面了:\n与memcached相比，Redis功能更强大，更受欢迎并且得到更好的支持. Memcached只能做Redis可以做的一小部分。即使在两者功能重叠的部分，Redis也表现得更好. 对于任何新内容，请使用Redis。  读/写速度：两者都非常快。虽然基准测试因工作负载，版本和许多其他因素而异，但通常显示redis与memcached一样快或几乎一样快。我建议使用redis，但不是因为memcached速度慢。不是。 内存使用 : Redis更好。  memcached：缓存大小由你决定，并且在插入数据时，守护程序会迅速增长到略大于该大小。除了重新启动memcached之外，从来没有真正的方法可以回收任何空间。您所有的密钥都可能过期，您可以刷新数据库，并且该数据库仍将使用您为其配置的全部RAM。 redis：设置最大大小由您决定。Redis将永远不会使用过多的内存，并会适时回收不再使用的内存。 我将100,000个〜2KB字符串（〜200MB）的随机句子存储到了两者中。Memcached RAM使用量增加到约225MB。Redis RAM使用量增加到〜228MB。刷新两次后，redis降至〜29MB，memcached保持在〜225MB。它们在存储数据方面同样有效，但是只有一个能够回收数据。   持久化：Redis显然是赢家，因为它默认情况下会这样做(自动持久化)，并且具有很多配置项可选。而如果不借助第3方工具，Memcached没有任何机制可以转储到磁盘。 可扩展性：在需要多个实例作为缓存之前，两者都为您提供了大量的空间。Redis包含的工具可帮助您超越此范围，而memcached则不会。(我补充一下,这里应该指的是Redis Replication,Redis Sentinel和Redis Cluster)  最后,他的结论是:\n毫无疑问，对于任何新项目或尚未使用memcached的现有项目，我建议使用redis而非memcached。\n以上听起来像我不喜欢memcached。相反：它是一个功能强大，简单，稳定，成熟和强化的工具。甚至在某些用例中，它比redis快一点。我喜欢memcached,我只是认为这对未来的发展没有多大意义。\n在2020年的今天看来,二者不仅从理论上,而且从实践上也已经分出了高下.如今使用memcached的公司是少之又少了.\n如果你的新项目考虑缓存,请毫不犹豫使用Redis.\n应用场景 热点数据的缓存 由于redis访问速度快,支持的数据类型比较丰富，所以redis很适合用来存储热点数据,缓解DB的压力.\n另外结合expire.我们可以设置过期时间然后再进行缓存更新操作.\n限时业务 redis中可以使用expire命令设置一个键的生存时间,到时间后redis会删除它.利用这一特性可以运用在限时的优惠活动信息、手机验证码等业务场景。\n计数器 redis由于incrby命令可以实现原子性的递增，所以可以运用于高并发的秒杀活动,分布式序列号的生成.具体业务还体现在比如限制一个手机号发多少条短信、一个接口一分钟限制多少请求、一个接口一天限制调用多少次等等。\n排行榜相关问题 榜单也属于热点数据,借助zset(sorted set)可以很轻松在redis上实现排行榜.\n以用户的openid作为的username,以用户的点赞数作为的score, 然后针对每个用户做一个hash,通过zrangebyscore就可以按照点赞数获取排行榜，然后再根据username获取用户的hash信息.\n分布式锁 先用setnx来争抢锁,抢到以后用expire给锁加个过期时间,防止忘记释放锁而导致死锁.\n由于setnx和expire两条命令的操作并非原子性,如果setnx之后执行expire之前进程挂掉,则可能造成死锁.\nredis在2.6.12版本过后提供了解决方案:\n命令:\nSET key value [EX seconds] [PX milliseconds] [NX|XX]\n例子:\nSET key value ex 10 nx\n过期时间是10,单位是秒(px则是毫秒).这样上面我们就用一条set指令原子性地替代了上面两条指令.\n延时操作 这里同样借助zset来实现,但要注意,这里的’延时'不是指redis延迟发送数据(并不是mq),而是说客户端主动查询N秒前的数据.\n拿时间戳作为score,消息内容作为key调用zadd生产消息,消费者用zrangebyscore命令获取N秒前的数据来轮询处理.\n异步队列 看到有些文章提到有这个做法,个人觉得可以是可以(只要有双端list都能做),但是这个问题最好交给mq解决.\n社交关系 set的特点是去重,因此用来表示交并集十分适合.\n例如微博上的共同关注,共同好友,公众号上’xx位朋友也在看’等.\n基本数据类型 Redis有5个基本的数据类型:string,hash,list,set,zset(sorted set).\n当然,为了在内存上’精打细算',redis在它们之下还有ziplist,skiplist等数据结构,不过这部分内容会在另一篇文章中再详细研究.\n  String\n实用最广泛的数据类型,用途包括:\n 缓存 计数器,限速器 共享session服务器也是基于该数据类型  常用命令有:\n  set/get :set name时如果name重复,那么设置的值会进行覆盖\n  setnx : 如果这个name已经存在,不会进行覆盖而是直接返回0.可用于分布式锁,返回值1表示获取锁,返回值0表示获取失败,当发生死锁时可使用del命令将锁数据删除(需要检测是否超时).\n  setex : 设置该key在缓存中的过期时间,过了这个时间后返回nil\n  mset/mget : 批量设置与获取\n  incr/incrby/decr/decrby : 数值加减,用作计数器\n    Hash\n一个hash表下可包含多个field,常用于缓存结构化数据(如果用string的话需要序列化和反序列化等额外开销),例如数据库中的整张表(一个field对应表中的一个字段).\nhset user_1 id 1 name 张三 age 16 sex 1\nhset user_2 id 2 name 李四 age 16 sex 1\n这样如果需要修改用户的某个属性值,可以单个修改,例如:\nhset user_1 age 30\n  List\n特点是有序,用途主要包括:\n 消息队列: LPUSH+BRPOP(阻塞特征) 缓存: 用户记录等各种记录,最大特点是可支持分页 栈: LPUSH+LPOP 队列: LPUSH+RPOP    Set\n无序性,主要用于去重,交集可用于表示社交上的共同关注,共同爱好\n  Zset\n适合用于存储排行榜,例如消费排行,设置执行任务的权重\n  单线程模型 Redis是单线程的,为什么它会这么快? 另一个经典的问题了.\n这可以分解成两个问题:\n 为什么redis是单线程的?  其实redis并非真正意义上的单线程服务器,之所以大家都这么认为可能是由于官方文档里的一句话:\n“Redis is, mostly, a single-threaded server from the POV of commands execution (actually modern versions of Redis use threads for different things).\"\n“redis绝大部分的命令都是通过单线程执行,事实上现代版本的redis将多线程用于其他不同的事情上.”\nRedis基于Reactor模式开发了网络事件处理器，这个处理器被称为文件事件处理器。它的组成结构为4部分：\n  多个套接字\n  IO多路复用程序\n  文件事件分派器\n  事件处理器\n  因为文件事件分派器队列的消费是单线程的(主要就是读写内存中的数据)，所以Redis才叫单线程模型。\n至于redis为什么是单线程的,官方的FAQ(http://www.redis.cn/topics/faq.html)是 :\n因为CPU不是Redis的瓶颈。Redis的瓶颈最有可能是机器内存或者网络带宽.\n既然单线程容易实现，而且CPU不会成为瓶颈，那就顺理成章地采用单线程的方案了。\nRedis客户端对服务端的每次调用都经历了发送命令，执行命令，返回结果三个过程。\n其中执行命令阶段，由于Redis是单线程来处理命令的，所有每一条到达服务端的命令不会立刻执行，所有的命令都会进入一个队列中，然后逐个被执行。并且多个客户端发送的命令的执行顺序是不确定的。但是可以确定的是不会有两条命令被同时执行，不会产生并发问题，这就是Redis的单线程基本模型。\n如果CPU成为你的Redis瓶颈了，或者，你就是不想让服务器其他核闲置，那怎么办？ 这很简单，单机多起几个Redis进程就好了。Redis是key-value数据库，不是关系数据库，数据之间没有约束。只要客户端分清哪些key放在哪个Redis进程上就可以了。redis-cluster可以帮你做的更好。\n为什么redis这么快?  Redis有多快可以参考官方的基准测试 : https://redis.io/topics/benchmarks\n量级10W ~ 100W QPS.\n主要的原因如下:\n 基于内存,所以读写速度都很快. 基于单线程,避免了上下文切换和竞态产生的开销. 使用epoll实现了I/O多路复用,不会因等待客户端发送数据而造成阻塞.  ","wordCount":"3806","inLanguage":"zh","datePublished":"2020-06-25T19:44:19+08:00","dateModified":"2020-06-25T19:44:19+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/redis%E6%A6%82%E8%BF%B0/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
+</head>
+<body id=top>
+<script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
+<header class=header>
+<nav class=nav>
+<div class=logo>
+<a href=http://euthpic.github.io/ accesskey=h title="🏡 乱花渐欲迷人眼 (Alt + H)">🏡 乱花渐欲迷人眼</a>
+<span class=logo-switches>
+<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+</span>
+</div>
+<ul id=menu>
+<li>
+<a href=http://euthpic.github.io/categories/ title="📔 系列">
+<span>📔 系列</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/tags/ title="🏷️ 标签">
+<span>🏷️ 标签</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/search/ title="🔍 搜索 (Alt + /)" accesskey=/>
+<span>🔍 搜索</span>
+</a>
+</li>
+<li>
+<a href=https://travellings.link title=🚇>
+<span>🚇</span>
+</a>
+</li>
+</ul>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-header>
+<div class=breadcrumbs><a href=http://euthpic.github.io/>主页</a>&nbsp;»&nbsp;<a href=http://euthpic.github.io/tech/>Teches</a></div>
+<h1 class=post-title>
+Redis概述
+</h1>
+<div class=post-meta><span title="2020-06-25 19:44:19 +0800 CST">June 25, 2020</span>&nbsp;·&nbsp;8 分钟&nbsp;·&nbsp;Guangfa&nbsp;|&nbsp;<a href=https://github.com/euthpic/euthpic.github.io/edit/main/content/tech/Redis%e6%a6%82%e8%bf%b0.md rel="noopener noreferrer" target=_blank>PR</a>
+</div>
+</header> <div class=toc>
+<details open>
+<summary accesskey=c title="(Alt + C)">
+<span class=details>目录</span>
+</summary>
+<div class=inner><ul>
+<li>
+<a href=#%e6%80%9d%e7%bb%b4%e5%af%bc%e5%9b%be aria-label=思维导图>思维导图</a></li>
+<li>
+<a href=#memcached-vs-redis aria-label="Memcached vs. Redis?">Memcached vs. Redis?</a></li>
+<li>
+<a href=#%e5%ba%94%e7%94%a8%e5%9c%ba%e6%99%af aria-label=应用场景>应用场景</a><ul>
+<li>
+<a href=#%e7%83%ad%e7%82%b9%e6%95%b0%e6%8d%ae%e7%9a%84%e7%bc%93%e5%ad%98 aria-label=热点数据的缓存>热点数据的缓存</a></li>
+<li>
+<a href=#%e9%99%90%e6%97%b6%e4%b8%9a%e5%8a%a1 aria-label=限时业务>限时业务</a></li>
+<li>
+<a href=#%e8%ae%a1%e6%95%b0%e5%99%a8 aria-label=计数器>计数器</a></li>
+<li>
+<a href=#%e6%8e%92%e8%a1%8c%e6%a6%9c%e7%9b%b8%e5%85%b3%e9%97%ae%e9%a2%98 aria-label=排行榜相关问题>排行榜相关问题</a></li>
+<li>
+<a href=#%e5%88%86%e5%b8%83%e5%bc%8f%e9%94%81 aria-label=分布式锁>分布式锁</a></li>
+<li>
+<a href=#%e5%bb%b6%e6%97%b6%e6%93%8d%e4%bd%9c aria-label=延时操作>延时操作</a></li>
+<li>
+<a href=#%e5%bc%82%e6%ad%a5%e9%98%9f%e5%88%97 aria-label=异步队列>异步队列</a></li>
+<li>
+<a href=#%e7%a4%be%e4%ba%a4%e5%85%b3%e7%b3%bb aria-label=社交关系>社交关系</a></li></ul>
+</li>
+<li>
+<a href=#%e5%9f%ba%e6%9c%ac%e6%95%b0%e6%8d%ae%e7%b1%bb%e5%9e%8b aria-label=基本数据类型>基本数据类型</a></li>
+<li>
+<a href=#%e5%8d%95%e7%ba%bf%e7%a8%8b%e6%a8%a1%e5%9e%8b aria-label=单线程模型>单线程模型</a><ul>
+<li>
+<a href=#redis%e6%98%af%e5%8d%95%e7%ba%bf%e7%a8%8b%e7%9a%84%e4%b8%ba%e4%bb%80%e4%b9%88%e5%ae%83%e4%bc%9a%e8%bf%99%e4%b9%88%e5%bf%ab aria-label=Redis是单线程的,为什么它会这么快?>Redis是单线程的,为什么它会这么快?</a>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</details>
+</div>
+<div class=post-content><p>在分布式系统中,为了应对高并发的情况,有3种主要的手段 : <strong>缓存,异步,分流</strong></p>
+<p>今天,我们要讲的就是在缓存中被最广泛使用的中间件 : Redis.</p>
+<h2 id=思维导图>思维导图</h2>
+<p><img loading=lazy src=https://tvax1.sinaimg.cn/large/006P3Jr6gy1h3qjmjifo0j31fm4ga7pi.jpg alt=Redis>
+</p>
+<h2 id=memcached-vs-redis>Memcached vs. Redis?</h2>
+<p>为什么会有这个问题?</p>
+<p>在大名鼎鼎的stackoverflow上搜索&rsquo;redis',可以看到排名第一,最高赞的问答就是这个</p>
+<p><img loading=lazy src=https://tvax2.sinaimg.cn/large/006P3Jr6gy1h3qjt5gqarj313r0netu1.jpg alt="search redis">
+</p>
+<p>这已经是2012年的问题了,虽然时过境迁,但这几年我在很多文章中还会看到对这个问题的讨论.</p>
+<p>与Memcached的比较对于我们认识redis还是大有裨益的,可以更加了解redis的特色.</p>
+<p>在这里就直接把一问一答都贴出来了.</p>
+<p><img loading=lazy src=https://tva2.sinaimg.cn/large/006P3Jr6gy1h3qjtgqp0zj30lg0hojyz.jpg alt=question>
+</p>
+<p>名为Sagiv Ofek的用户需要在Memcached和Redis中做出抉择,他希望了解的是:</p>
+<p>哪一个拥有更好的性能?Memcached和Redis彼此都有哪些优点,哪些缺点?比较的范围可以包括:</p>
+<ul>
+<li>读写的速率</li>
+<li>内存的使用</li>
+<li>持久化</li>
+<li>可拓展性</li>
+</ul>
+<p><img loading=lazy src=https://tvax4.sinaimg.cn/large/006P3Jr6gy1h3qjsk4v24j30ku0ne192.jpg alt=answer>
+</p>
+<p>最高赞Carl Zulauf的回答(最后更新于2017年)很全面了:</p>
+<pre tabindex=0><code>与memcached相比，Redis功能更强大，更受欢迎并且得到更好的支持.
+
+Memcached只能做Redis可以做的一小部分。即使在两者功能重叠的部分，Redis也表现得更好.
+
+对于任何新内容，请使用Redis。
+</code></pre><ul>
+<li><strong>读/写速度</strong>：<strong>两者都非常快</strong>。虽然基准测试因工作负载，版本和许多其他因素而异，但通常显示redis与memcached一样快或几乎一样快。我<strong>建议使用redis，但不是因为memcached速度慢</strong>。不是。</li>
+<li><strong>内存使用</strong> : Redis更好。
+<ul>
+<li>memcached：缓存大小由你决定，并且在插入数据时，守护程序会迅速增长到略大于该大小。除了重新启动memcached之外，<strong>从来没有真正的方法可以回收任何空间</strong>。您所有的密钥都可能过期，您可以刷新数据库，并且该数据库仍将使用您为其配置的全部RAM。</li>
+<li>redis：设置最大大小由您决定。Redis将永远不会使用过多的内存，并<strong>会适时回收不再使用的内存</strong>。</li>
+<li>我将100,000个〜2KB字符串（〜200MB）的随机句子存储到了两者中。Memcached RAM使用量增加到约225MB。Redis RAM使用量增加到〜228MB。刷新两次后，redis降至〜29MB，memcached保持在〜225MB。它们在存储数据方面同样有效，但是<strong>只有一个能够回收数据</strong>。</li>
+</ul>
+</li>
+<li><strong>持久化</strong>：Redis显然是赢家，因为它默认情况下会这样做(自动持久化)，并且具有很多配置项可选。而如果不借助第3方工具，Memcached没有任何机制可以转储到磁盘。</li>
+<li><strong>可扩展性</strong>：在需要多个实例作为缓存之前，两者都为您提供了大量的空间。Redis包含的工具可帮助您超越此范围，而memcached则不会。(我补充一下,这里应该指的是Redis Replication,Redis Sentinel和Redis Cluster)</li>
+</ul>
+<p>最后,他的结论是:</p>
+<p><strong>毫无疑问，对于任何新项目或尚未使用memcached的现有项目，我建议使用redis而非memcached。</strong></p>
+<p><strong>以上听起来像我不喜欢memcached。相反：它是一个功能强大，简单，稳定，成熟和强化的工具。甚至在某些用例中，它比redis快一点。我喜欢memcached,我只是认为这对未来的发展没有多大意义。</strong></p>
+<p>在2020年的今天看来,二者不仅从理论上,而且从实践上也已经分出了高下.如今使用memcached的公司是少之又少了.</p>
+<p><em><strong>如果你的新项目考虑缓存,请毫不犹豫使用Redis.</strong></em></p>
+<h2 id=应用场景>应用场景</h2>
+<h3 id=热点数据的缓存>热点数据的缓存</h3>
+<p>由于redis访问速度快,支持的数据类型比较丰富，所以redis很适合用来存储热点数据,缓解DB的压力.</p>
+<p>另外结合expire.我们可以设置过期时间然后再进行缓存更新操作.</p>
+<h3 id=限时业务>限时业务</h3>
+<p>redis中可以使用<strong>expire命令</strong>设置一个键的生存时间,到时间后redis会删除它.利用这一特性可以运用在限时的优惠活动信息、手机验证码等业务场景。</p>
+<h3 id=计数器>计数器</h3>
+<p>redis由于<strong>incrby命令</strong>可以实现原子性的递增，所以可以运用于高并发的秒杀活动,分布式序列号的生成.具体业务还体现在比如限制一个手机号发多少条短信、一个接口一分钟限制多少请求、一个接口一天限制调用多少次等等。</p>
+<h3 id=排行榜相关问题>排行榜相关问题</h3>
+<p>榜单也属于热点数据,借助<strong>zset</strong>(sorted set)可以很轻松在redis上实现排行榜.</p>
+<p>以用户的openid作为的username,以用户的点赞数作为的score, 然后针对每个用户做一个hash,通过<strong>zrangebyscore</strong>就可以按照点赞数获取排行榜，然后再根据username获取用户的hash信息.</p>
+<h3 id=分布式锁>分布式锁</h3>
+<p>先用<strong>setnx</strong>来争抢锁,抢到以后用<strong>expire</strong>给锁加个过期时间,防止忘记释放锁而导致死锁.</p>
+<p>由于setnx和expire两条命令的操作<strong>并非原子性</strong>,如果setnx之后执行expire之前进程挂掉,则<strong>可能造成死锁</strong>.</p>
+<p>redis在2.6.12版本过后提供了解决方案:</p>
+<p>命令:</p>
+<p>SET key value [EX seconds] [PX milliseconds] [NX|XX]</p>
+<p>例子:</p>
+<p>SET key value ex 10 nx</p>
+<p>过期时间是10,单位是秒(px则是毫秒).这样上面我们就用一条set指令原子性地替代了上面两条指令.</p>
+<h3 id=延时操作>延时操作</h3>
+<p>这里同样借助<strong>zset</strong>来实现,但要注意,这里的&rsquo;延时'<strong>不是指redis延迟发送数据</strong>(并不是mq),而是说<strong>客户端主动查询N秒前的数据</strong>.</p>
+<p>拿时间戳作为score,消息内容作为key调用zadd生产消息,消费者用zrangebyscore命令获取N秒前的数据来轮询处理.</p>
+<h3 id=异步队列>异步队列</h3>
+<p>看到有些文章提到有这个做法,个人觉得可以是可以(只要有双端list都能做),但是这个问题最好交给mq解决.</p>
+<h3 id=社交关系>社交关系</h3>
+<p>set的特点是去重,因此用来表示交并集十分适合.</p>
+<p>例如微博上的共同关注,共同好友,公众号上&rsquo;xx位朋友也在看&rsquo;等.</p>
+<h2 id=基本数据类型>基本数据类型</h2>
+<p>Redis有5个基本的数据类型:<strong>string,hash,list,set,zset(sorted set)</strong>.</p>
+<p>当然,为了在内存上&rsquo;精打细算',redis在它们之下还有ziplist,skiplist等数据结构,不过这部分内容会在另一篇文章中再详细研究.</p>
+<ul>
+<li>
+<p><strong>String</strong></p>
+<p>实用最广泛的数据类型,用途包括:</p>
+<ul>
+<li>缓存</li>
+<li>计数器,限速器</li>
+<li>共享session服务器也是基于该数据类型</li>
+</ul>
+<p>常用命令有:</p>
+<ul>
+<li>
+<p>set/get :set name时如果name重复,那么设置的值会进行覆盖</p>
+</li>
+<li>
+<p>setnx : 如果这个name已经存在,不会进行覆盖而是直接返回0.可用于分布式锁,返回值1表示获取锁,返回值0表示获取失败,当发生死锁时可使用del命令将锁数据删除(需要检测是否超时).</p>
+</li>
+<li>
+<p>setex : 设置该key在缓存中的过期时间,过了这个时间后返回nil</p>
+</li>
+<li>
+<p>mset/mget : 批量设置与获取</p>
+</li>
+<li>
+<p>incr/incrby/decr/decrby : 数值加减,用作计数器</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Hash</strong></p>
+<p>一个hash表下可包含多个field,常用于缓存结构化数据(如果用string的话需要序列化和反序列化等额外开销),例如数据库中的整张表(一个field对应表中的一个字段).</p>
+<p>hset user_1 id 1 name 张三 age 16 sex 1</p>
+<p>hset user_2 id 2 name 李四 age 16 sex 1</p>
+<p>这样如果需要修改用户的某个属性值,可以单个修改,例如:</p>
+<p>hset user_1 age 30</p>
+</li>
+<li>
+<p><strong>List</strong></p>
+<p>特点是有序,用途主要包括:</p>
+<ul>
+<li>消息队列: LPUSH+BRPOP(阻塞特征)</li>
+<li>缓存: 用户记录等各种记录,最大特点是可支持分页</li>
+<li>栈: LPUSH+LPOP</li>
+<li>队列: LPUSH+RPOP</li>
+</ul>
+</li>
+<li>
+<p><strong>Set</strong></p>
+<p>无序性,主要用于去重,交集可用于表示社交上的共同关注,共同爱好</p>
+</li>
+<li>
+<p><strong>Zset</strong></p>
+<p>适合用于存储排行榜,例如消费排行,设置执行任务的权重</p>
+</li>
+</ul>
+<h2 id=单线程模型>单线程模型</h2>
+<h3 id=redis是单线程的为什么它会这么快>Redis是单线程的,为什么它会这么快?</h3>
+<p>另一个经典的问题了.</p>
+<p>这可以分解成两个问题:</p>
+<ol>
+<li><strong>为什么redis是单线程的?</strong></li>
+</ol>
+<p>其实redis<strong>并非真正意义上的单线程</strong>服务器,之所以大家都这么认为可能是由于官方文档里的一句话:</p>
+<p><em><strong>&ldquo;Redis is, mostly, a single-threaded server from the POV of commands execution (actually modern versions of Redis use threads for different things)."</strong></em></p>
+<p>&ldquo;redis绝大部分的命令都是通过单线程执行,事实上现代版本的redis将多线程用于其他不同的事情上.&rdquo;</p>
+<p>Redis基于Reactor模式开发了网络事件处理器，这个处理器被称为<strong>文件事件处理器</strong>。它的组成结构为4部分：</p>
+<ul>
+<li>
+<p>多个套接字</p>
+</li>
+<li>
+<p>IO多路复用程序</p>
+</li>
+<li>
+<p>文件事件分派器</p>
+</li>
+<li>
+<p>事件处理器</p>
+</li>
+</ul>
+<p>因为<strong>文件事件分派器队列的消费是单线程的</strong>(主要就是读写内存中的数据)，所以Redis才叫单线程模型。</p>
+<p>至于redis为什么是单线程的,官方的FAQ(<a href=http://www.redis.cn/topics/faq.html>http://www.redis.cn/topics/faq.html</a>)是 :</p>
+<p><strong>因为CPU不是Redis的瓶颈。Redis的瓶颈最有可能是机器内存或者网络带宽</strong>.</p>
+<p>既然单线程容易实现，而且CPU不会成为瓶颈，那就顺理成章地采用单线程的方案了。</p>
+<p>Redis客户端对服务端的每次调用都经历了<strong>发送命令</strong>，<strong>执行命令</strong>，<strong>返回结果</strong>三个过程。</p>
+<p>其中执行命令阶段，由于Redis是单线程来处理命令的，<strong>所有每一条到达服务端的命令不会立刻执行，所有的命令都会进入一个队列中，然后逐个被执行。并且多个客户端发送的命令的执行顺序是不确定的。但是可以确定的是不会有两条命令被同时执行，不会产生并发问题，这就是Redis的单线程基本模型。</strong></p>
+<p><strong>如果CPU成为你的Redis瓶颈了，或者，你就是不想让服务器其他核闲置，那怎么办？</strong>
+这很简单，单机多起几个Redis进程就好了。Redis是key-value数据库，不是关系数据库，数据之间没有约束。只要客户端分清哪些key放在哪个Redis进程上就可以了。redis-cluster可以帮你做的更好。</p>
+<ol start=2>
+<li><strong>为什么redis这么快?</strong></li>
+</ol>
+<p>Redis有多快可以参考官方的基准测试 : <a href=https://redis.io/topics/benchmarks>https://redis.io/topics/benchmarks</a></p>
+<p>量级10W ~ 100W QPS.</p>
+<p>主要的原因如下:</p>
+<ul>
+<li>基于内存,所以读写速度都很快.</li>
+<li>基于单线程,避免了<strong>上下文切换</strong>和<strong>竞态</strong>产生的开销.</li>
+<li>使用epoll实现了<strong>I/O多路复用</strong>,不会因等待客户端发送数据而造成阻塞.</li>
+</ul>
+</div>
+<footer class=post-footer>
+<nav class=paginav>
+<a class=prev href=http://euthpic.github.io/tech/redis%E6%8C%81%E4%B9%85%E5%8C%96%E5%8E%9F%E7%90%86/>
+<span class=title>« 上一页</span>
+<br>
+<span>Redis持久化原理</span>
+</a>
+<a class=next href=http://euthpic.github.io/tech/%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96/>
+<span class=title>下一页 »</span>
+<br>
+<span>索引优化技巧</span>
+</a>
+</nav>
+<div class=share-buttons>
+<a target=_blank rel="noopener noreferrer" aria-label="share Redis概述 on twitter" href="https://twitter.com/intent/tweet/?text=Redis%e6%a6%82%e8%bf%b0&url=http%3a%2f%2feuthpic.github.io%2ftech%2fredis%25E6%25A6%2582%25E8%25BF%25B0%2f&hashtags="><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Redis概述 on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2feuthpic.github.io%2ftech%2fredis%25E6%25A6%2582%25E8%25BF%25B0%2f&title=Redis%e6%a6%82%e8%bf%b0&summary=Redis%e6%a6%82%e8%bf%b0&source=http%3a%2f%2feuthpic.github.io%2ftech%2fredis%25E6%25A6%2582%25E8%25BF%25B0%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Redis概述 on reddit" href="https://reddit.com/submit?url=http%3a%2f%2feuthpic.github.io%2ftech%2fredis%25E6%25A6%2582%25E8%25BF%25B0%2f&title=Redis%e6%a6%82%e8%bf%b0"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Redis概述 on facebook" href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2feuthpic.github.io%2ftech%2fredis%25E6%25A6%2582%25E8%25BF%25B0%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Redis概述 on whatsapp" href="https://api.whatsapp.com/send?text=Redis%e6%a6%82%e8%bf%b0%20-%20http%3a%2f%2feuthpic.github.io%2ftech%2fredis%25E6%25A6%2582%25E8%25BF%25B0%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Redis概述 on telegram" href="https://telegram.me/share/url?text=Redis%e6%a6%82%e8%bf%b0&url=http%3a%2f%2feuthpic.github.io%2ftech%2fredis%25E6%25A6%2582%25E8%25BF%25B0%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg>
+</a>
+</div>
+</footer>
+</article>
+</main>
+<footer class=footer>
+<span>&copy; 2022 <a href=http://euthpic.github.io/>乱花渐欲迷人眼</a></span>
+<span>
+Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a>
+</span>
+</footer>
+<a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a>
+<script>let menu=document.getElementById('menu');menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
+<script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script>
+<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
+</body>
+</html>

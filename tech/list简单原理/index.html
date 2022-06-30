@@ -1,0 +1,721 @@
+<!doctype html><html lang=zh dir=auto>
+<head><meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=robots content="index, follow">
+<title>List简单原理 | 乱花渐欲迷人眼</title>
+<meta name=keywords content>
+<meta name=description content="上一篇文章我们介绍了Hashmap,今天来看一看List接口下最主要的两个类 : ArrayList和LinkedList 思维导图 ArrayList 链表与数组 从">
+<meta name=author content="Guangfa">
+<link rel=canonical href=http://euthpic.github.io/tech/list%E7%AE%80%E5%8D%95%E5%8E%9F%E7%90%86/>
+<meta name=yandex-verification content="73b1a797f62c0e98">
+<link crossorigin=anonymous href=/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css integrity="sha256-yIlj/i15RiAA/Q+xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as=style>
+<script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=http://euthpic.github.io/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=http://euthpic.github.io/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=http://euthpic.github.io/favicon-32x32.png>
+<link rel=apple-touch-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<link rel=mask-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<meta name=theme-color content="#2e2e33">
+<meta name=msapplication-TileColor content="#2e2e33">
+<meta name=generator content="Hugo 0.89.4">
+<noscript>
+<style>#theme-toggle,.top-link{display:none}</style>
+<style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style>
+</noscript>
+<script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(a,e,f,g,b,c,d){a.GoogleAnalyticsObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=1,c.src=g,d.parentNode.insertBefore(c,d)}(window,document,'script','https://www.google-analytics.com/analytics.js','ga'),ga('create','UA-136094326-1','auto'),ga('send','pageview'))</script><meta property="og:title" content="List简单原理">
+<meta property="og:description" content="上一篇文章我们介绍了Hashmap,今天来看一看List接口下最主要的两个类 : ArrayList和LinkedList 思维导图 ArrayList 链表与数组 从">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://euthpic.github.io/tech/list%E7%AE%80%E5%8D%95%E5%8E%9F%E7%90%86/"><meta property="og:image" content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="article:section" content="tech">
+<meta property="article:published_time" content="2020-05-06T14:27:19+08:00">
+<meta property="article:modified_time" content="2020-05-06T14:27:19+08:00"><meta property="og:site_name" content="乱花渐欲迷人眼">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:image content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name=twitter:title content="List简单原理">
+<meta name=twitter:description content="上一篇文章我们介绍了Hashmap,今天来看一看List接口下最主要的两个类 : ArrayList和LinkedList 思维导图 ArrayList 链表与数组 从">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Teches","item":"http://euthpic.github.io/tech/"},{"@type":"ListItem","position":2,"name":"List简单原理","item":"http://euthpic.github.io/tech/list%E7%AE%80%E5%8D%95%E5%8E%9F%E7%90%86/"}]}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"List简单原理","name":"List简单原理","description":"上一篇文章我们介绍了Hashmap,今天来看一看List接口下最主要的两个类 : ArrayList和LinkedList 思维导图 ArrayList 链表与数组 从","keywords":[],"articleBody":"上一篇文章我们介绍了Hashmap,今天来看一看List接口下最主要的两个类 : ArrayList和LinkedList\n思维导图 ArrayList 链表与数组 从名字就可以看出来,ArrayList使用的是数组,LinkedList使用的是链表.\n 数组在内存中是地址连续的,而链表是离散的,每个节点都需要记录其后继节点(双向链表同时需要记录前节点) 数组只要知道了其中一个节点的地址,就能通过计算相对地址来访问其他节点,因此数组可以实现任意访问(ramdaomly access),适合读操作比较多的场景. 访问链表中的任意节点都需要从头节点开始遍历,逐一获取其后续节点,因此链表的写操作比较慢.但是也由于地址不连续,在增删节点时不需要考虑位置,直接修改相关的next节点就行了,因此链表适合频繁增删的场景.  链表与数组各有优点和缺点,这也是我们系统设计的一个特点 : 没有完美的方案,有的只是根据业务场景做出取舍,要么空间换时间,要么牺牲效率来提高安全性.\n数据结构 就是一个名叫elementData的数组,默认的初始长度是10;\ntransient Object[] elementData; // non-private to simplify nested class access  /** * Default initial capacity. */ private static final int DEFAULT_CAPACITY = 10; 初始化 ArrayList有三个构造方法:\n无参时设置为空数组,直到第一次往list里面add数据才会初始化为长度为10的数组.这里的相关逻辑有几层调用链,后面扩容的时候再详细展开\npublic ArrayList() { this.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;//设置成空数组  } private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {}; 参数为集合时将其转化为数组:\npublic ArrayList(Collection extends E c) { elementData = c.toArray(); if ((size = elementData.length) != 0) { // defend against c.toArray (incorrectly) not returning Object[]  // (see e.g. https://bugs.openjdk.java.net/browse/JDK-6260652)  if (elementData.getClass() != Object[].class) elementData = Arrays.copyOf(elementData, size, Object[].class); } else { // replace with empty array.  this.elementData = EMPTY_ELEMENTDATA; } } 当参数为一个整型,也就是指定数组长度时,新建一个指定长度的数组\npublic ArrayList(int initialCapacity) { if (initialCapacity  0) { this.elementData = new Object[initialCapacity]; } else if (initialCapacity == 0) { this.elementData = EMPTY_ELEMENTDATA;//当传入的是0,处理方法和无参构造的一致  } else { throw new IllegalArgumentException(\"Illegal Capacity: \"+ initialCapacity); } } Add 由于list的get,set都太简单,这里就直接跳过来分析add了.和map一样,add也可能触发扩容.\nprivate void add(E e, Object[] elementData, int s) { if (s == elementData.length)//扩容条件,当数组满了的时候进行扩容  elementData = grow(); elementData[s] = e; size = s + 1; } public boolean add(E e) { modCount++; add(e, elementData, size); return true; } public void add(int index, E element) { rangeCheckForAdd(index); modCount++; final int s; Object[] elementData; if ((s = size) == (elementData = this.elementData).length)//也是满了就扩容  elementData = grow(); System.arraycopy(elementData, index, elementData, index + 1, s - index);//如果在数组中间插入元素,那么就得复制一个新的数组了  elementData[index] = element; size = s + 1; }  add之前会检查数组当前的容量,看看需不需要扩容. 由于list不像map那样复杂,一个位置只有一个元素,所以扩容条件只有一个: 数组已满 由于数组是连续的,如果是在指定位置插入,那么就需要复制一个新的数组来操作了.  也就是说,如果数组已满,且你又要再指定位置插入一个数据,那么数组将被复制两次.\n一个小坑 来看一段代码\nArrayListInteger list=new ArrayList(10); list.set(5,4); 这段代码可以正常运行吗?\n可能有人会说list的大小是10,那我10以内比如往5的位置set个值应该没问题吧.\n实际上会报一个数组越界的异常.\n不过这并不算真正的越界,我们的数组长度还是10.\npublic E set(int index, E element) { Objects.checkIndex(index, size);//边界选用的是size而不是length  E oldValue = elementData(index); elementData[index] = element; return oldValue; } @HotSpotIntrinsicCandidate public static X extends RuntimeException int checkIndex(int index, int length, BiFunctionString, ListInteger, X oobef) { if (index  0 || index = length) throw outOfBoundsCheckIndex(oobef, index, length); return index; } 由于list里面判断边界用的是size(实际节点个数),而不是length(数组长度),所以这种情况会报一个\"越界\".\n这种写法实际上是把list当成数组来用了.\n官方认为虽然elementData是list的实现细节,但是它对外界是隐藏的,只能操作逻辑上的list而不是实际存在的elementData.\n封装的一大意义,就是向用户屏蔽用户不需要的操作.否则,用户可能会有意无意地调用这些操作,这将成为软件工程中重要的bug来源.\n如果list里面还没有元素,那么你只能add,不能get,set.\n如果list的size是5,那么你就不能访问第五个元素之后的位置.\nlist的add还没走到后面的位置,你就不能提前去put或者set.\n扩容 在list里面,扩容的函数是grow().\nprivate Object[] grow(int minCapacity) { return elementData = Arrays.copyOf(elementData, newCapacity(minCapacity)); } private Object[] grow() { return grow(size + 1);//扩容后数组长度最少+1  } 这里调用了Arrays.copyOf(),这个方法的作用就是将旧数组的内容复制到新的数组,新数组多出来的部分置为null.\n里面是个native方法,源码就不贴了.\n这里还调用了newCapacity(),这个方法用于判断新数组的长度.\nprivate int newCapacity(int minCapacity) { // overflow-conscious code  int oldCapacity = elementData.length; int newCapacity = oldCapacity + (oldCapacity  1);//新数组长度为原来的1.5倍,向下取整  if (newCapacity - minCapacity  0) { if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA)//初始化,数组为空,则长度设为10  return Math.max(DEFAULT_CAPACITY, minCapacity); if (minCapacity  0) // overflow  throw new OutOfMemoryError(); return minCapacity; } return (newCapacity - MAX_ARRAY_SIZE  0) ? newCapacity : hugeCapacity(minCapacity); } 这里关键的两条表达式:\n newCapacity = oldCapacity + (oldCapacity » 1) if (newCapacity - minCapacity  什么情况下第二条表达式为true呢?\n 当oldCapacity=0,minCapacity=0+1=1,newCapacity=0+0=0,那么newCapacity - minCapacity=-1 数组为空的情况,也就是上面我们说的无参构造方法会走到这条逻辑,将数组初始化长度为10. 当0数组长度+1. 其余情况newCapacity - minCapacity0,此时新数组长度=newCapacity,也就是原来的1.5倍(向下取整)  看到这里,也许你会默默总结 :\n哦,原来扩容后,除了初始化外,数组的长度有两种情况,一种是+1,一种是+50%\n其实当原长度=2或3时,扩容后它们虽然也是长度+1,但是1也是2和3的50%(向下取整).\n所以看到没有,如果让我们来写这段逻辑,可能我们的思路是这样:\n  if 数组长度=0, then….\n  if 数组长度=1, then…\n  而JDK的大神们用一两条表达式就把各种情况清清楚楚地分隔开了.不禁膜拜……\n缩容 ArrayList没有自动缩容的机制,不过它提供了一个方法把list的容量最小化(刚好装得下所有元素)\npublic void trimToSize() { modCount++; if (size  elementData.length) { elementData = (size == 0) ? EMPTY_ELEMENTDATA : Arrays.copyOf(elementData, size);//同样是复制  } } Remove 和add一样,remove一样需要通过复制数组来进行.\n但有一点不一样,add不指定位置时,默认插入到末尾,此时不需要复制.\n而remove不指定位置时,默认从头开始找,然后删除找到的一个元素.那么删除的元素位置不确定,所以都当成删除中间的节点来处理,因此不论哪种情况都需要复制数组.\n也许有人会建议作者找到对应元素后判断一下是否末尾元素,如果是直接置null不就节省了一次复制的操作了?\n我以为,在实际情况中,要删除的节点恰好位于末尾是小概率事件,为了这小概率事件而每次都额外判断一次恐怕划不来.\n删除指定位置:\npublic E remove(int index) { Objects.checkIndex(index, size); final Object[] es = elementData; @SuppressWarnings(\"unchecked\") E oldValue = (E) es[index]; fastRemove(es, index); return oldValue; } 根据**equals()**删除指定元素\npublic boolean remove(Object o) { final Object[] es = elementData; final int size = this.size; int i = 0; found: { if (o == null) { for (; i  size; i++) if (es[i] == null)//null也可以删,都是删除找到的第一个  break found; } else { for (; i  size; i++) if (o.equals(es[i])) break found; } return false; } fastRemove(es, i); return true; } private void fastRemove(Object[] es, int i) { modCount++; final int newSize; if ((newSize = size - 1)  i) System.arraycopy(es, i + 1, es, i, newSize - i);//复制到新数组  es[size = newSize] = null;//最后一个位置设为null  } 简单概括下流程:\n 先遍历去查找元素,元素是null则找null,元素非null则调用equals()来比较. 删除找到的第一个元素,然后剩余元素复制到新的数组. 新数组的最后一个位置设为null  深克隆/浅克隆 这个在Hashmap那篇文章忘了讲,在这里补回来.\n先看下定义:\n浅克隆\n被复制对象的所有变量都含有与原来的对象相同的值，而所有的对其他对象的引用仍然指向原来的对象。换言之，浅复制仅仅复制所拷贝的对象，而不复制它所引用的对象。 深克隆\n被复制对象的所有变量都含有与原来的对象相同的值，除去那些引用其他对象的变量。那些引用其他对象的变量将指向被复制过的新对象，而不再是原有的那些被引用的对象。换言之，深复制把要复制的对象所引用的对象都复制了一遍。 其实它们的区别也就是值传递和引用传递的区别.\n浅克隆=引用传递 深克隆=值传递\n在我印象中,JDK好像没有几个类是实现深克隆的,所以如果不想复制后的新对象与旧对象相互干扰,在复制之前要重写clone()方法.\nArrayList的克隆方法\n/** * Returns a shallow copy of this {@code ArrayList} instance. (The * elements themselves are not copied.) * * @return a clone of this {@code ArrayList} instance */ public Object clone() { try { ArrayList v = (ArrayList) super.clone(); v.elementData = Arrays.copyOf(elementData, size); v.modCount = 0; return v; } catch (CloneNotSupportedException e) { // this shouldn't happen, since we are Cloneable  throw new InternalError(e); } } 注释写的很明白了,是浅复制(shallow copy).除了modCount置0之外,数组也是直接复制过去的.\n如果改成深克隆的话,应该要遍历数组,依次调用每个元素的clone方法而不是直接复制.(要注意套娃的情况)\nLinkedList 数据结构 LinkedList有一个内部类Node,这就是存取数据的结构了.\nprivate static class NodeE { E item; NodeE next; NodeE prev; Node(NodeE prev, E element, NodeE next) { this.item = element; this.next = next; this.prev = prev; } } 很典型的双向链表了.\n此外LinkedList内部也持有头尾双指针.\n由于链表不存在扩容的概念,因此size是链表的长度也是实际元素的个数.\ntransient int size = 0; /** * Pointer to first node. */ transient NodeE first; /** * Pointer to last node. */ transient NodeE last; 初始化 来看一下构造函数\npublic LinkedList() { } public LinkedList(Collection extends E c) { this(); addAll(c); } 空的.\n没错是空的,它不需要像ArrayList先构造出一个数组那样现去构造出first节点.\nfirst是null的就让它暂时null吧,等到add第一个元素再去构造.\nAdd public boolean add(E e) {//插入一个节点,默认插入链尾  linkLast(e); return true; } public void add(int index, E element) {//往特定位置插入  checkPositionIndex(index); if (index == size) linkLast(element); else linkBefore(element, node(index)); } public void addFirst(E e) {//往头部插入  linkFirst(e); } public void addLast(E e) {往尾部插入 linkLast(e); } 可以看到LinkedList支持往任意位置插入元素.\n根据linkFirst,linkBefore,linkLast,插入可分为3种情况:\n 插入头部 插入到某元素前面 插入尾部  private void linkFirst(E e) { final NodeE f = first; final NodeE newNode = new Node(null, e, f);//小细节,这里是新建一个node而不是直接赋值  first = newNode;//new节点变为first节点  if (f == null)//链表是空的,那么first节点和last节点都同时为new节点  last = newNode; else f.prev = newNode;//原first节点的前驱变为new节点  size++; modCount++; } void linkBefore(E e, NodeE succ) { // assert succ != null;  final NodeE pred = succ.prev;//记录该节点的前驱  final NodeE newNode = new Node(pred, e, succ); succ.prev = newNode;//该节点的前驱为new节点  if (pred == null)//该节点的前驱为null,也就是该节点为first节点  first = newNode; else pred.next = newNode;//前驱的next指向新节点  size++; modCount++; } void linkLast(E e) { final NodeE l = last; final NodeE newNode = new Node(l, e, null); last = newNode; if (l == null) first = newNode; else l.next = newNode; size++; modCount++; } 常规的链表操作了,唯一需要注意的是 : 插入的不是节点本身,而是它的复制.\n应该说,这里用到的只是这个节点的值,而不需要知道它前驱节点以及后继节点的信息.\n所以对链表任意操作并不会影响插入时参考过的那些节点.\nRemove public E remove() {//默认删除头节点  return removeFirst(); } public E removeFirst() { final NodeE f = first; if (f == null)//链表为空时抛出异常  throw new NoSuchElementException(); return unlinkFirst(f); } public E removeLast() {//删除尾节点  final NodeE l = last; if (l == null)//链表为空时抛出异常  throw new NoSuchElementException(); return unlinkLast(l); } public E remove(int index) {//删除指定位置的节点  checkElementIndex(index); return unlink(node(index));//node(index)作用是返回index位置的节点  } public boolean remove(Object o) {//删除找到的第一个指定的元素  if (o == null) { for (NodeE x = first; x != null; x = x.next) { if (x.item == null) { unlink(x); return true; } } } else { for (NodeE x = first; x != null; x = x.next) { if (o.equals(x.item)) { unlink(x); return true; } } } return false; } 删除也是支持指定任意位置,任意元素的.\n删除同样分为三种情况:\n 删除头节点 删除尾节点 删除中间节点  private E unlinkFirst(NodeE f) { // assert f == first \u0026\u0026 f != null;  final E element = f.item;//记录返回值  final NodeE next = f.next;//记录后驱  f.item = null;//释放节点的资源, help GC就很骚了....  f.next = null; // help GC  first = next;//first节点后移  if (next == null) last = null;//若链表只有一个first节点,那么删除后last也为null  else next.prev = null;//否则next的前驱置为null,这里也可以写成first.prev=null  size--; modCount++; return element; } private E unlinkLast(NodeE l) { // assert l == last \u0026\u0026 l != null;  final E element = l.item; final NodeE prev = l.prev; l.item = null; l.prev = null; // help GC  last = prev; if (prev == null) first = null; else prev.next = null; size--; modCount++; return element; } E unlink(NodeE x) { // assert x != null;  final E element = x.item; final NodeE next = x.next; final NodeE prev = x.prev; if (prev == null) { first = next; } else { prev.next = next; x.prev = null; } if (next == null) { last = prev; } else { next.prev = prev; x.next = null; } x.item = null; size--; modCount++; return element; } 链表的操作也很简单,就不写那么多注释了(为偷懒找个接口).\n“二分查找”? 链表的存取很简单,本来想直接跳过的,不过这次看源码又新发现了一个小的优化点,就顺便提一下.\n在上面remove操作时有个node(idnex),这个函数在get和set中也用到.\nNodeE node(int index) { // assert isElementIndex(index);  if (index  (size  1)) {//判断index位于链表的前半部分还是后半部分  NodeE x = first; for (int i = 0; i  index; i++) x = x.next; return x; } else { NodeE x = last; for (int i = size - 1; i  index; i--) x = x.prev; return x; } } 前面提到过,LinkedList是支持操作任意节点的.\n而我们又知道,链表的节点地址是离散的,那么访问中间的节点一定要从first节点开始遍历吗?\n由于是双向链表,JDK在访问Linkedlist前,会先用 if (index  1))判断一下要访问的节点位于前半部分还是后半部分.\n如果是前半部分,就从first节点向后遍历;\n如果是后半部分,就从last节点向前遍历.\n最好的情况下,这样的优化可以把时间从O(n)降低到O(1).\n这个问题并不难,只要意识到这个问题都能回答上来.\n问题只在于意识.\n写这一部分是为了提醒自己在一些小细节上不要忘了优化的意识.\n队列 \u0026 双向队列 \u0026 栈 LinkedList作为双向链表,可以同时作为队列/双向队列/栈来使用.\n作为队列时:\n peek : 返回头节点(并非删除) poll : 返回并删除头节点(出队) offer : 队尾新增节点(入队,等同于add)  作为双向队列时:\n push : 队首新增节点(入栈) pop : 返回并删除头节点(出栈)  还有很多api,像peekFirst,pollLast等等.不列举了.\napi不用背的,用到的时候忘了,点进源码看下注释,一下就记起来了.\nClone /** * Returns a shallow copy of this {@code LinkedList}. (The elements * themselves are not cloned.) * * @return a shallow copy of this {@code LinkedList} instance */ public Object clone() { LinkedListE clone = superClone(); // Put clone into \"virgin\" state  clone.first = clone.last = null; clone.size = 0; clone.modCount = 0; // Initialize clone with our elements  for (NodeE x = first; x != null; x = x.next) clone.add(x.item); return clone; } 和ArrayList一样,也是浅复制\n","wordCount":"5814","inLanguage":"zh","datePublished":"2020-05-06T14:27:19+08:00","dateModified":"2020-05-06T14:27:19+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/list%E7%AE%80%E5%8D%95%E5%8E%9F%E7%90%86/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
+</head>
+<body id=top>
+<script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
+<header class=header>
+<nav class=nav>
+<div class=logo>
+<a href=http://euthpic.github.io/ accesskey=h title="🏡 乱花渐欲迷人眼 (Alt + H)">🏡 乱花渐欲迷人眼</a>
+<span class=logo-switches>
+<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+</span>
+</div>
+<ul id=menu>
+<li>
+<a href=http://euthpic.github.io/categories/ title="📔 系列">
+<span>📔 系列</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/tags/ title="🏷️ 标签">
+<span>🏷️ 标签</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/search/ title="🔍 搜索 (Alt + /)" accesskey=/>
+<span>🔍 搜索</span>
+</a>
+</li>
+<li>
+<a href=https://travellings.link title=🚇>
+<span>🚇</span>
+</a>
+</li>
+</ul>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-header>
+<div class=breadcrumbs><a href=http://euthpic.github.io/>主页</a>&nbsp;»&nbsp;<a href=http://euthpic.github.io/tech/>Teches</a></div>
+<h1 class=post-title>
+List简单原理
+</h1>
+<div class=post-meta><span title="2020-05-06 14:27:19 +0800 CST">May 6, 2020</span>&nbsp;·&nbsp;12 分钟&nbsp;·&nbsp;Guangfa&nbsp;|&nbsp;<a href=https://github.com/euthpic/euthpic.github.io/edit/main/content/tech/List%e7%ae%80%e5%8d%95%e5%8e%9f%e7%90%86.md rel="noopener noreferrer" target=_blank>PR</a>
+</div>
+</header> <div class=toc>
+<details open>
+<summary accesskey=c title="(Alt + C)">
+<span class=details>目录</span>
+</summary>
+<div class=inner><ul>
+<li>
+<a href=#%e6%80%9d%e7%bb%b4%e5%af%bc%e5%9b%be aria-label=思维导图>思维导图</a></li>
+<li>
+<a href=#arraylist aria-label=ArrayList>ArrayList</a><ul>
+<li>
+<a href=#%e9%93%be%e8%a1%a8%e4%b8%8e%e6%95%b0%e7%bb%84 aria-label=链表与数组>链表与数组</a></li>
+<li>
+<a href=#%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84 aria-label=数据结构>数据结构</a></li>
+<li>
+<a href=#%e5%88%9d%e5%a7%8b%e5%8c%96 aria-label=初始化>初始化</a></li>
+<li>
+<a href=#add aria-label=Add>Add</a><ul>
+<li>
+<a href=#%e4%b8%80%e4%b8%aa%e5%b0%8f%e5%9d%91 aria-label=一个小坑>一个小坑</a></li></ul>
+</li>
+<li>
+<a href=#%e6%89%a9%e5%ae%b9 aria-label=扩容>扩容</a><ul>
+<li>
+<a href=#%e7%bc%a9%e5%ae%b9 aria-label=缩容>缩容</a></li></ul>
+</li>
+<li>
+<a href=#remove aria-label=Remove>Remove</a></li>
+<li>
+<a href=#%e6%b7%b1%e5%85%8b%e9%9a%86%e6%b5%85%e5%85%8b%e9%9a%86 aria-label=深克隆/浅克隆>深克隆/浅克隆</a></li></ul>
+</li>
+<li>
+<a href=#linkedlist aria-label=LinkedList>LinkedList</a><ul>
+<li>
+<a href=#%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84-1 aria-label=数据结构>数据结构</a></li>
+<li>
+<a href=#%e5%88%9d%e5%a7%8b%e5%8c%96-1 aria-label=初始化>初始化</a></li>
+<li>
+<a href=#add-1 aria-label=Add>Add</a></li>
+<li>
+<a href=#remove-1 aria-label=Remove>Remove</a></li>
+<li>
+<a href=#%e4%ba%8c%e5%88%86%e6%9f%a5%e6%89%be aria-label=&amp;ldquo;二分查找&amp;rdquo;?>&ldquo;二分查找&rdquo;?</a></li>
+<li>
+<a href=#%e9%98%9f%e5%88%97--%e5%8f%8c%e5%90%91%e9%98%9f%e5%88%97--%e6%a0%88 aria-label="队列 &amp;amp; 双向队列 &amp;amp; 栈">队列 & 双向队列 & 栈</a></li>
+<li>
+<a href=#clone aria-label=Clone>Clone</a>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</details>
+</div>
+<div class=post-content><p>上一篇文章我们介绍了Hashmap,今天来看一看List接口下最主要的两个类 : ArrayList和LinkedList</p>
+<h1 id=思维导图>思维导图</h1>
+<p><img loading=lazy src=https://tva1.sinaimg.cn/large/006P3Jr6gy1h3qka63d7hj31c41pg10y.jpg alt=List>
+</p>
+<h1 id=arraylist>ArrayList</h1>
+<h2 id=链表与数组>链表与数组</h2>
+<p>从名字就可以看出来,ArrayList使用的是数组,LinkedList使用的是链表.</p>
+<ul>
+<li>数组在内存中是<strong>地址连续</strong>的,而链表是<strong>离散</strong>的,每个节点都需要记录其后继节点(双向链表同时需要记录前节点)</li>
+<li>数组只要知道了其中一个节点的地址,就能通过计算<strong>相对地址</strong>来访问其他节点,因此数组可以实现任意访问(ramdaomly access),适合<strong>读操作比较多</strong>的场景.</li>
+<li>访问链表中的任意节点都需要从头节点开始遍历,逐一获取其后续节点,因此链表的写操作比较慢.但是也由于地址不连续,在增删节点时不需要考虑位置,直接修改相关的next节点就行了,因此链表适合<strong>频繁增删</strong>的场景.</li>
+</ul>
+<p>链表与数组各有优点和缺点,这也是我们系统设计的一个特点 : 没有完美的方案,有的只是根据业务场景做出取舍,要么空间换时间,要么牺牲效率来提高安全性.</p>
+<h2 id=数据结构>数据结构</h2>
+<p>就是一个名叫elementData的数组,默认的初始长度是10;</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java> <span style=color:#66d9ef>transient</span> Object<span style=color:#f92672>[]</span> elementData<span style=color:#f92672>;</span> <span style=color:#75715e>// non-private to simplify nested class access
+</span><span style=color:#75715e></span>
+ <span style=color:#75715e>/**
+</span><span style=color:#75715e>  * Default initial capacity.
+</span><span style=color:#75715e>  */</span>
+ <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>final</span> <span style=color:#66d9ef>int</span> DEFAULT_CAPACITY <span style=color:#f92672>=</span> 10<span style=color:#f92672>;</span>
+</code></pre></div><h2 id=初始化>初始化</h2>
+<p>ArrayList有三个构造方法:</p>
+<p><strong>无参</strong>时设置为空数组,<strong>直到第一次往list里面add数据才会初始化为长度为10的数组</strong>.这里的相关逻辑有几层调用链,后面扩容的时候再详细展开</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>public</span> <span style=color:#a6e22e>ArrayList</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>elementData</span> <span style=color:#f92672>=</span> DEFAULTCAPACITY_EMPTY_ELEMENTDATA<span style=color:#f92672>;</span><span style=color:#75715e>//设置成空数组
+</span><span style=color:#75715e></span>    <span style=color:#f92672>}</span>
+
+<span style=color:#66d9ef>private</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>final</span> Object<span style=color:#f92672>[]</span> DEFAULTCAPACITY_EMPTY_ELEMENTDATA <span style=color:#f92672>=</span> <span style=color:#f92672>{};</span>
+</code></pre></div><p><strong>参数为集合</strong>时将其<strong>转化为数组</strong>:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>public</span> <span style=color:#a6e22e>ArrayList</span><span style=color:#f92672>(</span>Collection<span style=color:#f92672>&lt;?</span> <span style=color:#66d9ef>extends</span> E<span style=color:#f92672>&gt;</span> c<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        elementData <span style=color:#f92672>=</span> c<span style=color:#f92672>.</span><span style=color:#a6e22e>toArray</span><span style=color:#f92672>();</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>((</span>size <span style=color:#f92672>=</span> elementData<span style=color:#f92672>.</span><span style=color:#a6e22e>length</span><span style=color:#f92672>)</span> <span style=color:#f92672>!=</span> 0<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            <span style=color:#75715e>// defend against c.toArray (incorrectly) not returning Object[]
+</span><span style=color:#75715e></span>            <span style=color:#75715e>// (see e.g. https://bugs.openjdk.java.net/browse/JDK-6260652)
+</span><span style=color:#75715e></span>            <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>elementData<span style=color:#f92672>.</span><span style=color:#a6e22e>getClass</span><span style=color:#f92672>()</span> <span style=color:#f92672>!=</span> Object<span style=color:#f92672>[].</span><span style=color:#a6e22e>class</span><span style=color:#f92672>)</span>
+                elementData <span style=color:#f92672>=</span> Arrays<span style=color:#f92672>.</span><span style=color:#a6e22e>copyOf</span><span style=color:#f92672>(</span>elementData<span style=color:#f92672>,</span> size<span style=color:#f92672>,</span> Object<span style=color:#f92672>[].</span><span style=color:#a6e22e>class</span><span style=color:#f92672>);</span>
+        <span style=color:#f92672>}</span> <span style=color:#66d9ef>else</span> <span style=color:#f92672>{</span>
+            <span style=color:#75715e>// replace with empty array.
+</span><span style=color:#75715e></span>            <span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>elementData</span> <span style=color:#f92672>=</span> EMPTY_ELEMENTDATA<span style=color:#f92672>;</span>
+        <span style=color:#f92672>}</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><p>当参数为一个整型,也就是<strong>指定数组长度</strong>时,新建一个指定长度的数组</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>public</span> <span style=color:#a6e22e>ArrayList</span><span style=color:#f92672>(</span><span style=color:#66d9ef>int</span> initialCapacity<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>initialCapacity <span style=color:#f92672>&gt;</span> 0<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            <span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>elementData</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Object<span style=color:#f92672>[</span>initialCapacity<span style=color:#f92672>];</span>
+        <span style=color:#f92672>}</span> <span style=color:#66d9ef>else</span> <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>initialCapacity <span style=color:#f92672>==</span> 0<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            <span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>elementData</span> <span style=color:#f92672>=</span> EMPTY_ELEMENTDATA<span style=color:#f92672>;</span><span style=color:#75715e>//当传入的是0,处理方法和无参构造的一致
+</span><span style=color:#75715e></span>        <span style=color:#f92672>}</span> <span style=color:#66d9ef>else</span> <span style=color:#f92672>{</span>
+            <span style=color:#66d9ef>throw</span> <span style=color:#66d9ef>new</span> IllegalArgumentException<span style=color:#f92672>(</span><span style=color:#e6db74>&#34;Illegal Capacity: &#34;</span><span style=color:#f92672>+</span>
+                                               initialCapacity<span style=color:#f92672>);</span>
+        <span style=color:#f92672>}</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><h2 id=add>Add</h2>
+<p>由于list的get,set都太简单,这里就直接跳过来分析add了.和map一样,add也可能触发扩容.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>add</span><span style=color:#f92672>(</span>E e<span style=color:#f92672>,</span> Object<span style=color:#f92672>[]</span> elementData<span style=color:#f92672>,</span> <span style=color:#66d9ef>int</span> s<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>s <span style=color:#f92672>==</span> elementData<span style=color:#f92672>.</span><span style=color:#a6e22e>length</span><span style=color:#f92672>)</span><span style=color:#75715e>//扩容条件,当数组满了的时候进行扩容
+</span><span style=color:#75715e></span>            elementData <span style=color:#f92672>=</span> grow<span style=color:#f92672>();</span>
+        elementData<span style=color:#f92672>[</span>s<span style=color:#f92672>]</span> <span style=color:#f92672>=</span> e<span style=color:#f92672>;</span>
+        size <span style=color:#f92672>=</span> s <span style=color:#f92672>+</span> 1<span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>boolean</span> <span style=color:#a6e22e>add</span><span style=color:#f92672>(</span>E e<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        modCount<span style=color:#f92672>++;</span>
+        add<span style=color:#f92672>(</span>e<span style=color:#f92672>,</span> elementData<span style=color:#f92672>,</span> size<span style=color:#f92672>);</span>
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span><span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>add</span><span style=color:#f92672>(</span><span style=color:#66d9ef>int</span> index<span style=color:#f92672>,</span> E element<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        rangeCheckForAdd<span style=color:#f92672>(</span>index<span style=color:#f92672>);</span>
+        modCount<span style=color:#f92672>++;</span>
+        <span style=color:#66d9ef>final</span> <span style=color:#66d9ef>int</span> s<span style=color:#f92672>;</span>
+        Object<span style=color:#f92672>[]</span> elementData<span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>((</span>s <span style=color:#f92672>=</span> size<span style=color:#f92672>)</span> <span style=color:#f92672>==</span> <span style=color:#f92672>(</span>elementData <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>elementData</span><span style=color:#f92672>).</span><span style=color:#a6e22e>length</span><span style=color:#f92672>)</span><span style=color:#75715e>//也是满了就扩容
+</span><span style=color:#75715e></span>            elementData <span style=color:#f92672>=</span> grow<span style=color:#f92672>();</span>
+        System<span style=color:#f92672>.</span><span style=color:#a6e22e>arraycopy</span><span style=color:#f92672>(</span>elementData<span style=color:#f92672>,</span> index<span style=color:#f92672>,</span>
+                         elementData<span style=color:#f92672>,</span> index <span style=color:#f92672>+</span> 1<span style=color:#f92672>,</span>
+                         s <span style=color:#f92672>-</span> index<span style=color:#f92672>);</span><span style=color:#75715e>//如果在数组中间插入元素,那么就得复制一个新的数组了
+</span><span style=color:#75715e></span>        elementData<span style=color:#f92672>[</span>index<span style=color:#f92672>]</span> <span style=color:#f92672>=</span> element<span style=color:#f92672>;</span>
+        size <span style=color:#f92672>=</span> s <span style=color:#f92672>+</span> 1<span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><ul>
+<li>add之前会<strong>检查数组当前的容量</strong>,看看需不需要扩容.</li>
+<li>由于list不像map那样复杂,一个位置只有一个元素,所以扩容条件只有一个: <strong>数组已满</strong></li>
+<li>由于数组是连续的,如果是<strong>在指定位置插入</strong>,那么就需要<strong>复制一个新的数组</strong>来操作了.</li>
+</ul>
+<p>也就是说,如果数组已满,且你又要再指定位置插入一个数据,那么数组将被<strong>复制两次</strong>.</p>
+<h3 id=一个小坑>一个小坑</h3>
+<p>来看一段代码</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>  ArrayList<span style=color:#f92672>&lt;</span>Integer<span style=color:#f92672>&gt;</span> list<span style=color:#f92672>=</span><span style=color:#66d9ef>new</span> ArrayList<span style=color:#f92672>&lt;&gt;(</span>10<span style=color:#f92672>);</span>
+  list<span style=color:#f92672>.</span><span style=color:#a6e22e>set</span><span style=color:#f92672>(</span>5<span style=color:#f92672>,</span>4<span style=color:#f92672>);</span>
+</code></pre></div><p>这段代码可以正常运行吗?</p>
+<p>可能有人会说list的大小是10,那我10以内比如往5的位置set个值应该没问题吧.</p>
+<p>实际上会报一个<strong>数组越界</strong>的异常.</p>
+<p>不过这并不算真正的越界,我们的数组长度还是10.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>public</span> E <span style=color:#a6e22e>set</span><span style=color:#f92672>(</span><span style=color:#66d9ef>int</span> index<span style=color:#f92672>,</span> E element<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        Objects<span style=color:#f92672>.</span><span style=color:#a6e22e>checkIndex</span><span style=color:#f92672>(</span>index<span style=color:#f92672>,</span> size<span style=color:#f92672>);</span><span style=color:#75715e>//边界选用的是size而不是length
+</span><span style=color:#75715e></span>        E oldValue <span style=color:#f92672>=</span> elementData<span style=color:#f92672>(</span>index<span style=color:#f92672>);</span>
+        elementData<span style=color:#f92672>[</span>index<span style=color:#f92672>]</span> <span style=color:#f92672>=</span> element<span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>return</span> oldValue<span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#a6e22e>@HotSpotIntrinsicCandidate</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> <span style=color:#f92672>&lt;</span>X <span style=color:#66d9ef>extends</span> RuntimeException<span style=color:#f92672>&gt;</span>
+    <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>checkIndex</span><span style=color:#f92672>(</span><span style=color:#66d9ef>int</span> index<span style=color:#f92672>,</span> <span style=color:#66d9ef>int</span> length<span style=color:#f92672>,</span>
+                   BiFunction<span style=color:#f92672>&lt;</span>String<span style=color:#f92672>,</span> List<span style=color:#f92672>&lt;</span>Integer<span style=color:#f92672>&gt;,</span> X<span style=color:#f92672>&gt;</span> oobef<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>index <span style=color:#f92672>&lt;</span> 0 <span style=color:#f92672>||</span> index <span style=color:#f92672>&gt;=</span> length<span style=color:#f92672>)</span>
+            <span style=color:#66d9ef>throw</span> outOfBoundsCheckIndex<span style=color:#f92672>(</span>oobef<span style=color:#f92672>,</span> index<span style=color:#f92672>,</span> length<span style=color:#f92672>);</span>
+        <span style=color:#66d9ef>return</span> index<span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><p>由于list里面判断边界用的是<strong>size</strong>(实际节点个数),而不是length(数组长度),所以这种情况会报一个"越界".</p>
+<p>这种写法实际上是把list当成数组来用了.</p>
+<p>官方认为虽然elementData是list的实现细节,但是它<strong>对外界是隐藏</strong>的,只能操作逻辑上的list而不是实际存在的elementData.</p>
+<p><strong>封装的一大意义,就是向用户屏蔽用户不需要的操作.否则,用户可能会有意无意地调用这些操作,这将成为软件工程中重要的bug来源.</strong></p>
+<p>如果list里面还没有元素,那么你只能add,不能get,set.</p>
+<p>如果list的size是5,那么你就不能访问第五个元素之后的位置.</p>
+<p>list的add还没走到后面的位置,你就不能提前去put或者set.</p>
+<h2 id=扩容>扩容</h2>
+<p>在list里面,扩容的函数是grow().</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>private</span> Object<span style=color:#f92672>[]</span> <span style=color:#a6e22e>grow</span><span style=color:#f92672>(</span><span style=color:#66d9ef>int</span> minCapacity<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>return</span> elementData <span style=color:#f92672>=</span> Arrays<span style=color:#f92672>.</span><span style=color:#a6e22e>copyOf</span><span style=color:#f92672>(</span>elementData<span style=color:#f92672>,</span>
+                                           newCapacity<span style=color:#f92672>(</span>minCapacity<span style=color:#f92672>));</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>private</span> Object<span style=color:#f92672>[]</span> <span style=color:#a6e22e>grow</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>return</span> grow<span style=color:#f92672>(</span>size <span style=color:#f92672>+</span> 1<span style=color:#f92672>);</span><span style=color:#75715e>//扩容后数组长度最少+1
+</span><span style=color:#75715e></span>    <span style=color:#f92672>}</span>
+</code></pre></div><p>这里调用了Arrays.copyOf(),这个方法的作用就是<strong>将旧数组的内容复制到新的数组,新数组多出来的部分置为null</strong>.</p>
+<p>里面是个native方法,源码就不贴了.</p>
+<p>这里还调用了newCapacity(),这个方法用于<strong>判断新数组的长度</strong>.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>int</span> <span style=color:#a6e22e>newCapacity</span><span style=color:#f92672>(</span><span style=color:#66d9ef>int</span> minCapacity<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#75715e>// overflow-conscious code
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>int</span> oldCapacity <span style=color:#f92672>=</span> elementData<span style=color:#f92672>.</span><span style=color:#a6e22e>length</span><span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>int</span> newCapacity <span style=color:#f92672>=</span> oldCapacity <span style=color:#f92672>+</span> <span style=color:#f92672>(</span>oldCapacity <span style=color:#f92672>&gt;&gt;</span> 1<span style=color:#f92672>);</span><span style=color:#75715e>//新数组长度为原来的1.5倍,向下取整
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>newCapacity <span style=color:#f92672>-</span> minCapacity <span style=color:#f92672>&lt;=</span> 0<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>elementData <span style=color:#f92672>==</span> DEFAULTCAPACITY_EMPTY_ELEMENTDATA<span style=color:#f92672>)</span><span style=color:#75715e>//初始化,数组为空,则长度设为10
+</span><span style=color:#75715e></span>                <span style=color:#66d9ef>return</span> Math<span style=color:#f92672>.</span><span style=color:#a6e22e>max</span><span style=color:#f92672>(</span>DEFAULT_CAPACITY<span style=color:#f92672>,</span> minCapacity<span style=color:#f92672>);</span>
+            <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>minCapacity <span style=color:#f92672>&lt;</span> 0<span style=color:#f92672>)</span> <span style=color:#75715e>// overflow
+</span><span style=color:#75715e></span>                <span style=color:#66d9ef>throw</span> <span style=color:#66d9ef>new</span> OutOfMemoryError<span style=color:#f92672>();</span>
+            <span style=color:#66d9ef>return</span> minCapacity<span style=color:#f92672>;</span>
+        <span style=color:#f92672>}</span>
+        <span style=color:#66d9ef>return</span> <span style=color:#f92672>(</span>newCapacity <span style=color:#f92672>-</span> MAX_ARRAY_SIZE <span style=color:#f92672>&lt;=</span> 0<span style=color:#f92672>)</span>
+            <span style=color:#f92672>?</span> newCapacity
+            <span style=color:#f92672>:</span> hugeCapacity<span style=color:#f92672>(</span>minCapacity<span style=color:#f92672>);</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><p>这里关键的两条表达式:</p>
+<ul>
+<li>newCapacity = oldCapacity + (oldCapacity &#187; 1)</li>
+<li>if (newCapacity - minCapacity &lt;= 0)</li>
+</ul>
+<p>什么情况下第二条表达式为true呢?</p>
+<ul>
+<li>当oldCapacity=0,minCapacity=0+1=1,newCapacity=0+0=0,那么newCapacity - minCapacity=-1 &lt; 0.这对应的是<strong>数组为空</strong>的情况,也就是上面我们说的无参构造方法会走到这条逻辑,<strong>将数组初始化长度为10</strong>.</li>
+<li>当0&lt;oldCapacity&lt;4时,newCapacity - minCapacity依然小于0,这种情况扩容后<strong>数组长度+1</strong>.</li>
+<li>其余情况newCapacity - minCapacity>0,此时新数组长度=newCapacity,也就是原来的<strong>1.5倍</strong>(向下取整)</li>
+</ul>
+<p>看到这里,也许你会默默总结 :</p>
+<p><strong>哦,原来扩容后,除了初始化外,数组的长度有两种情况,一种是+1,一种是+50%</strong></p>
+<p>其实当原长度=2或3时,扩容后它们虽然也是长度+1,但是1也是2和3的50%(向下取整).</p>
+<p>所以看到没有,如果让我们来写这段逻辑,可能我们的思路是这样:</p>
+<ul>
+<li>
+<p>if 数组长度=0, then&mldr;.</p>
+</li>
+<li>
+<p>if 数组长度=1, then&mldr;</p>
+</li>
+</ul>
+<p>而JDK的大神们用一两条表达式就把各种情况清清楚楚地分隔开了.不禁膜拜&mldr;&mldr;</p>
+<h3 id=缩容>缩容</h3>
+<p>ArrayList<strong>没有自动缩容</strong>的机制,不过它提供了一个方法把list的<strong>容量最小化</strong>(刚好装得下所有元素)</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>trimToSize</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        modCount<span style=color:#f92672>++;</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>size <span style=color:#f92672>&lt;</span> elementData<span style=color:#f92672>.</span><span style=color:#a6e22e>length</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            elementData <span style=color:#f92672>=</span> <span style=color:#f92672>(</span>size <span style=color:#f92672>==</span> 0<span style=color:#f92672>)</span>
+              <span style=color:#f92672>?</span> EMPTY_ELEMENTDATA
+              <span style=color:#f92672>:</span> Arrays<span style=color:#f92672>.</span><span style=color:#a6e22e>copyOf</span><span style=color:#f92672>(</span>elementData<span style=color:#f92672>,</span> size<span style=color:#f92672>);</span><span style=color:#75715e>//同样是复制
+</span><span style=color:#75715e></span>        <span style=color:#f92672>}</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><h2 id=remove>Remove</h2>
+<p><img loading=lazy src=https://tvax2.sinaimg.cn/large/006P3Jr6gy1h3qkbruuqoj30fe056wf4.jpg alt=remove>
+</p>
+<p>和add一样,remove一样需要通过复制数组来进行.</p>
+<p>但有一点不一样,add不指定位置时,默认插入到末尾,此时不需要复制.</p>
+<p>而remove不指定位置时,默认从头开始找,然后<strong>删除找到的一个元素</strong>.那么删除的元素位置不确定,所以都当成删除中间的节点来处理,因此<strong>不论哪种情况都需要复制数组.</strong></p>
+<p>也许有人会建议作者<strong>找到对应元素后判断一下是否末尾元素,如果是直接置null不就节省了一次复制的操作了</strong>?</p>
+<p>我以为,在实际情况中,要删除的<strong>节点恰好位于末尾是小概率事件</strong>,为了这小概率事件而每次都额外判断一次恐怕划不来.</p>
+<p>删除指定位置:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>public</span> E <span style=color:#a6e22e>remove</span><span style=color:#f92672>(</span><span style=color:#66d9ef>int</span> index<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        Objects<span style=color:#f92672>.</span><span style=color:#a6e22e>checkIndex</span><span style=color:#f92672>(</span>index<span style=color:#f92672>,</span> size<span style=color:#f92672>);</span>
+        <span style=color:#66d9ef>final</span> Object<span style=color:#f92672>[]</span> es <span style=color:#f92672>=</span> elementData<span style=color:#f92672>;</span>
+
+        <span style=color:#a6e22e>@SuppressWarnings</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;unchecked&#34;</span><span style=color:#f92672>)</span> E oldValue <span style=color:#f92672>=</span> <span style=color:#f92672>(</span>E<span style=color:#f92672>)</span> es<span style=color:#f92672>[</span>index<span style=color:#f92672>];</span>
+        fastRemove<span style=color:#f92672>(</span>es<span style=color:#f92672>,</span> index<span style=color:#f92672>);</span>
+
+        <span style=color:#66d9ef>return</span> oldValue<span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><p>根据**equals()**删除指定元素</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>boolean</span> <span style=color:#a6e22e>remove</span><span style=color:#f92672>(</span>Object o<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>final</span> Object<span style=color:#f92672>[]</span> es <span style=color:#f92672>=</span> elementData<span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>final</span> <span style=color:#66d9ef>int</span> size <span style=color:#f92672>=</span> <span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>size</span><span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> 0<span style=color:#f92672>;</span>
+        found<span style=color:#f92672>:</span> <span style=color:#f92672>{</span>
+            <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>o <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+                <span style=color:#66d9ef>for</span> <span style=color:#f92672>(;</span> i <span style=color:#f92672>&lt;</span> size<span style=color:#f92672>;</span> i<span style=color:#f92672>++)</span>
+                    <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>es<span style=color:#f92672>[</span>i<span style=color:#f92672>]</span> <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span><span style=color:#75715e>//null也可以删,都是删除找到的第一个
+</span><span style=color:#75715e></span>                        <span style=color:#66d9ef>break</span> found<span style=color:#f92672>;</span>
+            <span style=color:#f92672>}</span> <span style=color:#66d9ef>else</span> <span style=color:#f92672>{</span>
+                <span style=color:#66d9ef>for</span> <span style=color:#f92672>(;</span> i <span style=color:#f92672>&lt;</span> size<span style=color:#f92672>;</span> i<span style=color:#f92672>++)</span>
+                    <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>o<span style=color:#f92672>.</span><span style=color:#a6e22e>equals</span><span style=color:#f92672>(</span>es<span style=color:#f92672>[</span>i<span style=color:#f92672>]))</span>
+                        <span style=color:#66d9ef>break</span> found<span style=color:#f92672>;</span>
+            <span style=color:#f92672>}</span>
+            <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span><span style=color:#f92672>;</span>
+        <span style=color:#f92672>}</span>
+        fastRemove<span style=color:#f92672>(</span>es<span style=color:#f92672>,</span> i<span style=color:#f92672>);</span>
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span><span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>fastRemove</span><span style=color:#f92672>(</span>Object<span style=color:#f92672>[]</span> es<span style=color:#f92672>,</span> <span style=color:#66d9ef>int</span> i<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        modCount<span style=color:#f92672>++;</span>
+        <span style=color:#66d9ef>final</span> <span style=color:#66d9ef>int</span> newSize<span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>((</span>newSize <span style=color:#f92672>=</span> size <span style=color:#f92672>-</span> 1<span style=color:#f92672>)</span> <span style=color:#f92672>&gt;</span> i<span style=color:#f92672>)</span>
+            System<span style=color:#f92672>.</span><span style=color:#a6e22e>arraycopy</span><span style=color:#f92672>(</span>es<span style=color:#f92672>,</span> i <span style=color:#f92672>+</span> 1<span style=color:#f92672>,</span> es<span style=color:#f92672>,</span> i<span style=color:#f92672>,</span> newSize <span style=color:#f92672>-</span> i<span style=color:#f92672>);</span><span style=color:#75715e>//复制到新数组
+</span><span style=color:#75715e></span>        es<span style=color:#f92672>[</span>size <span style=color:#f92672>=</span> newSize<span style=color:#f92672>]</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span><span style=color:#75715e>//最后一个位置设为null
+</span><span style=color:#75715e></span>    <span style=color:#f92672>}</span>
+</code></pre></div><p>简单概括下流程:</p>
+<ul>
+<li>先遍历去查找元素,元素是null则找null,元素非null则调用equals()来比较.</li>
+<li>删除找到的第一个元素,然后剩余元素复制到新的数组.</li>
+<li>新数组的最后一个位置设为null</li>
+</ul>
+<h2 id=深克隆浅克隆>深克隆/浅克隆</h2>
+<p>这个在Hashmap那篇文章忘了讲,在这里补回来.</p>
+<p>先看下定义:</p>
+<p><strong>浅克隆</strong></p>
+<pre tabindex=0><code>被复制对象的所有变量都含有与原来的对象相同的值，而所有的对其他对象的引用仍然指向原来的对象。换言之，浅复制仅仅复制所拷贝的对象，而不复制它所引用的对象。
+</code></pre><p><strong>深克隆</strong></p>
+<pre tabindex=0><code>被复制对象的所有变量都含有与原来的对象相同的值，除去那些引用其他对象的变量。那些引用其他对象的变量将指向被复制过的新对象，而不再是原有的那些被引用的对象。换言之，深复制把要复制的对象所引用的对象都复制了一遍。
+</code></pre><p>其实它们的区别也就是<strong>值传递和引用传递</strong>的区别.</p>
+<p>浅克隆=引用传递 深克隆=值传递</p>
+<p>在我印象中,JDK好像没有几个类是实现深克隆的,所以如果不想复制后的新对象与旧对象相互干扰,在复制之前要重写clone()方法.</p>
+<p><strong>ArrayList的克隆方法</strong></p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#75715e>/**
+</span><span style=color:#75715e>     * Returns a shallow copy of this {@code ArrayList} instance.  (The
+</span><span style=color:#75715e>     * elements themselves are not copied.)
+</span><span style=color:#75715e>     *
+</span><span style=color:#75715e>     * @return a clone of this {@code ArrayList} instance
+</span><span style=color:#75715e>     */</span>    
+	<span style=color:#66d9ef>public</span> Object <span style=color:#a6e22e>clone</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>try</span> <span style=color:#f92672>{</span>
+            ArrayList<span style=color:#f92672>&lt;?&gt;</span> v <span style=color:#f92672>=</span> <span style=color:#f92672>(</span>ArrayList<span style=color:#f92672>&lt;?&gt;)</span> <span style=color:#66d9ef>super</span><span style=color:#f92672>.</span><span style=color:#a6e22e>clone</span><span style=color:#f92672>();</span>
+            v<span style=color:#f92672>.</span><span style=color:#a6e22e>elementData</span> <span style=color:#f92672>=</span> Arrays<span style=color:#f92672>.</span><span style=color:#a6e22e>copyOf</span><span style=color:#f92672>(</span>elementData<span style=color:#f92672>,</span> size<span style=color:#f92672>);</span>
+            v<span style=color:#f92672>.</span><span style=color:#a6e22e>modCount</span> <span style=color:#f92672>=</span> 0<span style=color:#f92672>;</span>
+            <span style=color:#66d9ef>return</span> v<span style=color:#f92672>;</span>
+        <span style=color:#f92672>}</span> <span style=color:#66d9ef>catch</span> <span style=color:#f92672>(</span>CloneNotSupportedException e<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            <span style=color:#75715e>// this shouldn&#39;t happen, since we are Cloneable
+</span><span style=color:#75715e></span>            <span style=color:#66d9ef>throw</span> <span style=color:#66d9ef>new</span> InternalError<span style=color:#f92672>(</span>e<span style=color:#f92672>);</span>
+        <span style=color:#f92672>}</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><p>注释写的很明白了,是<strong>浅复制(shallow copy)</strong>.除了modCount置0之外,数组也是直接复制过去的.</p>
+<p>如果改成深克隆的话,应该要遍历数组,依次调用每个元素的clone方法而不是直接复制.(要注意套娃的情况)</p>
+<h1 id=linkedlist>LinkedList</h1>
+<h2 id=数据结构-1>数据结构</h2>
+<p>LinkedList有一个内部类Node,这就是存取数据的结构了.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>Node</span><span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> <span style=color:#f92672>{</span>
+        E item<span style=color:#f92672>;</span>
+        Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> next<span style=color:#f92672>;</span>
+        Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> prev<span style=color:#f92672>;</span>
+
+        Node<span style=color:#f92672>(</span>Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> prev<span style=color:#f92672>,</span> E element<span style=color:#f92672>,</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> next<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            <span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>item</span> <span style=color:#f92672>=</span> element<span style=color:#f92672>;</span>
+            <span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>next</span> <span style=color:#f92672>=</span> next<span style=color:#f92672>;</span>
+            <span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>prev</span> <span style=color:#f92672>=</span> prev<span style=color:#f92672>;</span>
+        <span style=color:#f92672>}</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><p>很典型的双向链表了.</p>
+<p>此外LinkedList内部也持有<strong>头尾双指针</strong>.</p>
+<p>由于链表不存在扩容的概念,因此size是链表的长度也是实际元素的个数.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>transient</span> <span style=color:#66d9ef>int</span> size <span style=color:#f92672>=</span> 0<span style=color:#f92672>;</span>
+
+    <span style=color:#75715e>/**
+</span><span style=color:#75715e>     * Pointer to first node.
+</span><span style=color:#75715e>     */</span>
+    <span style=color:#66d9ef>transient</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> first<span style=color:#f92672>;</span>
+
+    <span style=color:#75715e>/**
+</span><span style=color:#75715e>     * Pointer to last node.
+</span><span style=color:#75715e>     */</span>
+    <span style=color:#66d9ef>transient</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> last<span style=color:#f92672>;</span>
+</code></pre></div><h2 id=初始化-1>初始化</h2>
+<p>来看一下构造函数</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>public</span> <span style=color:#a6e22e>LinkedList</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#a6e22e>LinkedList</span><span style=color:#f92672>(</span>Collection<span style=color:#f92672>&lt;?</span> <span style=color:#66d9ef>extends</span> E<span style=color:#f92672>&gt;</span> c<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>this</span><span style=color:#f92672>();</span>
+        addAll<span style=color:#f92672>(</span>c<span style=color:#f92672>);</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><p>空的.</p>
+<p>没错是空的,它不需要像ArrayList先构造出一个数组那样现去构造出first节点.</p>
+<p>first是null的就让它暂时null吧,等到add第一个元素再去构造.</p>
+<h2 id=add-1>Add</h2>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>  <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>boolean</span> <span style=color:#a6e22e>add</span><span style=color:#f92672>(</span>E e<span style=color:#f92672>)</span> <span style=color:#f92672>{</span><span style=color:#75715e>//插入一个节点,默认插入链尾
+</span><span style=color:#75715e></span>        linkLast<span style=color:#f92672>(</span>e<span style=color:#f92672>);</span>
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span><span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>add</span><span style=color:#f92672>(</span><span style=color:#66d9ef>int</span> index<span style=color:#f92672>,</span> E element<span style=color:#f92672>)</span> <span style=color:#f92672>{</span><span style=color:#75715e>//往特定位置插入
+</span><span style=color:#75715e></span>        checkPositionIndex<span style=color:#f92672>(</span>index<span style=color:#f92672>);</span>
+
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>index <span style=color:#f92672>==</span> size<span style=color:#f92672>)</span>
+            linkLast<span style=color:#f92672>(</span>element<span style=color:#f92672>);</span>
+        <span style=color:#66d9ef>else</span>
+            linkBefore<span style=color:#f92672>(</span>element<span style=color:#f92672>,</span> node<span style=color:#f92672>(</span>index<span style=color:#f92672>));</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>addFirst</span><span style=color:#f92672>(</span>E e<span style=color:#f92672>)</span> <span style=color:#f92672>{</span><span style=color:#75715e>//往头部插入
+</span><span style=color:#75715e></span>        linkFirst<span style=color:#f92672>(</span>e<span style=color:#f92672>);</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>addLast</span><span style=color:#f92672>(</span>E e<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>往尾部插入
+        <span style=color:#a6e22e>linkLast</span><span style=color:#f92672>(</span>e<span style=color:#f92672>);</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><p>可以看到LinkedList支持<strong>往任意位置插入元素</strong>.</p>
+<p><img loading=lazy src=https://tva3.sinaimg.cn/large/006P3Jr6gy1h3qkcp0nxfj30sr09yq56.jpg alt="insert for LinkedList">
+</p>
+<p>根据linkFirst,linkBefore,linkLast,插入可分为3种情况:</p>
+<ul>
+<li>插入头部</li>
+<li>插入到某元素前面</li>
+<li>插入尾部</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>linkFirst</span><span style=color:#f92672>(</span>E e<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>final</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> f <span style=color:#f92672>=</span> first<span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>final</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> newNode <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Node<span style=color:#f92672>&lt;&gt;(</span><span style=color:#66d9ef>null</span><span style=color:#f92672>,</span> e<span style=color:#f92672>,</span> f<span style=color:#f92672>);</span><span style=color:#75715e>//小细节,这里是新建一个node而不是直接赋值
+</span><span style=color:#75715e></span>        first <span style=color:#f92672>=</span> newNode<span style=color:#f92672>;</span><span style=color:#75715e>//new节点变为first节点
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>f <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span><span style=color:#75715e>//链表是空的,那么first节点和last节点都同时为new节点
+</span><span style=color:#75715e></span>            last <span style=color:#f92672>=</span> newNode<span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>else</span>
+            f<span style=color:#f92672>.</span><span style=color:#a6e22e>prev</span> <span style=color:#f92672>=</span> newNode<span style=color:#f92672>;</span><span style=color:#75715e>//原first节点的前驱变为new节点
+</span><span style=color:#75715e></span>        size<span style=color:#f92672>++;</span>
+        modCount<span style=color:#f92672>++;</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>linkBefore</span><span style=color:#f92672>(</span>E e<span style=color:#f92672>,</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> succ<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#75715e>// assert succ != null;
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>final</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> pred <span style=color:#f92672>=</span> succ<span style=color:#f92672>.</span><span style=color:#a6e22e>prev</span><span style=color:#f92672>;</span><span style=color:#75715e>//记录该节点的前驱
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>final</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> newNode <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Node<span style=color:#f92672>&lt;&gt;(</span>pred<span style=color:#f92672>,</span> e<span style=color:#f92672>,</span> succ<span style=color:#f92672>);</span>
+        succ<span style=color:#f92672>.</span><span style=color:#a6e22e>prev</span> <span style=color:#f92672>=</span> newNode<span style=color:#f92672>;</span><span style=color:#75715e>//该节点的前驱为new节点
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>pred <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span><span style=color:#75715e>//该节点的前驱为null,也就是该节点为first节点
+</span><span style=color:#75715e></span>            first <span style=color:#f92672>=</span> newNode<span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>else</span>
+            pred<span style=color:#f92672>.</span><span style=color:#a6e22e>next</span> <span style=color:#f92672>=</span> newNode<span style=color:#f92672>;</span><span style=color:#75715e>//前驱的next指向新节点
+</span><span style=color:#75715e></span>        size<span style=color:#f92672>++;</span>
+        modCount<span style=color:#f92672>++;</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>linkLast</span><span style=color:#f92672>(</span>E e<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>final</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> l <span style=color:#f92672>=</span> last<span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>final</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> newNode <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Node<span style=color:#f92672>&lt;&gt;(</span>l<span style=color:#f92672>,</span> e<span style=color:#f92672>,</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>);</span>
+        last <span style=color:#f92672>=</span> newNode<span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>l <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span>
+            first <span style=color:#f92672>=</span> newNode<span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>else</span>
+            l<span style=color:#f92672>.</span><span style=color:#a6e22e>next</span> <span style=color:#f92672>=</span> newNode<span style=color:#f92672>;</span>
+        size<span style=color:#f92672>++;</span>
+        modCount<span style=color:#f92672>++;</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><p>常规的链表操作了,唯一需要注意的是 : <strong>插入的不是节点本身,而是它的复制</strong>.</p>
+<p>应该说,这里用到的只是这个<strong>节点的值</strong>,而不需要知道它前驱节点以及后继节点的信息.</p>
+<p>所以对链表任意操作并不会影响插入时参考过的那些节点.</p>
+<h2 id=remove-1>Remove</h2>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>public</span> E <span style=color:#a6e22e>remove</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span><span style=color:#75715e>//默认删除头节点
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>return</span> removeFirst<span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>public</span> E <span style=color:#a6e22e>removeFirst</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        <span style=color:#66d9ef>final</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> f <span style=color:#f92672>=</span> first<span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>f <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span><span style=color:#75715e>//链表为空时抛出异常
+</span><span style=color:#75715e></span>            <span style=color:#66d9ef>throw</span> <span style=color:#66d9ef>new</span> NoSuchElementException<span style=color:#f92672>();</span>
+        <span style=color:#66d9ef>return</span> unlinkFirst<span style=color:#f92672>(</span>f<span style=color:#f92672>);</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>public</span> E <span style=color:#a6e22e>removeLast</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span><span style=color:#75715e>//删除尾节点
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>final</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> l <span style=color:#f92672>=</span> last<span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>l <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span><span style=color:#75715e>//链表为空时抛出异常
+</span><span style=color:#75715e></span>            <span style=color:#66d9ef>throw</span> <span style=color:#66d9ef>new</span> NoSuchElementException<span style=color:#f92672>();</span>
+        <span style=color:#66d9ef>return</span> unlinkLast<span style=color:#f92672>(</span>l<span style=color:#f92672>);</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>public</span> E <span style=color:#a6e22e>remove</span><span style=color:#f92672>(</span><span style=color:#66d9ef>int</span> index<span style=color:#f92672>)</span> <span style=color:#f92672>{</span><span style=color:#75715e>//删除指定位置的节点
+</span><span style=color:#75715e></span>        checkElementIndex<span style=color:#f92672>(</span>index<span style=color:#f92672>);</span>
+        <span style=color:#66d9ef>return</span> unlink<span style=color:#f92672>(</span>node<span style=color:#f92672>(</span>index<span style=color:#f92672>));</span><span style=color:#75715e>//node(index)作用是返回index位置的节点
+</span><span style=color:#75715e></span>    <span style=color:#f92672>}</span>
+
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>boolean</span> <span style=color:#a6e22e>remove</span><span style=color:#f92672>(</span>Object o<span style=color:#f92672>)</span> <span style=color:#f92672>{</span><span style=color:#75715e>//删除找到的第一个指定的元素
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>o <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> x <span style=color:#f92672>=</span> first<span style=color:#f92672>;</span> x <span style=color:#f92672>!=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span> x <span style=color:#f92672>=</span> x<span style=color:#f92672>.</span><span style=color:#a6e22e>next</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+                <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>x<span style=color:#f92672>.</span><span style=color:#a6e22e>item</span> <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+                    unlink<span style=color:#f92672>(</span>x<span style=color:#f92672>);</span>
+                    <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span><span style=color:#f92672>;</span>
+                <span style=color:#f92672>}</span>
+            <span style=color:#f92672>}</span>
+        <span style=color:#f92672>}</span> <span style=color:#66d9ef>else</span> <span style=color:#f92672>{</span>
+            <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> x <span style=color:#f92672>=</span> first<span style=color:#f92672>;</span> x <span style=color:#f92672>!=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span> x <span style=color:#f92672>=</span> x<span style=color:#f92672>.</span><span style=color:#a6e22e>next</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+                <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>o<span style=color:#f92672>.</span><span style=color:#a6e22e>equals</span><span style=color:#f92672>(</span>x<span style=color:#f92672>.</span><span style=color:#a6e22e>item</span><span style=color:#f92672>))</span> <span style=color:#f92672>{</span>
+                    unlink<span style=color:#f92672>(</span>x<span style=color:#f92672>);</span>
+                    <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>true</span><span style=color:#f92672>;</span>
+                <span style=color:#f92672>}</span>
+            <span style=color:#f92672>}</span>
+        <span style=color:#f92672>}</span>
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>false</span><span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><p>删除也是支持指定任意位置,任意元素的.</p>
+<p><img loading=lazy src=https://tvax4.sinaimg.cn/large/006P3Jr6gy1h3qkc96mhgj30p008g0ua.jpg alt="remove for LinkedList">
+</p>
+<p>删除同样分为三种情况:</p>
+<ul>
+<li>删除头节点</li>
+<li>删除尾节点</li>
+<li>删除中间节点</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>private</span> E <span style=color:#a6e22e>unlinkFirst</span><span style=color:#f92672>(</span>Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> f<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#75715e>// assert f == first &amp;&amp; f != null;
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>final</span> E element <span style=color:#f92672>=</span> f<span style=color:#f92672>.</span><span style=color:#a6e22e>item</span><span style=color:#f92672>;</span><span style=color:#75715e>//记录返回值
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>final</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> next <span style=color:#f92672>=</span> f<span style=color:#f92672>.</span><span style=color:#a6e22e>next</span><span style=color:#f92672>;</span><span style=color:#75715e>//记录后驱
+</span><span style=color:#75715e></span>        f<span style=color:#f92672>.</span><span style=color:#a6e22e>item</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span><span style=color:#75715e>//释放节点的资源, help GC就很骚了....
+</span><span style=color:#75715e></span>        f<span style=color:#f92672>.</span><span style=color:#a6e22e>next</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span> <span style=color:#75715e>// help GC
+</span><span style=color:#75715e></span>        first <span style=color:#f92672>=</span> next<span style=color:#f92672>;</span><span style=color:#75715e>//first节点后移
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>next <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span>
+            last <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span><span style=color:#75715e>//若链表只有一个first节点,那么删除后last也为null
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>else</span>
+            next<span style=color:#f92672>.</span><span style=color:#a6e22e>prev</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span><span style=color:#75715e>//否则next的前驱置为null,这里也可以写成first.prev=null
+</span><span style=color:#75715e></span>        size<span style=color:#f92672>--;</span>
+        modCount<span style=color:#f92672>++;</span>
+        <span style=color:#66d9ef>return</span> element<span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#66d9ef>private</span> E <span style=color:#a6e22e>unlinkLast</span><span style=color:#f92672>(</span>Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> l<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#75715e>// assert l == last &amp;&amp; l != null;
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>final</span> E element <span style=color:#f92672>=</span> l<span style=color:#f92672>.</span><span style=color:#a6e22e>item</span><span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>final</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> prev <span style=color:#f92672>=</span> l<span style=color:#f92672>.</span><span style=color:#a6e22e>prev</span><span style=color:#f92672>;</span>
+        l<span style=color:#f92672>.</span><span style=color:#a6e22e>item</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span>
+        l<span style=color:#f92672>.</span><span style=color:#a6e22e>prev</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span> <span style=color:#75715e>// help GC
+</span><span style=color:#75715e></span>        last <span style=color:#f92672>=</span> prev<span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>prev <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span>
+            first <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>else</span>
+            prev<span style=color:#f92672>.</span><span style=color:#a6e22e>next</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span>
+        size<span style=color:#f92672>--;</span>
+        modCount<span style=color:#f92672>++;</span>
+        <span style=color:#66d9ef>return</span> element<span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    E <span style=color:#a6e22e>unlink</span><span style=color:#f92672>(</span>Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> x<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#75715e>// assert x != null;
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>final</span> E element <span style=color:#f92672>=</span> x<span style=color:#f92672>.</span><span style=color:#a6e22e>item</span><span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>final</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> next <span style=color:#f92672>=</span> x<span style=color:#f92672>.</span><span style=color:#a6e22e>next</span><span style=color:#f92672>;</span>
+        <span style=color:#66d9ef>final</span> Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> prev <span style=color:#f92672>=</span> x<span style=color:#f92672>.</span><span style=color:#a6e22e>prev</span><span style=color:#f92672>;</span>
+
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>prev <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            first <span style=color:#f92672>=</span> next<span style=color:#f92672>;</span>
+        <span style=color:#f92672>}</span> <span style=color:#66d9ef>else</span> <span style=color:#f92672>{</span>
+            prev<span style=color:#f92672>.</span><span style=color:#a6e22e>next</span> <span style=color:#f92672>=</span> next<span style=color:#f92672>;</span>
+            x<span style=color:#f92672>.</span><span style=color:#a6e22e>prev</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span>
+        <span style=color:#f92672>}</span>
+
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>next <span style=color:#f92672>==</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+            last <span style=color:#f92672>=</span> prev<span style=color:#f92672>;</span>
+        <span style=color:#f92672>}</span> <span style=color:#66d9ef>else</span> <span style=color:#f92672>{</span>
+            next<span style=color:#f92672>.</span><span style=color:#a6e22e>prev</span> <span style=color:#f92672>=</span> prev<span style=color:#f92672>;</span>
+            x<span style=color:#f92672>.</span><span style=color:#a6e22e>next</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span>
+        <span style=color:#f92672>}</span>
+
+        x<span style=color:#f92672>.</span><span style=color:#a6e22e>item</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span>
+        size<span style=color:#f92672>--;</span>
+        modCount<span style=color:#f92672>++;</span>
+        <span style=color:#66d9ef>return</span> element<span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><p>链表的操作也很简单,就不写那么多注释了(为偷懒找个接口).</p>
+<h2 id=二分查找>&ldquo;二分查找&rdquo;?</h2>
+<p>链表的存取很简单,本来想直接跳过的,不过这次看源码又新发现了一个小的优化点,就顺便提一下.</p>
+<p>在上面remove操作时有个node(idnex),这个函数在get和set中也用到.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> <span style=color:#a6e22e>node</span><span style=color:#f92672>(</span><span style=color:#66d9ef>int</span> index<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+        <span style=color:#75715e>// assert isElementIndex(index);
+</span><span style=color:#75715e></span>
+        <span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>index <span style=color:#f92672>&lt;</span> <span style=color:#f92672>(</span>size <span style=color:#f92672>&gt;&gt;</span> 1<span style=color:#f92672>))</span> <span style=color:#f92672>{</span><span style=color:#75715e>//判断index位于链表的前半部分还是后半部分
+</span><span style=color:#75715e></span>            Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> x <span style=color:#f92672>=</span> first<span style=color:#f92672>;</span>
+            <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span><span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> 0<span style=color:#f92672>;</span> i <span style=color:#f92672>&lt;</span> index<span style=color:#f92672>;</span> i<span style=color:#f92672>++)</span>
+                x <span style=color:#f92672>=</span> x<span style=color:#f92672>.</span><span style=color:#a6e22e>next</span><span style=color:#f92672>;</span>
+            <span style=color:#66d9ef>return</span> x<span style=color:#f92672>;</span>
+        <span style=color:#f92672>}</span> <span style=color:#66d9ef>else</span> <span style=color:#f92672>{</span>
+            Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> x <span style=color:#f92672>=</span> last<span style=color:#f92672>;</span>
+            <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span><span style=color:#66d9ef>int</span> i <span style=color:#f92672>=</span> size <span style=color:#f92672>-</span> 1<span style=color:#f92672>;</span> i <span style=color:#f92672>&gt;</span> index<span style=color:#f92672>;</span> i<span style=color:#f92672>--)</span>
+                x <span style=color:#f92672>=</span> x<span style=color:#f92672>.</span><span style=color:#a6e22e>prev</span><span style=color:#f92672>;</span>
+            <span style=color:#66d9ef>return</span> x<span style=color:#f92672>;</span>
+        <span style=color:#f92672>}</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><p>前面提到过,LinkedList是支持操作任意节点的.</p>
+<p>而我们又知道,链表的节点地址是离散的,那么<strong>访问中间的节点一定要从first节点开始遍历吗</strong>?</p>
+<p>由于是双向链表,JDK在访问Linkedlist前,会先用<code> if (index &lt; (size >> 1))</code>判断一下要访问的节点位于前半部分还是后半部分.</p>
+<p><strong>如果是前半部分,就从first节点向后遍历;</strong></p>
+<p><strong>如果是后半部分,就从last节点向前遍历.</strong></p>
+<p>最好的情况下,这样的优化可以把时间从O(n)降低到O(1).</p>
+<p>这个问题并不难,只要意识到这个问题都能回答上来.</p>
+<p>问题只在于<strong>意识</strong>.</p>
+<p>写这一部分是为了提醒自己<strong>在一些小细节上不要忘了优化的意识</strong>.</p>
+<h2 id=队列--双向队列--栈>队列 & 双向队列 & 栈</h2>
+<p>LinkedList作为双向链表,可以<strong>同时作为队列/双向队列/栈来使用</strong>.</p>
+<p>作为队列时:</p>
+<ul>
+<li>peek : 返回头节点(并非删除)</li>
+<li>poll : 返回并删除头节点(出队)</li>
+<li>offer : 队尾新增节点(入队,等同于add)</li>
+</ul>
+<p>作为双向队列时:</p>
+<ul>
+<li>push : 队首新增节点(入栈)</li>
+<li>pop : 返回并删除头节点(出栈)</li>
+</ul>
+<p>还有很多api,像peekFirst,pollLast等等.不列举了.</p>
+<p>api不用背的,用到的时候忘了,点进源码看下注释,一下就记起来了.</p>
+<h2 id=clone>Clone</h2>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>    <span style=color:#75715e>/**
+</span><span style=color:#75715e>     * Returns a shallow copy of this {@code LinkedList}. (The elements
+</span><span style=color:#75715e>     * themselves are not cloned.)
+</span><span style=color:#75715e>     *
+</span><span style=color:#75715e>     * @return a shallow copy of this {@code LinkedList} instance
+</span><span style=color:#75715e>     */</span>
+    <span style=color:#66d9ef>public</span> Object <span style=color:#a6e22e>clone</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+        LinkedList<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> clone <span style=color:#f92672>=</span> superClone<span style=color:#f92672>();</span>
+
+        <span style=color:#75715e>// Put clone into &#34;virgin&#34; state
+</span><span style=color:#75715e></span>        clone<span style=color:#f92672>.</span><span style=color:#a6e22e>first</span> <span style=color:#f92672>=</span> clone<span style=color:#f92672>.</span><span style=color:#a6e22e>last</span> <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span>
+        clone<span style=color:#f92672>.</span><span style=color:#a6e22e>size</span> <span style=color:#f92672>=</span> 0<span style=color:#f92672>;</span>
+        clone<span style=color:#f92672>.</span><span style=color:#a6e22e>modCount</span> <span style=color:#f92672>=</span> 0<span style=color:#f92672>;</span>
+
+        <span style=color:#75715e>// Initialize clone with our elements
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>for</span> <span style=color:#f92672>(</span>Node<span style=color:#f92672>&lt;</span>E<span style=color:#f92672>&gt;</span> x <span style=color:#f92672>=</span> first<span style=color:#f92672>;</span> x <span style=color:#f92672>!=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span> x <span style=color:#f92672>=</span> x<span style=color:#f92672>.</span><span style=color:#a6e22e>next</span><span style=color:#f92672>)</span>
+            clone<span style=color:#f92672>.</span><span style=color:#a6e22e>add</span><span style=color:#f92672>(</span>x<span style=color:#f92672>.</span><span style=color:#a6e22e>item</span><span style=color:#f92672>);</span>
+
+        <span style=color:#66d9ef>return</span> clone<span style=color:#f92672>;</span>
+    <span style=color:#f92672>}</span>
+</code></pre></div><p>和ArrayList一样,也是浅复制</p>
+</div>
+<footer class=post-footer>
+<nav class=paginav>
+<a class=prev href=http://euthpic.github.io/tech/hashmap%E7%AE%80%E5%8D%95%E5%8E%9F%E7%90%86/>
+<span class=title>« 上一页</span>
+<br>
+<span>Hashmap简单原理</span>
+</a>
+<a class=next href=http://euthpic.github.io/tech/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/>
+<span class=title>下一页 »</span>
+<br>
+<span>设计模式</span>
+</a>
+</nav>
+<div class=share-buttons>
+<a target=_blank rel="noopener noreferrer" aria-label="share List简单原理 on twitter" href="https://twitter.com/intent/tweet/?text=List%e7%ae%80%e5%8d%95%e5%8e%9f%e7%90%86&url=http%3a%2f%2feuthpic.github.io%2ftech%2flist%25E7%25AE%2580%25E5%258D%2595%25E5%258E%259F%25E7%2590%2586%2f&hashtags="><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share List简单原理 on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2feuthpic.github.io%2ftech%2flist%25E7%25AE%2580%25E5%258D%2595%25E5%258E%259F%25E7%2590%2586%2f&title=List%e7%ae%80%e5%8d%95%e5%8e%9f%e7%90%86&summary=List%e7%ae%80%e5%8d%95%e5%8e%9f%e7%90%86&source=http%3a%2f%2feuthpic.github.io%2ftech%2flist%25E7%25AE%2580%25E5%258D%2595%25E5%258E%259F%25E7%2590%2586%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share List简单原理 on reddit" href="https://reddit.com/submit?url=http%3a%2f%2feuthpic.github.io%2ftech%2flist%25E7%25AE%2580%25E5%258D%2595%25E5%258E%259F%25E7%2590%2586%2f&title=List%e7%ae%80%e5%8d%95%e5%8e%9f%e7%90%86"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share List简单原理 on facebook" href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2feuthpic.github.io%2ftech%2flist%25E7%25AE%2580%25E5%258D%2595%25E5%258E%259F%25E7%2590%2586%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share List简单原理 on whatsapp" href="https://api.whatsapp.com/send?text=List%e7%ae%80%e5%8d%95%e5%8e%9f%e7%90%86%20-%20http%3a%2f%2feuthpic.github.io%2ftech%2flist%25E7%25AE%2580%25E5%258D%2595%25E5%258E%259F%25E7%2590%2586%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share List简单原理 on telegram" href="https://telegram.me/share/url?text=List%e7%ae%80%e5%8d%95%e5%8e%9f%e7%90%86&url=http%3a%2f%2feuthpic.github.io%2ftech%2flist%25E7%25AE%2580%25E5%258D%2595%25E5%258E%259F%25E7%2590%2586%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg>
+</a>
+</div>
+</footer>
+</article>
+</main>
+<footer class=footer>
+<span>&copy; 2022 <a href=http://euthpic.github.io/>乱花渐欲迷人眼</a></span>
+<span>
+Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a>
+</span>
+</footer>
+<a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a>
+<script>let menu=document.getElementById('menu');menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
+<script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script>
+<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!doctype html><html lang=zh dir=auto>
+<head><meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=robots content="index, follow">
+<title>MySQL锁篇 | 乱花渐欲迷人眼</title>
+<meta name=keywords content>
+<meta name=description content="思维导图 前言 我们都知道,事务有ACID四大特性.前面讲Redis时提到过,Redis的隔离性是由单线程模型来实现的,每条命令都是串行化执行,">
+<meta name=author content="Guangfa">
+<link rel=canonical href=http://euthpic.github.io/tech/mysql%E9%94%81%E7%AF%87/>
+<meta name=yandex-verification content="73b1a797f62c0e98">
+<link crossorigin=anonymous href=/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css integrity="sha256-yIlj/i15RiAA/Q+xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as=style>
+<script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=http://euthpic.github.io/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=http://euthpic.github.io/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=http://euthpic.github.io/favicon-32x32.png>
+<link rel=apple-touch-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<link rel=mask-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<meta name=theme-color content="#2e2e33">
+<meta name=msapplication-TileColor content="#2e2e33">
+<meta name=generator content="Hugo 0.89.4">
+<noscript>
+<style>#theme-toggle,.top-link{display:none}</style>
+<style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style>
+</noscript>
+<script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(a,e,f,g,b,c,d){a.GoogleAnalyticsObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=1,c.src=g,d.parentNode.insertBefore(c,d)}(window,document,'script','https://www.google-analytics.com/analytics.js','ga'),ga('create','UA-136094326-1','auto'),ga('send','pageview'))</script><meta property="og:title" content="MySQL锁篇">
+<meta property="og:description" content="思维导图 前言 我们都知道,事务有ACID四大特性.前面讲Redis时提到过,Redis的隔离性是由单线程模型来实现的,每条命令都是串行化执行,">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://euthpic.github.io/tech/mysql%E9%94%81%E7%AF%87/"><meta property="og:image" content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="article:section" content="tech">
+<meta property="article:published_time" content="2020-06-18T19:27:19+08:00">
+<meta property="article:modified_time" content="2020-06-18T19:27:19+08:00"><meta property="og:site_name" content="乱花渐欲迷人眼">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:image content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name=twitter:title content="MySQL锁篇">
+<meta name=twitter:description content="思维导图 前言 我们都知道,事务有ACID四大特性.前面讲Redis时提到过,Redis的隔离性是由单线程模型来实现的,每条命令都是串行化执行,">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Teches","item":"http://euthpic.github.io/tech/"},{"@type":"ListItem","position":2,"name":"MySQL锁篇","item":"http://euthpic.github.io/tech/mysql%E9%94%81%E7%AF%87/"}]}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"MySQL锁篇","name":"MySQL锁篇","description":"思维导图 前言 我们都知道,事务有ACID四大特性.前面讲Redis时提到过,Redis的隔离性是由单线程模型来实现的,每条命令都是串行化执行,","keywords":[],"articleBody":"思维导图 前言 我们都知道,事务有ACID四大特性.前面讲Redis时提到过,Redis的隔离性是由单线程模型来实现的,每条命令都是串行化执行,保证彼此不相互干扰.\nRedis运行在内存里,内存速度快,所以它可以这么玩,可是MySQL不行,硬盘的速度可比内存慢太多了.所以MySQL使用锁来实现隔离性.有了锁,一方面不仅能最大程度地利用数据库的并发访问,另外一方面还能确保每个用户能以一致的方式读取和修改数据.\n事务与锁是MySQL中的重要内容,两者密切联系,互为因果.事务的实现离不开锁,锁的目的是保证事务.今天就来谈一谈MySQL的锁,同时也为下一篇事务专题做准备.\n全局锁 根据锁的粒度不同,MySQL可以分为全局锁,表级锁和行级锁.\n全局锁是粒度最粗的锁,顾名思义,就是对整个数据库实例加锁.\nMySQL提供了一个加全局读锁的方法，命令是 Flush tables with read lock (FTWRL).使用了这个命令后,整个库都处于只读状态, 任何试图修改数据库的命令都会被阻止.\n全局锁的典型使用场景是，做全库逻辑备份.也就是把整库每个表都select出来存成文本.这听上去很危险,如果是主库,那么业务基本就停摆了;如果是从库,那么主从就暂时无法同步.\n不过这基本是运维专属的活了,我们研发知道它的存在就行.\n表级锁 MySQL的表级锁分为两类:\n lock tables … read/write MDL(metadata lock)元数据锁  lock tables … read,锁定整张表,只允许读,就连拿到这个锁的线程在unlock tables之前都只能读,不能写.\nlock tables … write,锁定整张表,不允许其它线程访问.\nMDL  MDL分为MDL读锁和MDL写锁. MDL读锁之间不会相互阻塞. MDL写锁与写锁,写锁与读锁之间相互阻塞. MDL不需要显式使用,在访问一个表时mysql会自动帮我们加锁. DML - MDL读锁. 对一个表进行增删查改等DML操作时,mysql自动帮我们加上MDL读锁. DDL - MDL写锁. 对一个表进行结构性更改,例如增加字段等DDL操作时,mysql自动帮我们加上MDL写锁.  可以看到,MDL锁的设计是为了隔离开DML和DDL操作,但平时我们讨论mysql的锁时,注意力都在CURD的情景中,很容易就忽略了MDL元数据锁的存在.\n忽视MDL也可能导致严重后果.来看一张图\nsession A和B拿到了MDL读锁,正常运行,而C拿到了写锁,因此被阻塞了.\nC自己被阻塞了还不要紧,但它的加入会阻塞了原本不会阻塞的session D以及其它想读改表的事务–这就是锁表了.\n如果这张表存的都是读的热点数据,那么由于这个阻塞可能都导致这个库的线程爆满.\n如果这个C是个长事务,事务不提交，就会一直占着MDL锁.\n所以在进行DDL的情况下,一定要注意MDL锁的存在.\n 尽量避免在长事务中使用. 如果一时半会也拿不到MDL锁,就考虑先kill掉这条命令,等表空闲的时候再来操作  除了以上两种,MySQL名义上的表级锁还包括两种意向锁IS和IX,这个放到下面与X/S锁一起介绍.\n行级锁 行锁是InnoDB引擎的特点.也许你曾被问到InnoDB和MyISAM之间有何不同,在这里你就会明白锁粒度的不同(是否支持行锁)是它们最鲜明的差别.\nInnoDB的行级锁包括:\n S锁 : 共享锁,也叫读锁.语法是SELECT … LOCK IN SHARE MODE. X锁 : 排他锁,也叫写锁.语法是SELECT … FOR UPDATE. 间隙锁 : Gap Lock,与S/X锁不同,锁定的是一个范围,开区间. Next-Key Lock : 行锁(X/S锁)与间隙锁的组合,左开右闭.  S锁 一般我们讲行锁,指的都是X锁或者S锁,它们锁定的是具体的某一行.\nS锁的作用是锁定数据,只允许读,不允许修改.\nmysql select c from t where c =5 lock in share mode; 输入了上述的语句后,假如id=5的行存在,那么就会在这一行上加上S锁.\n为什么说假如呢,因为如果没有符合条件的行,那么innodb加的不是S锁,而是间隙锁.\ninnodb加锁的逻辑是有点复杂的,这篇文章不会牵涉那么深,在介绍完事务和和索引之后,会专门去分析加锁的逻辑.\nX锁 X锁的作用是锁定数据,只允许自己读写,不允许其他事务访问.\n当执行update,insert,delete或者select … for update时,就会自动获取X锁.\nS锁之间兼容,X锁阻塞别的X锁或者S锁.\n间隙锁 间隙锁和Next-Key Lock锁定的都是一个范围,主要作用是锁定行与行之间的间隙,防止插入.\n间隙锁是个开区间,Next-Key Lock左开右闭.它们可以是共享锁,也可以是排他锁.\n也许你会问,怎么手动加上间隙锁啊?\n其实,innodb在行上的加锁单位是Next-Key Lock,不过根据情况的不同,Next-Key Lock会退化成间隙锁,X锁或者S锁.\n上面我们说select … lock in share mode加的是S锁,其实不详细.一开始加的是Next-Key Lock,在上述这个等值查询的例子中,刚好存在这么一条数据,所以它退化成了S锁.\n假设表中只有id=5和id=10两条数据.\nmysql select * from t where id =7 for update; 上述sql的目的是想选择id=7的数据,可是没有这么一条数据,那么mysql就会把这个区间锁🔒住.\n对于间隙锁,锁住的就是(5,10);对于Next-Key Lock,锁住的就是(5,10].它们的区别就在于右边界,间隙锁不会锁住id=10这一行,但是Next-Key Lock会.\n不过,间隙锁并不是静态的,它会动态生长.在上述例子中,假如我们把id=10这一行删掉,那么间隙锁将从(5,10)变为(5,+∞]. +∞是个开区间.\n你可以验证一下,在删掉id=10这一行后,试试能不能插入id=10或者更大的数据.\n也许这里你还会有个疑问,为什么id=7没有对应的行也要上锁呢?而且还是把整个区间都锁上了.\n这就涉及到不可重复读和幻读的问题了,得等到了事务篇再详细解释.\n这里先记住,间隙锁最大的意义在于解决幻读的问题.\n意向锁 InnoDB支持两种意向锁:\n 意向共享锁 : IS Lock.事务想要获得一个表中某几行的共享锁. 意向排他锁 : IX Lock.事务想要获得一个表中某几行的排他锁.  关于它们有以下协议:\n 在事务能够获取表中的行上的共享锁之前，它必须首先获取表上的IS锁或更强的锁。 在事务能够获取表中的行上的独占锁之前，它必须首先获取表上的IX锁。  你可以这么理解,获得了X锁,也一定同时持有IX锁;获得了S锁,也一定同时持有了IS锁.\nIS锁和IX锁彼此兼容,而且和X/S锁也兼容,这体现了innodb支持不同粒度的锁共存的特性.\n意向锁属于表级别的锁,但是实际上它们仅表意向,并没有阻塞功能.\n也许你会有疑问,怎么会有不阻塞的锁?那么意向锁有什么作用呢?\n根据《MySQL技术内幕:InnoDB引擎》的说法,意向锁只会阻塞全表扫描的请求.\n那么我们就可以这样理解 : 意向锁的目的其实是加快能否扫全表时的判断效率.\n全表扫描时,需要获得表中所有的S锁或者X锁,只要有一行获取失败,那么就无法进行扫描.\n既然如此,与其试图获取全部全部的S锁或者X锁(一行一行扫描,不累吗),不如直接通过意向锁来进行判断.\n如果你想读全表,本来你得一行行判断没有X锁,现在只用判断有没有IX锁即可.\n如果你想写全表,本来得一行行判断有没有S或者X锁,现在只用判断有没有IX或者IS锁即可.\n与其说它们是锁,倒不如说是个信号.\n这样设计的好处不仅在于加快效率,而且也可以减少阻塞甚至是死锁的情况.假如我们全表扫之前不先做判断拿表锁,而是进去一行一行的获取行锁,如果我们在最后一行被阻塞了,那么我们前面获取的锁就暂时不会得到释放,同样会阻塞其他访问该表的请求,更糟糕的是如果拿到最后一行锁的事务又要拿前面的行锁,这样就会造成死锁了.\n二阶段锁协议 在InnoDB事务中，行锁是在需要的时候才加上的，但并不是不需要了就立刻释放，而是要等到事务结束时才释放。这个就是两阶段锁协议.\n两段锁协议是指每个事务的执行可以分为两个阶段：生长阶段（加锁阶段）和衰退阶段（解锁阶段）。\n 加锁阶段：在该阶段可以进行加锁操作。在对任何数据进行读操作之前要申请并获得S锁，在进行写操作之前要申请并获得X锁。加锁不成功，则事务进入等待状态，直到加锁成功才继续执行。 解锁阶段：当事务释放了一个封锁以后，事务进入解锁阶段，在该阶段只能进行解锁操作不能再进行加锁操作。  MySQL的两段封锁法是这样实现的：\n 事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。 ROLLBACK和COMMIT使事务进入解锁阶段，即在ROLLBACK和COMMIT模块中DBMS释放所有封锁。  锁升级 锁升级是指将当前锁的粒度降低,也就是粒行锁变表锁,表锁变全局锁.\n在某些数据库中,为了降低锁的开销,会在满足条件后,将多个锁合并升级到一个更粗粒度的锁.\n可是在InnoDB中,1个锁的开销和1000000个锁是一样的,都没有开销.\n所以InnoDB没有锁升级.\n","wordCount":"3565","inLanguage":"zh","datePublished":"2020-06-18T19:27:19+08:00","dateModified":"2020-06-18T19:27:19+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/mysql%E9%94%81%E7%AF%87/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
+</head>
+<body id=top>
+<script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
+<header class=header>
+<nav class=nav>
+<div class=logo>
+<a href=http://euthpic.github.io/ accesskey=h title="🏡 乱花渐欲迷人眼 (Alt + H)">🏡 乱花渐欲迷人眼</a>
+<span class=logo-switches>
+<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+</span>
+</div>
+<ul id=menu>
+<li>
+<a href=http://euthpic.github.io/categories/ title="📔 系列">
+<span>📔 系列</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/tags/ title="🏷️ 标签">
+<span>🏷️ 标签</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/search/ title="🔍 搜索 (Alt + /)" accesskey=/>
+<span>🔍 搜索</span>
+</a>
+</li>
+<li>
+<a href=https://travellings.link title=🚇>
+<span>🚇</span>
+</a>
+</li>
+</ul>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-header>
+<div class=breadcrumbs><a href=http://euthpic.github.io/>主页</a>&nbsp;»&nbsp;<a href=http://euthpic.github.io/tech/>Teches</a></div>
+<h1 class=post-title>
+MySQL锁篇
+</h1>
+<div class=post-meta><span title="2020-06-18 19:27:19 +0800 CST">June 18, 2020</span>&nbsp;·&nbsp;8 分钟&nbsp;·&nbsp;Guangfa&nbsp;|&nbsp;<a href=https://github.com/euthpic/euthpic.github.io/edit/main/content/tech/MySQL%e9%94%81%e7%af%87.md rel="noopener noreferrer" target=_blank>PR</a>
+</div>
+</header> <div class=toc>
+<details open>
+<summary accesskey=c title="(Alt + C)">
+<span class=details>目录</span>
+</summary>
+<div class=inner><ul>
+<li>
+<a href=#%e6%80%9d%e7%bb%b4%e5%af%bc%e5%9b%be aria-label=思维导图>思维导图</a></li>
+<li>
+<a href=#%e5%89%8d%e8%a8%80 aria-label=前言>前言</a></li>
+<li>
+<a href=#%e5%85%a8%e5%b1%80%e9%94%81 aria-label=全局锁>全局锁</a></li>
+<li>
+<a href=#%e8%a1%a8%e7%ba%a7%e9%94%81 aria-label=表级锁>表级锁</a><ul>
+<li>
+<a href=#mdl aria-label=MDL>MDL</a></li></ul>
+</li>
+<li>
+<a href=#%e8%a1%8c%e7%ba%a7%e9%94%81 aria-label=行级锁>行级锁</a><ul>
+<li>
+<a href=#s%e9%94%81 aria-label=S锁>S锁</a></li>
+<li>
+<a href=#x%e9%94%81 aria-label=X锁>X锁</a></li>
+<li>
+<a href=#%e9%97%b4%e9%9a%99%e9%94%81 aria-label=间隙锁>间隙锁</a></li>
+<li>
+<a href=#%e6%84%8f%e5%90%91%e9%94%81 aria-label=意向锁>意向锁</a></li></ul>
+</li>
+<li>
+<a href=#%e4%ba%8c%e9%98%b6%e6%ae%b5%e9%94%81%e5%8d%8f%e8%ae%ae aria-label=二阶段锁协议>二阶段锁协议</a></li>
+<li>
+<a href=#%e9%94%81%e5%8d%87%e7%ba%a7 aria-label=锁升级>锁升级</a>
+</li>
+</ul>
+</div>
+</details>
+</div>
+<div class=post-content><h2 id=思维导图>思维导图</h2>
+<p><img loading=lazy src=https://tvax4.sinaimg.cn/large/006P3Jr6gy1h3qjcro7p4j323v4cm7wh.jpg alt=MySQL>
+</p>
+<h2 id=前言>前言</h2>
+<p>我们都知道,事务有ACID四大特性.前面讲Redis时提到过,Redis的隔离性是由单线程模型来实现的,每条命令都是串行化执行,保证彼此不相互干扰.</p>
+<p>Redis运行在内存里,内存速度快,所以它可以这么玩,可是MySQL不行,硬盘的速度可比内存慢太多了.所以<strong>MySQL使用锁来实现隔离性</strong>.有了锁,一方面不仅能最大程度地利用数据库的并发访问,另外一方面还能确保每个用户能以一致的方式读取和修改数据.</p>
+<p>事务与锁是MySQL中的重要内容,两者密切联系,互为因果.事务的实现离不开锁,锁的目的是保证事务.今天就来谈一谈MySQL的锁,同时也为下一篇事务专题做准备.</p>
+<h2 id=全局锁>全局锁</h2>
+<p>根据锁的粒度不同,MySQL可以分为<strong>全局锁,表级锁和行级锁</strong>.</p>
+<p>全局锁是粒度最粗的锁,顾名思义,就是对整个数据库实例加锁.</p>
+<p>MySQL提供了一个加全局读锁的方法，命令是 <strong>Flush tables with read lock</strong> (FTWRL).使用了这个命令后,整个库都处于只读状态, 任何试图修改数据库的命令都会被阻止.</p>
+<p><strong>全局锁的典型使用场景是，做全库逻辑备份</strong>.也就是把整库每个表都select出来存成文本.这听上去很危险,如果是主库,那么业务基本就停摆了;如果是从库,那么主从就暂时无法同步.</p>
+<p>不过这基本是运维专属的活了,我们研发知道它的存在就行.</p>
+<h2 id=表级锁>表级锁</h2>
+<p>MySQL的表级锁分为两类:</p>
+<ul>
+<li>lock tables … read/write</li>
+<li>MDL(metadata lock)元数据锁</li>
+</ul>
+<p>lock tables … read,锁定整张表,只允许读,就连拿到这个锁的线程在unlock tables之前都只能读,不能写.</p>
+<p>lock tables … write,锁定整张表,不允许其它线程访问.</p>
+<h3 id=mdl>MDL</h3>
+<ul>
+<li>MDL分为<strong>MDL读锁</strong>和<strong>MDL写锁</strong>.</li>
+<li>MDL读锁之间不会相互阻塞.</li>
+<li>MDL写锁与写锁,写锁与读锁之间相互阻塞.</li>
+<li><strong>MDL不需要显式使用</strong>,在访问一个表时mysql会自动帮我们加锁.</li>
+<li><strong>DML -> MDL读锁</strong>. 对一个表进行增删查改等DML操作时,mysql自动帮我们加上MDL读锁.</li>
+<li><strong>DDL -> MDL写锁</strong>. 对一个表进行结构性更改,例如增加字段等DDL操作时,mysql自动帮我们加上MDL写锁.</li>
+</ul>
+<p>可以看到,MDL锁的设计是为了隔离开DML和DDL操作,但平时我们讨论mysql的锁时,注意力都在CURD的情景中,很容易就忽略了MDL元数据锁的存在.</p>
+<p>忽视MDL也可能导致严重后果.来看一张图</p>
+<p><img loading=lazy src=https://tvax4.sinaimg.cn/large/006P3Jr6gy1h3qjdgqvv3j30vq0nsq4k.jpg alt=MDL-lock>
+</p>
+<p>session A和B拿到了MDL读锁,正常运行,而C拿到了写锁,因此被阻塞了.</p>
+<p>C自己被阻塞了还不要紧,但它的加入会阻塞了原本不会阻塞的session D以及其它想读改表的事务&ndash;这就是<strong>锁表</strong>了.</p>
+<p>如果这张表存的都是读的热点数据,那么由于这个阻塞可能都导致这个库的线程爆满.</p>
+<p>如果这个C是个长事务,事务不提交，就会一直占着MDL锁.</p>
+<p>所以在进行DDL的情况下,一定要注意MDL锁的存在.</p>
+<ul>
+<li>尽量避免在长事务中使用.</li>
+<li>如果一时半会也拿不到MDL锁,就考虑先kill掉这条命令,等表空闲的时候再来操作</li>
+</ul>
+<p>除了以上两种,MySQL名义上的表级锁还包括两种意向锁IS和IX,这个放到下面与X/S锁一起介绍.</p>
+<h2 id=行级锁>行级锁</h2>
+<p>行锁是InnoDB引擎的特点.也许你曾被问到InnoDB和MyISAM之间有何不同,在这里你就会明白锁粒度的不同(是否支持行锁)是它们最鲜明的差别.</p>
+<p>InnoDB的行级锁包括:</p>
+<ul>
+<li>S锁 : 共享锁,也叫读锁.语法是SELECT … LOCK IN SHARE MODE.</li>
+<li>X锁 : 排他锁,也叫写锁.语法是SELECT … FOR UPDATE.</li>
+<li>间隙锁 : Gap Lock,与S/X锁不同,锁定的是一个范围,开区间.</li>
+<li>Next-Key Lock : 行锁(X/S锁)与间隙锁的组合,左开右闭.</li>
+</ul>
+<h3 id=s锁>S锁</h3>
+<p>一般我们讲行锁,指的都是X锁或者S锁,它们锁定的是具体的某一行.</p>
+<p>S锁的作用是锁定数据,只允许读,不允许修改.</p>
+<pre tabindex=0><code class=language-mysq data-lang=mysq>mysql&gt; select c from t where c =5 lock in share mode;
+</code></pre><p>输入了上述的语句后,假如id=5的行存在,那么就会在这一行上加上S锁.</p>
+<p>为什么说假如呢,因为如果没有符合条件的行,那么innodb加的不是S锁,而是间隙锁.</p>
+<p>innodb加锁的逻辑是有点复杂的,这篇文章不会牵涉那么深,在介绍完事务和和索引之后,会专门去分析加锁的逻辑.</p>
+<h3 id=x锁>X锁</h3>
+<p>X锁的作用是锁定数据,只允许自己读写,不允许其他事务访问.</p>
+<p>当执行update,insert,delete或者select &mldr; for update时,就会自动获取X锁.</p>
+<p>S锁之间兼容,X锁阻塞别的X锁或者S锁.</p>
+<h3 id=间隙锁>间隙锁</h3>
+<p>间隙锁和Next-Key Lock锁定的都是一个范围,主要作用是<strong>锁定行与行之间的间隙,防止插入</strong>.</p>
+<p>间隙锁是个开区间,Next-Key Lock左开右闭.它们可以是共享锁,也可以是排他锁.</p>
+<p>也许你会问,怎么手动加上间隙锁啊?</p>
+<p>其实,<strong>innodb在行上的加锁单位是Next-Key Lock</strong>,不过根据情况的不同,Next-Key Lock会退化成间隙锁,X锁或者S锁.</p>
+<p>上面我们说select &mldr; lock in share mode加的是S锁,其实不详细.一开始加的是Next-Key Lock,在上述这个等值查询的例子中,刚好存在这么一条数据,所以它退化成了S锁.</p>
+<p>假设表中只有id=5和id=10两条数据.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-mysql data-lang=mysql>mysql<span style=color:#f92672>&gt;</span> <span style=color:#66d9ef>select</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>from</span> t <span style=color:#66d9ef>where</span> id <span style=color:#f92672>=</span><span style=color:#ae81ff>7</span> <span style=color:#66d9ef>for</span> <span style=color:#66d9ef>update</span>;
+</code></pre></div><p>上述sql的目的是想选择id=7的数据,可是没有这么一条数据,那么mysql就会把这个区间锁🔒住.</p>
+<p>对于间隙锁,锁住的就是(5,10);对于Next-Key Lock,锁住的就是(5,10].它们的区别就在于右边界,间隙锁不会锁住id=10这一行,但是Next-Key Lock会.</p>
+<p>不过,<strong>间隙锁并不是静态的,它会动态生长</strong>.在上述例子中,假如我们把id=10这一行删掉,那么间隙锁将从(5,10)变为(5,+∞]. +∞是个开区间.</p>
+<p>你可以验证一下,在删掉id=10这一行后,试试能不能插入id=10或者更大的数据.</p>
+<p>也许这里你还会有个疑问,为什么id=7没有对应的行也要上锁呢?而且还是把整个区间都锁上了.</p>
+<p>这就涉及到不可重复读和幻读的问题了,得等到了事务篇再详细解释.</p>
+<p>这里先记住,间隙锁最大的意义在于解决幻读的问题.</p>
+<h3 id=意向锁>意向锁</h3>
+<p>InnoDB支持两种意向锁:</p>
+<ul>
+<li>意向共享锁 : IS Lock.事务想要获得一个表中某几行的共享锁.</li>
+<li>意向排他锁 : IX Lock.事务想要获得一个表中某几行的排他锁.</li>
+</ul>
+<p>关于它们有以下协议:</p>
+<ul>
+<li>在事务能够获取表中的行上的共享锁之前，它必须首先获取表上的IS锁或更强的锁。</li>
+<li>在事务能够获取表中的行上的独占锁之前，它必须首先获取表上的IX锁。</li>
+</ul>
+<p>你可以这么理解,获得了X锁,也一定同时持有IX锁;获得了S锁,也一定同时持有了IS锁.</p>
+<p>IS锁和IX锁彼此兼容,而且和X/S锁也兼容,这体现了innodb支持不同粒度的锁共存的特性.</p>
+<p>意向锁属于表级别的锁,但是实际上它们<strong>仅表意向,并没有阻塞功能</strong>.</p>
+<p>也许你会有疑问,<strong>怎么会有不阻塞的锁</strong>?那么意向锁有什么作用呢?</p>
+<p>根据《MySQL技术内幕:InnoDB引擎》的说法,<strong>意向锁只会阻塞全表扫描的请求</strong>.</p>
+<p>那么我们就可以这样理解 : <strong>意向锁的目的其实是加快能否扫全表时的判断效率</strong>.</p>
+<p>全表扫描时,需要获得表中所有的S锁或者X锁,只要有一行获取失败,那么就无法进行扫描.</p>
+<p>既然如此,与其试图获取全部全部的S锁或者X锁(一行一行扫描,不累吗),不如直接通过意向锁来进行判断.</p>
+<p>如果你想读全表,本来你得一行行判断没有X锁,现在只用判断有没有IX锁即可.</p>
+<p>如果你想写全表,本来得一行行判断有没有S或者X锁,现在只用判断有没有IX或者IS锁即可.</p>
+<p>与其说它们是锁,倒不如说是个信号.</p>
+<p>这样设计的好处不仅在于加快效率,而且也可以减少阻塞甚至是死锁的情况.假如我们全表扫之前不先做判断拿表锁,而是进去一行一行的获取行锁,如果我们在最后一行被阻塞了,那么我们前面获取的锁就暂时不会得到释放,同样会阻塞其他访问该表的请求,更糟糕的是如果拿到最后一行锁的事务又要拿前面的行锁,这样就会造成死锁了.</p>
+<h2 id=二阶段锁协议>二阶段锁协议</h2>
+<p>在InnoDB事务中，行锁是在需要的时候才加上的，但并不是不需要了就立刻释放，而是要<strong>等到事务结束时才释放</strong>。这个就是两阶段锁协议.</p>
+<p>两段锁协议是指每个事务的执行可以分为两个阶段：<strong>生长阶段</strong>（加锁阶段）和<strong>衰退阶段</strong>（解锁阶段）。</p>
+<ul>
+<li>加锁阶段：在该阶段可以进行加锁操作。在对任何数据进行读操作之前要申请并获得S锁，在进行写操作之前要申请并获得X锁。加锁不成功，则事务进入等待状态，直到加锁成功才继续执行。</li>
+<li>解锁阶段：当事务释放了一个封锁以后，事务进入解锁阶段，在该阶段只能进行解锁操作不能再进行加锁操作。</li>
+</ul>
+<p>MySQL的两段封锁法是这样实现的：</p>
+<ul>
+<li>事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。</li>
+<li>ROLLBACK和COMMIT使事务进入解锁阶段，即在ROLLBACK和COMMIT模块中DBMS释放所有封锁。</li>
+</ul>
+<h2 id=锁升级>锁升级</h2>
+<p>锁升级是指将当前锁的粒度降低,也就是粒行锁变表锁,表锁变全局锁.</p>
+<p>在某些数据库中,为了降低锁的开销,会在满足条件后,将多个锁合并升级到一个更粗粒度的锁.</p>
+<p>可是在InnoDB中,1个锁的开销和1000000个锁是一样的,都没有开销.</p>
+<p><strong>所以InnoDB没有锁升级</strong>.</p>
+</div>
+<footer class=post-footer>
+<nav class=paginav>
+<a class=prev href=http://euthpic.github.io/tech/mysql%E4%BA%8B%E5%8A%A1%E7%AF%87/>
+<span class=title>« 上一页</span>
+<br>
+<span>MySQL事务篇</span>
+</a>
+<a class=next href=http://euthpic.github.io/tech/b+%E6%A0%91-vs.-b-%E6%A0%91/>
+<span class=title>下一页 »</span>
+<br>
+<span>B+树 vs. B-树</span>
+</a>
+</nav>
+<div class=share-buttons>
+<a target=_blank rel="noopener noreferrer" aria-label="share MySQL锁篇 on twitter" href="https://twitter.com/intent/tweet/?text=MySQL%e9%94%81%e7%af%87&url=http%3a%2f%2feuthpic.github.io%2ftech%2fmysql%25E9%2594%2581%25E7%25AF%2587%2f&hashtags="><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share MySQL锁篇 on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2feuthpic.github.io%2ftech%2fmysql%25E9%2594%2581%25E7%25AF%2587%2f&title=MySQL%e9%94%81%e7%af%87&summary=MySQL%e9%94%81%e7%af%87&source=http%3a%2f%2feuthpic.github.io%2ftech%2fmysql%25E9%2594%2581%25E7%25AF%2587%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share MySQL锁篇 on reddit" href="https://reddit.com/submit?url=http%3a%2f%2feuthpic.github.io%2ftech%2fmysql%25E9%2594%2581%25E7%25AF%2587%2f&title=MySQL%e9%94%81%e7%af%87"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share MySQL锁篇 on facebook" href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2feuthpic.github.io%2ftech%2fmysql%25E9%2594%2581%25E7%25AF%2587%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share MySQL锁篇 on whatsapp" href="https://api.whatsapp.com/send?text=MySQL%e9%94%81%e7%af%87%20-%20http%3a%2f%2feuthpic.github.io%2ftech%2fmysql%25E9%2594%2581%25E7%25AF%2587%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share MySQL锁篇 on telegram" href="https://telegram.me/share/url?text=MySQL%e9%94%81%e7%af%87&url=http%3a%2f%2feuthpic.github.io%2ftech%2fmysql%25E9%2594%2581%25E7%25AF%2587%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg>
+</a>
+</div>
+</footer>
+</article>
+</main>
+<footer class=footer>
+<span>&copy; 2022 <a href=http://euthpic.github.io/>乱花渐欲迷人眼</a></span>
+<span>
+Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a>
+</span>
+</footer>
+<a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a>
+<script>let menu=document.getElementById('menu');menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
+<script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script>
+<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
+</body>
+</html>

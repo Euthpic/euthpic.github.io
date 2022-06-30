@@ -1,0 +1,419 @@
+<!doctype html><html lang=zh dir=auto>
+<head><meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=robots content="index, follow">
+<title>关于并发 | 乱花渐欲迷人眼</title>
+<meta name=keywords content>
+<meta name=description content="前面我们介绍map和list的时候说过,它们是线程不安全的. 在并发环境下,线程安全是必须要关注的问题,所以今天这篇文章就围绕线程安全这个话题">
+<meta name=author content="Guangfa">
+<link rel=canonical href=http://euthpic.github.io/tech/%E5%85%B3%E4%BA%8E%E5%B9%B6%E5%8F%91/>
+<meta name=yandex-verification content="73b1a797f62c0e98">
+<link crossorigin=anonymous href=/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css integrity="sha256-yIlj/i15RiAA/Q+xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as=style>
+<script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=http://euthpic.github.io/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=http://euthpic.github.io/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=http://euthpic.github.io/favicon-32x32.png>
+<link rel=apple-touch-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<link rel=mask-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<meta name=theme-color content="#2e2e33">
+<meta name=msapplication-TileColor content="#2e2e33">
+<meta name=generator content="Hugo 0.89.4">
+<noscript>
+<style>#theme-toggle,.top-link{display:none}</style>
+<style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style>
+</noscript>
+<script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(a,e,f,g,b,c,d){a.GoogleAnalyticsObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=1,c.src=g,d.parentNode.insertBefore(c,d)}(window,document,'script','https://www.google-analytics.com/analytics.js','ga'),ga('create','UA-136094326-1','auto'),ga('send','pageview'))</script><meta property="og:title" content="关于并发">
+<meta property="og:description" content="前面我们介绍map和list的时候说过,它们是线程不安全的. 在并发环境下,线程安全是必须要关注的问题,所以今天这篇文章就围绕线程安全这个话题">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://euthpic.github.io/tech/%E5%85%B3%E4%BA%8E%E5%B9%B6%E5%8F%91/"><meta property="og:image" content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="article:section" content="tech">
+<meta property="article:published_time" content="2020-06-02T18:27:19+08:00">
+<meta property="article:modified_time" content="2020-06-02T18:27:19+08:00"><meta property="og:site_name" content="乱花渐欲迷人眼">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:image content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name=twitter:title content="关于并发">
+<meta name=twitter:description content="前面我们介绍map和list的时候说过,它们是线程不安全的. 在并发环境下,线程安全是必须要关注的问题,所以今天这篇文章就围绕线程安全这个话题">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Teches","item":"http://euthpic.github.io/tech/"},{"@type":"ListItem","position":2,"name":"关于并发","item":"http://euthpic.github.io/tech/%E5%85%B3%E4%BA%8E%E5%B9%B6%E5%8F%91/"}]}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"关于并发","name":"关于并发","description":"前面我们介绍map和list的时候说过,它们是线程不安全的. 在并发环境下,线程安全是必须要关注的问题,所以今天这篇文章就围绕线程安全这个话题","keywords":[],"articleBody":"前面我们介绍map和list的时候说过,它们是线程不安全的.\n在并发环境下,线程安全是必须要关注的问题,所以今天这篇文章就围绕线程安全这个话题来展开.\n不过由于这部分的内容比较多且抽象,如果直接展开太多细节可能很难消化,所以今天只是简单谈谈并发中比较基础的概念,常见的线程安全问题以及解决方案,原理先不深究,好从整体上掌握这个方向.\n思维导图 线程安全 何谓线程安全?\n当多个线程访问某个类,或调用某个方法时，不管运行环境采用何种调度方式或者这些进程将如何交替执行，并且在主调代码中不需要任何额外的协同或者同步，这个类或方法都能表现出正确的行为，那么就可以说这个类或方法是线程安全的。 那为什么会出现线程不安全的情况呢?\n这得从JMM(Java内存模型)说起了\n在JMM中,每个线程不会直接去操作主存,而是先操作线程内的副本.\n举个栗子🌰,当线程A和B同时对变量进行喜**+1**操作,假设变量原先的值是10.\n那么单线程下它们是顺序执行的,A把10变为11,然后B再把11变为12.\n可是在并发环境下,它们也许是’同时’进行的.\nA,B同时把副本的10变成11.\n然后A把11写回主存,主存变为11,然后A继续运行.\n而B暂时并不知道A做了什么,它以为主存中的变量还是10,所以它仍然把副本里的11写回了主存.主存从11变为11(等于没变).\n所以B实际上相当于没有操作过,它的操作由于’误会’被抵消了.这就导致线程不安全了.\n线程安全性体现在3个方面:\n 原子性：提供互斥访问，同一时刻只能有一个线程对数据进行操作（Atomic、CAS算法、synchronized、Lock） 可见性：一个主内存的线程如果进行了修改，可以及时被其他线程观察到（synchronized、volatile） 有序性：如果两个线程不能从 happens-before原则 观察出来，那么就不能保证他们的有序性，虚拟机可以随意的对他们进行重排序，导致其观察观察结果杂乱无序（happens-before原则）  锁 为了保障线程安全,其中一项最主要的手段是给临界资源加锁🔒\nJava中的锁从各种性质上可分为多对含义相对的锁,比如:\n 乐观锁/悲观锁 共享锁/互斥锁 公平锁/非公平锁 可重入锁/不可重入锁  此外,根据synchronized的锁状态又可以分出无锁/偏向锁/轻量级锁/重量级锁.\n不过,从具体形式上来看,最主要的就是这两个: synchronized和Lock.\nsynchronized和Lock 它们的区别包括:\n 前者是关键字,后者为接口 synchronized在发生异常时,会自动释放锁,不会有死锁问题,而Lock不会释放,建议在finally中释放锁 Lock的子类包括可重入锁ReentrantLock,读写锁ReentrantReadWriteLock等,可通过lockInterruptibly()方法实现可中断性,通过构造方法来实现公平性等. Lock能起到的作用更多,例如中断等待锁的线程,获知是否成功获取锁. ReentrantReadWriteLock可通过读写分离提高并发效率,而synchronized在高并发下效率较低.  不过synchronized经过1.6的优化后(也就是上面说的锁状态)效率提高了.\n举个🌰,ConcurrentHashmap原先使用了CAS+分段锁,1.8之后改回了synchronized,这说明官方对于synchronized的效率是有信心的.\n乐观锁/悲观锁 悲观锁\n悲观锁认为自己在使用数据的时候一定有别的线程来修改数据，因此在获取数据的时候会先加锁，确保数据不会被别的线程修改\n例子 : synchronized,Lock\n乐观锁\n乐观锁认为自己在使用数据时不会有别的线程修改数据，所以不会添加锁，只是在更新数据的时候去判断之前有没有别的线程更新了这个数据。如果这个数据没有被更新，当前线程将自己修改的数据成功写入。如果数据已经被其他线程更新，则根据不同的实现方式执行不同的操作（例如报错或者自动重试）。\n例子 : CAS\n共享锁/互斥锁 互斥锁\n也叫排他锁，是指该锁一次只能被一个线程所持有。如果线程T对数据A加上排它锁后，则其他线程不能再对A加任何类型的锁。获得排它锁的线程即能读数据又能修改数据。\n例子 : synchronized,ReentrantLock,ReentrantReadWriterLock中的写锁\n共享锁\n是指该锁可被多个线程所持有。如果线程T对数据A加上共享锁后，则其他线程只能对A再加共享锁，不能加排它锁。获得共享锁的线程只能读数据，不能修改数据。\n例子 : ReentrantReadWriterLock中的读锁\n公平锁/非公平锁 公平锁\n多个线程按照申请锁的顺序来获取锁，线程直接进入队列中排队，队列中的第一个线程才能获得锁。\n公平锁的优点是等待锁的线程不会饿死。缺点是整体吞吐效率相对非公平锁要低，等待队列中除第一个线程以外的所有线程都会阻塞，CPU唤醒阻塞线程的开销比非公平锁大。\n非公平锁\n多个线程加锁时直接尝试获取锁，获取不到才会到等待队列的队尾等待。但如果此时锁刚好可用，那么这个线程可以无需阻塞直接获取到锁，所以非公平锁有可能出现后申请锁的线程先获取锁的场景。\n非公平锁的优点是可以减少唤起线程的开销，整体的吞吐效率高，因为线程有几率不阻塞直接获得锁，CPU不必唤醒所有线程。缺点是处于等待队列中的线程可能会饿死，或者等很久才会获得锁。\n例子 : ReentrantLock可通过构造函数里的fair参数来决定是否公平,默认是非公平锁\n可重入锁/不可重入锁 可重入锁又名递归锁，是指在同一个线程在外层方法获取锁的时候，再进入该线程的内层方法会自动获取锁（前提锁对象得是同一个对象或者class），不会因为之前已经获取过还没释放而阻塞,不会自己阻塞自己导致死锁。\n例子 : synchronized,ReentrantLock\nps : 特地备注在这里,经过1.6优化后synchronized复杂了很多,根据锁的状态不同,它既可以是乐观锁也可以是悲观锁,既可以是共享锁也可以是互斥锁,不需要特地去记它的分类,研究完它的原理之后自然了然于心.\nvolatile volatile的作用\n 保证数据的可见性. 禁止指令重排序 不能保证原子性  volatile做了哪些工作?\n  当写一个volatile变量时，写完后JMM会把该线程对应的本地内存中的共享变量立即刷新到主内存\n  当读一个volatile变量时，读之前JMM会把该线程对应的本地内存置为无效，线程接下来将从主内存中读取共享变量\n  ThreadLocal ThreadLocal类用来提供线程内部的局部变量。\n这种变量在多线程环境下访问（通过get和set方法访问）时能保证各个线程的变量相对独立于其他线程内的变量。\nThreadLocal实例通常来说都是private static类型的，用于关联线程和线程上下文。\nThreadLocal变量在线程的生命周期内起作用，减少同一个线程内多个函数或组件之间一些公共变量的传递的复杂度。\n上述可以概述为：ThreadLocal提供线程内部的局部变量，在本线程内随时随地可取，隔离其他线程。\n使用场景\n数据库连接、Session管理等\n线程池 线程池好处  重用存在的线程,减少对象创建,销毁的开销 可有效控制最大并发线程数 提供定时执行,定期执行等功能.  ThreadPoolExecutor 线程池可以通过ThreadPoolExecutor生成,以下是它的构造函数:\npublic TheadPoolExecutor(int corePoolSize, int maximumPoolSize,long keepAliveTime,TimeUnit unit, BlockingQueueRunnable workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler) Executors Executors类为我们提供了几种常用的线程池,可以跳过参数设置直接使用.\n  newFixedThreadPool (固定数目线程的线程池) :\n  newCachedThreadPool(线程无限的线程池)\n  newSingleThreadExecutor(单线程的线程池)\n  newScheduledThreadPool(定时或周期执行的线程池)\n  但是,对于线程的使用必须要慎重,如果不清楚线程池的各种特点就滥用很可能导致严重的线上故障.\n因此,Executors这种’傻瓜一键式’创建线程池的做法在阿里开发手册里是被禁止的.\nJ.U.C J.U.C是java.util.concurrent工具包的简称,专门负责处理线程与并发相关的问题.\nJ.U.C的内容包括原子类,并发容器,并发工具以及我们上面讲到的线程池.\n原子类 原子类也就是Atomic包下的类.\n在并发环境中,共享资源不能使用int,long double等基本类型,而是使用AtomicXXX等类,例如AtomicInteger,AtomicLong等的incrementAndGet ()方法.\n最常用到的类包括:\n AtomicBoolean：以原子更新的方式更新 boolean. AtomicInteger：以原子更新的方式更新 Integer. AtomicLong：以原子更新的方式更新 Long.  并发容器 前面我们提到过Hashmap,ArrayList是线程不安全的,可以在JUC里面找到它们对应的线程安全类.\n它们对应的替代关系:\n ArrayList - CopyOnWriteArrayList HashSet - CopyOnWriteArraySet TreeSet - ConcurrentSkipSet HashMap - ConcurrentHashMap TreeMap - ConcurrentSkipListMap  并发工具 前面我们提到的原子类以及并发容器都是为了防止线程安全问题,数据不一致问题的发生而设计.\n在并发环境下,完成一个任务可能需要线程之间相互协作,这时候就需要用到并发工具了.\nJava的并发工具包括:\n CountDownLatch : 倒数器(计数器).举个栗子🌰,赛跑比赛中,裁判得等到选手们都抵达终点,他的任务才算完成.假设裁判和选手都是线程,每一个选手线程抵达终点,裁判线程的倒数器就-1,减到0之后裁判在这阶段的工作才算完成,才可以进行下一阶段的工作. Semaphore : 信号量.用于控制资源能够被并发访问的线程数量，以保证多个线程能够合理的使用特定资源.这个大家应该不陌生了,生产者消费者模型就是最典型的应用之一. CyclicBarrier : 栅栏.用于控制线程之间的同步,需要所有线程都到达,然后才能继续执行.赛跑比赛中,所有选手都抵达起跑线之后,比赛才能开始,选手才能开始跑. Exchanger : 用于两个线程在同步点交换资源.举个栗子🌰,无间道看过吧,卧底和阿sir到指定地点交换情报或者证据.为什么要强调同步点呢,因为在不同的时候,线程的资源值是不同的,必须要在正确的时间,才能交换到正确的资源,如果卧底提前把情报放在那里,可能会被掉包.  AQS 队列同步器AQS是AbstractQueuedSynchronizer的简称,是JUC的核心类.\nAQS使用了一个int类型的变量表示同步状态,通过内置的FIFO队列来完成线程获取资源的排队工作. AQS是实现锁的关键.简单来说,它为并发包的各个组件加锁解锁提供了底层支持.\n基本上,JDK的锁(除了关键字synchronized)都有一个内部类Sync,这个Sync一定是继承AQS的.\nCAS CAS = compare and swap 先比较后交换\nCAS是JUC并发包的核心实现,本质是一种乐观锁,自旋锁.\n当多线程同时对某资源进行操作时,只能有一个线程操作成功,但不会阻塞其他线程而是通知它们操作失败,最底层调用的是native方法.\n该算法有三个操作数:\n  内存值V,\n  旧的预期值A,\n  要修改的新值B\n  当且仅当A和V的值相同时,才将内存值V更新为新值B,否则什么都不做.\n一般情况下，“更新”是一个不断重试的操作(死循环)。\nCAS虽然很高效，但是它也存在三大问题，这里也简单说一下：\nABA问题\nCAS需要在操作值的时候检查内存值是否发生变化，没有发生变化才会更新内存值。但是如果内存值原来是A，后来变成了B，然后又变成了A，那么CAS进行检查时会发现值没有发生变化，但是实际上是有变化的。ABA问题的解决思路就是在变量前面添加版本号，每次变量更新的时候都把版本号加一，这样变化过程就从“A－B－A”变成了“1A－2B－3A”。\nJDK从1.5开始提供了AtomicStampedReference类来解决ABA问题，具体操作封装在compareAndSet()中。compareAndSet()首先检查当前引用和当前标志与预期引用和预期标志是否相等，如果都相等，则以原子方式将引用值和标志的值设置为给定的更新值。\n循环时间长开销大\nCAS操作如果长时间不成功，会导致其一直自旋，给CPU带来非常大的开销。\n只能保证一个共享变量的原子操作\n对一个共享变量执行操作时，CAS能够保证原子操作，但是对多个共享变量操作时，CAS是无法保证操作的原子性的。\nJava从1.5开始JDK提供了AtomicReference类来保证引用对象之间的原子性，可以把多个变量放在一个对象里来进行CAS操作。\n安全发布对象 发布对象 使一个对象能够被当前范围之外的代码所使用.\n相对的概念 : 对象逸出 一种错误的发布.当一个对象还没有构造完成时,就使它被其它线程所见.\n四种方法  在静态初始化函数中初始化一个对象引用. 将对象的引用保存到volatile类型域或者AtomicReference对象中. 将对象的引用保存到某个正确构造对象的final类型域中. 将对象的引用保存到一个由锁保护的域中.  线程不安全类与写法  StringBuilder - StringBuffer SimpleDateFormat - joda-time or java8的日期api ArrayList,HashSet,HashMap等 非原子性操作,例如先检查再执行: if( condition(a) ) { handle(a); }  后言 本文带大家走马观花地看了一遍并发中比较基础的概念,常见的线程安全问题以及解决方案,意在对于并发编程的全貌有个大致的框图.\n当然了,并发是一个很复杂也很庞大的问题,一篇文章是不支持深入到各个细节去研究的.\n对于本文所提到的各个组件,各种原理,后续会由一系列文章来展开.\n","wordCount":"5389","inLanguage":"zh","datePublished":"2020-06-02T18:27:19+08:00","dateModified":"2020-06-02T18:27:19+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/%E5%85%B3%E4%BA%8E%E5%B9%B6%E5%8F%91/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
+</head>
+<body id=top>
+<script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
+<header class=header>
+<nav class=nav>
+<div class=logo>
+<a href=http://euthpic.github.io/ accesskey=h title="🏡 乱花渐欲迷人眼 (Alt + H)">🏡 乱花渐欲迷人眼</a>
+<span class=logo-switches>
+<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+</span>
+</div>
+<ul id=menu>
+<li>
+<a href=http://euthpic.github.io/categories/ title="📔 系列">
+<span>📔 系列</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/tags/ title="🏷️ 标签">
+<span>🏷️ 标签</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/search/ title="🔍 搜索 (Alt + /)" accesskey=/>
+<span>🔍 搜索</span>
+</a>
+</li>
+<li>
+<a href=https://travellings.link title=🚇>
+<span>🚇</span>
+</a>
+</li>
+</ul>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-header>
+<div class=breadcrumbs><a href=http://euthpic.github.io/>主页</a>&nbsp;»&nbsp;<a href=http://euthpic.github.io/tech/>Teches</a></div>
+<h1 class=post-title>
+关于并发
+</h1>
+<div class=post-meta><span title="2020-06-02 18:27:19 +0800 CST">June 2, 2020</span>&nbsp;·&nbsp;11 分钟&nbsp;·&nbsp;Guangfa&nbsp;|&nbsp;<a href=https://github.com/euthpic/euthpic.github.io/edit/main/content/tech/%e5%85%b3%e4%ba%8e%e5%b9%b6%e5%8f%91.md rel="noopener noreferrer" target=_blank>PR</a>
+</div>
+</header> <div class=toc>
+<details open>
+<summary accesskey=c title="(Alt + C)">
+<span class=details>目录</span>
+</summary>
+<div class=inner><ul>
+<li>
+<a href=#%e6%80%9d%e7%bb%b4%e5%af%bc%e5%9b%be aria-label=思维导图>思维导图</a></li>
+<li>
+<a href=#%e7%ba%bf%e7%a8%8b%e5%ae%89%e5%85%a8 aria-label=线程安全>线程安全</a></li>
+<li>
+<a href=#%e9%94%81 aria-label=锁>锁</a><ul>
+<li>
+<a href=#synchronized%e5%92%8clock aria-label=synchronized和Lock>synchronized和Lock</a></li>
+<li>
+<a href=#%e4%b9%90%e8%a7%82%e9%94%81%e6%82%b2%e8%a7%82%e9%94%81 aria-label=乐观锁/悲观锁>乐观锁/悲观锁</a></li>
+<li>
+<a href=#%e5%85%b1%e4%ba%ab%e9%94%81%e4%ba%92%e6%96%a5%e9%94%81 aria-label=共享锁/互斥锁>共享锁/互斥锁</a></li>
+<li>
+<a href=#%e5%85%ac%e5%b9%b3%e9%94%81%e9%9d%9e%e5%85%ac%e5%b9%b3%e9%94%81 aria-label=公平锁/非公平锁>公平锁/非公平锁</a></li>
+<li>
+<a href=#%e5%8f%af%e9%87%8d%e5%85%a5%e9%94%81%e4%b8%8d%e5%8f%af%e9%87%8d%e5%85%a5%e9%94%81 aria-label=可重入锁/不可重入锁>可重入锁/不可重入锁</a></li></ul>
+</li>
+<li>
+<a href=#volatile aria-label=volatile>volatile</a></li>
+<li>
+<a href=#threadlocal aria-label=ThreadLocal>ThreadLocal</a></li>
+<li>
+<a href=#%e7%ba%bf%e7%a8%8b%e6%b1%a0 aria-label=线程池>线程池</a><ul>
+<ul>
+<li>
+<a href=#%e7%ba%bf%e7%a8%8b%e6%b1%a0%e5%a5%bd%e5%a4%84 aria-label=线程池好处>线程池好处</a></li>
+<li>
+<a href=#threadpoolexecutor aria-label=ThreadPoolExecutor>ThreadPoolExecutor</a></li>
+<li>
+<a href=#executors aria-label=Executors>Executors</a></li></ul>
+</ul>
+</li>
+<li>
+<a href=#juc aria-label=J.U.C>J.U.C</a><ul>
+<ul>
+<li>
+<a href=#%e5%8e%9f%e5%ad%90%e7%b1%bb aria-label=原子类>原子类</a></li>
+<li>
+<a href=#%e5%b9%b6%e5%8f%91%e5%ae%b9%e5%99%a8 aria-label=并发容器>并发容器</a></li>
+<li>
+<a href=#%e5%b9%b6%e5%8f%91%e5%b7%a5%e5%85%b7 aria-label=并发工具>并发工具</a></li></ul>
+</ul>
+</li>
+<li>
+<a href=#aqs aria-label=AQS>AQS</a></li>
+<li>
+<a href=#cas aria-label=CAS>CAS</a></li>
+<li>
+<a href=#%e5%ae%89%e5%85%a8%e5%8f%91%e5%b8%83%e5%af%b9%e8%b1%a1 aria-label=安全发布对象>安全发布对象</a><ul>
+<ul>
+<li>
+<a href=#%e5%8f%91%e5%b8%83%e5%af%b9%e8%b1%a1 aria-label=发布对象>发布对象</a></li>
+<li>
+<a href=#%e7%9b%b8%e5%af%b9%e7%9a%84%e6%a6%82%e5%bf%b5--%e5%af%b9%e8%b1%a1%e9%80%b8%e5%87%ba aria-label="相对的概念 : 对象逸出">相对的概念 : 对象逸出</a></li>
+<li>
+<a href=#%e5%9b%9b%e7%a7%8d%e6%96%b9%e6%b3%95 aria-label=四种方法>四种方法</a></li></ul>
+</ul>
+</li>
+<li>
+<a href=#%e7%ba%bf%e7%a8%8b%e4%b8%8d%e5%ae%89%e5%85%a8%e7%b1%bb%e4%b8%8e%e5%86%99%e6%b3%95 aria-label=线程不安全类与写法>线程不安全类与写法</a></li>
+<li>
+<a href=#%e5%90%8e%e8%a8%80 aria-label=后言>后言</a>
+</li>
+</ul>
+</div>
+</details>
+</div>
+<div class=post-content><p>前面我们介绍map和list的时候说过,它们是线程不安全的.</p>
+<p>在<strong>并发</strong>环境下,线程安全是必须要关注的问题,所以今天这篇文章就围绕线程安全这个话题来展开.</p>
+<p>不过由于这部分的内容比较多且抽象,如果直接展开太多细节可能很难消化,所以今天只是简单谈谈并发中比较基础的概念,常见的线程安全问题以及解决方案,<strong>原理先不深究</strong>,好从整体上掌握这个方向.</p>
+<h1 id=思维导图>思维导图</h1>
+<p><img loading=lazy src=https://tva2.sinaimg.cn/large/006P3Jr6gy1h3qivj1qlcj31ay3la1ce.jpg alt=concurrent>
+</p>
+<h1 id=线程安全>线程安全</h1>
+<p><strong>何谓线程安全?</strong></p>
+<pre tabindex=0><code>当多个线程访问某个类,或调用某个方法时，不管运行环境采用何种调度方式或者这些进程将如何交替执行，并且在主调代码中不需要任何额外的协同或者同步，这个类或方法都能表现出正确的行为，那么就可以说这个类或方法是线程安全的。
+</code></pre><p><strong>那为什么会出现线程不安全的情况呢?</strong></p>
+<p>这得从JMM(Java内存模型)说起了</p>
+<p><img loading=lazy src=https://tvax1.sinaimg.cn/large/006P3Jr6gy1h3qit32dfqj30zz0q2n5f.jpg alt=JMM>
+</p>
+<p>在JMM中,每个线程不会直接去操作主存,而是<strong>先操作线程内的副本</strong>.</p>
+<p>举个栗子🌰,当线程A和B同时对变量进行喜**+1**操作,假设变量原先的值是10.</p>
+<p>那么单线程下它们是顺序执行的,A把10变为11,然后B再把11变为12.</p>
+<p>可是在并发环境下,它们也许是&rsquo;同时&rsquo;进行的.</p>
+<p>A,B同时把副本的10变成11.</p>
+<p>然后A把11写回主存,主存变为11,然后A继续运行.</p>
+<p>而B暂时并不知道A做了什么,它以为主存中的变量还是10,所以它仍然把副本里的11写回了主存.主存从11变为11(等于没变).</p>
+<p>所以B实际上相当于没有操作过,它的操作由于&rsquo;误会&rsquo;被抵消了.这就导致线程不安全了.</p>
+<p><strong>线程安全性</strong>体现在3个方面:</p>
+<ul>
+<li><strong>原子性</strong>：提供互斥访问，同一时刻只能有一个线程对数据进行操作（Atomic、CAS算法、synchronized、Lock）</li>
+<li><strong>可见性</strong>：一个主内存的线程如果进行了修改，可以及时被其他线程观察到（synchronized、volatile）</li>
+<li><strong>有序性</strong>：如果两个线程不能从 happens-before原则 观察出来，那么就不能保证他们的有序性，虚拟机可以随意的对他们进行重排序，导致其观察观察结果杂乱无序（happens-before原则）</li>
+</ul>
+<h1 id=锁>锁</h1>
+<p>为了保障线程安全,其中一项最主要的手段是<strong>给临界资源加锁🔒</strong></p>
+<p>Java中的锁从各种性质上可分为<strong>多对含义相对的锁</strong>,比如:</p>
+<ul>
+<li>乐观锁/悲观锁</li>
+<li>共享锁/互斥锁</li>
+<li>公平锁/非公平锁</li>
+<li>可重入锁/不可重入锁</li>
+</ul>
+<p>此外,根据synchronized的<strong>锁状态</strong>又可以分出无锁/偏向锁/轻量级锁/重量级锁.</p>
+<p>不过,从具体形式上来看,最主要的就是这两个: <strong>synchronized和Lock</strong>.</p>
+<h2 id=synchronized和lock>synchronized和Lock</h2>
+<p>它们的区别包括:</p>
+<ul>
+<li>前者是关键字,后者为接口</li>
+<li>synchronized在发生异常时,会<strong>自动释放锁</strong>,不会有死锁问题,而Lock不会释放,建议<strong>在finally中释放锁</strong></li>
+<li>Lock的子类包括可重入锁ReentrantLock,读写锁ReentrantReadWriteLock等,可通过lockInterruptibly()方法实现可中断性,通过构造方法来实现公平性等.</li>
+<li><strong>Lock能起到的作用更多</strong>,例如中断等待锁的线程,获知是否成功获取锁.</li>
+<li>ReentrantReadWriteLock可通过读写分离提高并发效率,而<strong>synchronized在高并发下效率较低</strong>.</li>
+</ul>
+<p>不过synchronized经过1.6的优化后(也就是上面说的锁状态)效率提高了.</p>
+<p>举个🌰,ConcurrentHashmap原先使用了CAS+分段锁,1.8之后改回了synchronized,这说明官方对于synchronized的效率是有信心的.</p>
+<h2 id=乐观锁悲观锁>乐观锁/悲观锁</h2>
+<p><strong>悲观锁</strong></p>
+<p>悲观锁认为自己在使用数据的时候<strong>一定有别的线程来修改数据</strong>，因此在<strong>获取数据的时候会先加锁</strong>，确保数据不会被别的线程修改</p>
+<p>例子 : synchronized,Lock</p>
+<p><strong>乐观锁</strong></p>
+<p>乐观锁认为自己在使用数据时<strong>不会有别的线程修改数据</strong>，所以<strong>不会添加锁</strong>，只是在更新数据的时候去判断之前有没有别的线程更新了这个数据。如果这个数据没有被更新，当前线程将自己修改的数据成功写入。如果数据已经被其他线程更新，则根据不同的实现方式执行不同的操作（例如报错或者自动重试）。</p>
+<p>例子 : CAS</p>
+<h2 id=共享锁互斥锁>共享锁/互斥锁</h2>
+<p><strong>互斥锁</strong></p>
+<p>也叫排他锁，是指该锁<strong>一次只能被一个线程所持有</strong>。如果线程T对数据A加上排它锁后，则其他线程不能再对A加任何类型的锁。获得排它锁的线程<strong>即能读数据又能修改数据</strong>。</p>
+<p>例子 : synchronized,ReentrantLock,ReentrantReadWriterLock中的写锁</p>
+<p><strong>共享锁</strong></p>
+<p>是指该锁<strong>可被多个线程所持有</strong>。如果线程T对数据A加上共享锁后，则其他线程只能对A再加共享锁，不能加排它锁。获得共享锁的线程<strong>只能读数据，不能修改数据</strong>。</p>
+<p>例子 : ReentrantReadWriterLock中的读锁</p>
+<h2 id=公平锁非公平锁>公平锁/非公平锁</h2>
+<p><strong>公平锁</strong></p>
+<p>多个线程<strong>按照申请锁的顺序来获取锁</strong>，线程直接进入队列中排队，队列中的第一个线程才能获得锁。</p>
+<p>公平锁的优点是<strong>等待锁的线程不会饿死</strong>。缺点是<strong>整体吞吐效率相对非公平锁要低</strong>，等待队列中除第一个线程以外的所有线程都会阻塞，CPU唤醒阻塞线程的开销比非公平锁大。</p>
+<p><strong>非公平锁</strong></p>
+<p>多个线程<strong>加锁时直接尝试获取锁</strong>，获取不到才会到等待队列的队尾等待。但如果此时锁刚好可用，那么这个线程可以无需阻塞直接获取到锁，所以非公平锁有可能出现后申请锁的线程先获取锁的场景。</p>
+<p>非公平锁的优点是可以<strong>减少唤起线程的开销</strong>，<strong>整体的吞吐效率高</strong>，因为线程有几率不阻塞直接获得锁，CPU不必唤醒所有线程。缺点是<strong>处于等待队列中的线程可能会饿死</strong>，或者等很久才会获得锁。</p>
+<p>例子 : ReentrantLock可通过构造函数里的<code>fair</code>参数来决定是否公平,<strong>默认是非公平锁</strong></p>
+<h2 id=可重入锁不可重入锁>可重入锁/不可重入锁</h2>
+<p>可重入锁又名递归锁，是指在<strong>同一个线程</strong>在外层方法获取锁的时候，再<strong>进入该线程的内层方法会自动获取锁</strong>（前提锁对象得是同一个对象或者class），不会因为之前已经获取过还没释放而阻塞,<strong>不会自己阻塞自己导致死锁</strong>。</p>
+<p>例子 : synchronized,ReentrantLock</p>
+<p>ps : 特地备注在这里,经过1.6优化后synchronized复杂了很多,根据锁的状态不同,它既可以是乐观锁也可以是悲观锁,既可以是共享锁也可以是互斥锁,不需要特地去记它的分类,研究完它的原理之后自然了然于心.</p>
+<h1 id=volatile>volatile</h1>
+<p><strong>volatile的作用</strong></p>
+<ul>
+<li>保证数据的可见性.</li>
+<li>禁止指令重排序</li>
+<li>不能保证原子性</li>
+</ul>
+<p><strong>volatile做了哪些工作?</strong></p>
+<ul>
+<li>
+<p>当写一个volatile变量时，<strong>写完后</strong>JMM会把该线程对应的本地内存中的共享变量<strong>立即刷新到主内存</strong></p>
+</li>
+<li>
+<p>当读一个volatile变量时，<strong>读之前</strong>JMM会把该线程对应的<strong>本地内存置为无效</strong>，线程接下来将从主内存中读取共享变量</p>
+</li>
+</ul>
+<h1 id=threadlocal>ThreadLocal</h1>
+<p><code>ThreadLocal</code>类用来提供<strong>线程内部的局部变量</strong>。</p>
+<p>这种变量在多线程环境下访问（通过<code>get</code>和<code>set</code>方法访问）时能保证各个线程的变量相对<strong>独立于其他线程</strong>内的变量。</p>
+<p><code>ThreadLocal</code>实例通常来说都是<code>private static</code>类型的，用于关联线程和线程上下文。</p>
+<p><code>ThreadLocal</code>变量在<strong>线程的生命周期内起作用</strong>，减少同一个线程内多个函数或组件之间一些公共变量的传递的复杂度。</p>
+<p>上述可以概述为：<code>ThreadLocal</code>提供线程内部的局部变量，<strong>在本线程内随时随地可取，隔离其他线程</strong>。</p>
+<p><strong>使用场景</strong></p>
+<p>数据库连接、Session管理等</p>
+<h1 id=线程池>线程池</h1>
+<h3 id=线程池好处>线程池好处</h3>
+<ul>
+<li>重用存在的线程,减少对象创建,销毁的开销</li>
+<li>可有效控制最大并发线程数</li>
+<li>提供定时执行,定期执行等功能.</li>
+</ul>
+<h3 id=threadpoolexecutor>ThreadPoolExecutor</h3>
+<p>线程池可以通过ThreadPoolExecutor生成,以下是它的构造函数:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#66d9ef>public</span> <span style=color:#a6e22e>TheadPoolExecutor</span><span style=color:#f92672>(</span><span style=color:#66d9ef>int</span> corePoolSize<span style=color:#f92672>,</span> <span style=color:#66d9ef>int</span> maximumPoolSize<span style=color:#f92672>,</span><span style=color:#66d9ef>long</span> keepAliveTime<span style=color:#f92672>,</span>TimeUnit unit<span style=color:#f92672>,</span>
+   BlockingQueue<span style=color:#f92672>&lt;</span>Runnable<span style=color:#f92672>&gt;</span> workQueue<span style=color:#f92672>,</span>
+   ThreadFactory threadFactory<span style=color:#f92672>,</span>
+   RejectedExecutionHandler handler<span style=color:#f92672>)</span> 
+
+</code></pre></div><h3 id=executors>Executors</h3>
+<p>Executors类为我们提供了几种常用的线程池,可以跳过参数设置直接使用.</p>
+<ul>
+<li>
+<p>newFixedThreadPool (固定数目线程的线程池) :</p>
+</li>
+<li>
+<p>newCachedThreadPool(线程无限的线程池)</p>
+</li>
+<li>
+<p>newSingleThreadExecutor(单线程的线程池)</p>
+</li>
+<li>
+<p>newScheduledThreadPool(定时或周期执行的线程池)</p>
+</li>
+</ul>
+<p>但是,对于线程的使用必须要慎重,如果不清楚线程池的各种特点就滥用很可能导致严重的线上故障.</p>
+<p>因此,Executors这种&rsquo;傻瓜一键式&rsquo;创建线程池的做法在阿里开发手册里是被禁止的.</p>
+<h1 id=juc>J.U.C</h1>
+<p>J.U.C是java.util.concurrent工具包的简称,专门负责处理线程与并发相关的问题.</p>
+<p>J.U.C的内容包括原子类,并发容器,并发工具以及我们上面讲到的线程池.</p>
+<h3 id=原子类>原子类</h3>
+<p>原子类也就是<strong>Atomic</strong>包下的类.</p>
+<p>在并发环境中,共享资源不能使用int,long double等基本类型,而是使用AtomicXXX等类,例如AtomicInteger,AtomicLong等的incrementAndGet ()方法.</p>
+<p>最常用到的类包括:</p>
+<ul>
+<li>AtomicBoolean：以原子更新的方式更新 boolean.</li>
+<li>AtomicInteger：以原子更新的方式更新 Integer.</li>
+<li>AtomicLong：以原子更新的方式更新 Long.</li>
+</ul>
+<h3 id=并发容器>并发容器</h3>
+<p>前面我们提到过Hashmap,ArrayList是线程不安全的,可以在JUC里面找到它们对应的线程安全类.</p>
+<p>它们对应的替代关系:</p>
+<ul>
+<li>ArrayList -> CopyOnWriteArrayList</li>
+<li>HashSet -> CopyOnWriteArraySet</li>
+<li>TreeSet -> ConcurrentSkipSet</li>
+<li>HashMap -> ConcurrentHashMap</li>
+<li>TreeMap -> ConcurrentSkipListMap</li>
+</ul>
+<h3 id=并发工具>并发工具</h3>
+<p>前面我们提到的原子类以及并发容器都是为了防止线程安全问题,数据不一致问题的发生而设计.</p>
+<p>在并发环境下,完成一个任务可能需要线程之间相互协作,这时候就需要用到并发工具了.</p>
+<p>Java的并发工具包括:</p>
+<ul>
+<li><strong>CountDownLatch</strong> : 倒数器(计数器).举个栗子🌰,赛跑比赛中,裁判得等到选手们都抵达终点,他的任务才算完成.假设裁判和选手都是线程,每一个选手线程抵达终点,裁判线程的倒数器就-1,减到0之后裁判在这阶段的工作才算完成,才可以进行下一阶段的工作.</li>
+<li><strong>Semaphore</strong> : 信号量.用于控制资源能够被并发访问的线程数量，以保证多个线程能够合理的使用特定资源.这个大家应该不陌生了,<strong>生产者消费者模型</strong>就是最典型的应用之一.</li>
+<li><strong>CyclicBarrier</strong> : 栅栏.用于控制线程之间的同步,需要所有线程都到达,然后才能继续执行.赛跑比赛中,所有选手都抵达起跑线之后,比赛才能开始,选手才能开始跑.</li>
+<li><strong>Exchanger</strong> : 用于两个线程在<strong>同步点</strong>交换资源.举个栗子🌰,无间道看过吧,卧底和阿sir到指定地点交换情报或者证据.为什么要强调同步点呢,因为在不同的时候,线程的资源值是不同的,必须要在正确的时间,才能交换到正确的资源,如果卧底提前把情报放在那里,可能会被掉包.</li>
+</ul>
+<h1 id=aqs>AQS</h1>
+<p>队列同步器AQS是<strong>AbstractQueuedSynchronizer</strong>的简称,是JUC的核心类.</p>
+<p>AQS使用了一个int类型的变量表示同步状态,通过内置的FIFO队列来完成线程获取资源的排队工作.
+AQS是<strong>实现锁的关键</strong>.简单来说,它为并发包的各个组件加锁解锁提供了底层支持.</p>
+<p>基本上,JDK的锁(除了关键字synchronized)都有一个内部类Sync,这个Sync一定是继承AQS的.</p>
+<h1 id=cas>CAS</h1>
+<p>CAS = compare and swap 先比较后交换</p>
+<p>CAS是JUC并发包的核心实现,本质是一种<strong>乐观锁,自旋锁</strong>.</p>
+<p>当多线程同时对某资源进行操作时,只能有一个线程操作成功,但不会阻塞其他线程而是通知它们操作失败,最底层调用的是native方法.</p>
+<p>该算法有三个操作数:</p>
+<ul>
+<li>
+<p>内存值V,</p>
+</li>
+<li>
+<p>旧的预期值A,</p>
+</li>
+<li>
+<p>要修改的新值B</p>
+</li>
+</ul>
+<p>当且仅当A和V的值相同时,才将内存值V更新为新值B,否则什么都不做.</p>
+<p>一般情况下，“更新”是一个不断重试的操作(死循环)。</p>
+<p>CAS虽然很高效，但是它也存在三大问题，这里也简单说一下：</p>
+<p><strong>ABA问题</strong></p>
+<p>CAS需要在操作值的时候检查内存值是否发生变化，没有发生变化才会更新内存值。但是如果内存值原来是A，后来变成了B，然后又变成了A，那么CAS进行检查时会发现值没有发生变化，但是实际上是有变化的。ABA问题的解决思路就是在变量前面添加版本号，每次变量更新的时候都把版本号加一，这样变化过程就从“A－B－A”变成了“1A－2B－3A”。</p>
+<p>JDK从1.5开始提供了AtomicStampedReference类来解决ABA问题，具体操作封装在compareAndSet()中。compareAndSet()首先检查当前引用和当前标志与预期引用和预期标志是否相等，如果都相等，则以原子方式将引用值和标志的值设置为给定的更新值。</p>
+<p><strong>循环时间长开销大</strong></p>
+<p>CAS操作如果长时间不成功，会导致其一直自旋，给CPU带来非常大的开销。</p>
+<p><strong>只能保证一个共享变量的原子操作</strong></p>
+<p>对一个共享变量执行操作时，CAS能够保证原子操作，但是对多个共享变量操作时，CAS是无法保证操作的原子性的。</p>
+<p>Java从1.5开始JDK提供了AtomicReference类来保证引用对象之间的原子性，可以把多个变量放在一个对象里来进行CAS操作。</p>
+<h1 id=安全发布对象>安全发布对象</h1>
+<h3 id=发布对象>发布对象</h3>
+<p>使一个对象能够被当前范围之外的代码所使用.</p>
+<h3 id=相对的概念--对象逸出>相对的概念 : 对象逸出</h3>
+<p>一种错误的发布.当一个对象还没有构造完成时,就使它被其它线程所见.</p>
+<h3 id=四种方法>四种方法</h3>
+<ul>
+<li>在静态初始化函数中初始化一个对象引用.</li>
+<li>将对象的引用保存到volatile类型域或者AtomicReference对象中.</li>
+<li>将对象的引用保存到某个正确构造对象的final类型域中.</li>
+<li>将对象的引用保存到一个由锁保护的域中.</li>
+</ul>
+<h1 id=线程不安全类与写法>线程不安全类与写法</h1>
+<ul>
+<li>StringBuilder -> StringBuffer</li>
+<li>SimpleDateFormat -> joda-time or java8的日期api</li>
+<li>ArrayList,HashSet,HashMap等</li>
+<li>非原子性操作,例如先检查再执行: if( condition(a) ) { handle(a); }</li>
+</ul>
+<h1 id=后言>后言</h1>
+<p>本文带大家走马观花地看了一遍并发中比较基础的概念,常见的线程安全问题以及解决方案,意在对于并发编程的全貌有个大致的框图.</p>
+<p>当然了,并发是一个很复杂也很庞大的问题,一篇文章是不支持深入到各个细节去研究的.</p>
+<p>对于本文所提到的各个组件,各种原理,后续会由一系列文章来展开.</p>
+</div>
+<footer class=post-footer>
+<nav class=paginav>
+<a class=prev href=http://euthpic.github.io/tech/%E5%B9%B6%E5%8F%91%E5%AE%B9%E5%99%A8collections/>
+<span class=title>« 上一页</span>
+<br>
+<span>并发容器Collections</span>
+</a>
+<a class=next href=http://euthpic.github.io/tech/%E7%BA%BF%E7%A8%8B%E6%B1%A0executors/>
+<span class=title>下一页 »</span>
+<br>
+<span>线程池Executors</span>
+</a>
+</nav>
+<div class=share-buttons>
+<a target=_blank rel="noopener noreferrer" aria-label="share 关于并发 on twitter" href="https://twitter.com/intent/tweet/?text=%e5%85%b3%e4%ba%8e%e5%b9%b6%e5%8f%91&url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E5%2585%25B3%25E4%25BA%258E%25E5%25B9%25B6%25E5%258F%2591%2f&hashtags="><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 关于并发 on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E5%2585%25B3%25E4%25BA%258E%25E5%25B9%25B6%25E5%258F%2591%2f&title=%e5%85%b3%e4%ba%8e%e5%b9%b6%e5%8f%91&summary=%e5%85%b3%e4%ba%8e%e5%b9%b6%e5%8f%91&source=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E5%2585%25B3%25E4%25BA%258E%25E5%25B9%25B6%25E5%258F%2591%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 关于并发 on reddit" href="https://reddit.com/submit?url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E5%2585%25B3%25E4%25BA%258E%25E5%25B9%25B6%25E5%258F%2591%2f&title=%e5%85%b3%e4%ba%8e%e5%b9%b6%e5%8f%91"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 关于并发 on facebook" href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E5%2585%25B3%25E4%25BA%258E%25E5%25B9%25B6%25E5%258F%2591%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 关于并发 on whatsapp" href="https://api.whatsapp.com/send?text=%e5%85%b3%e4%ba%8e%e5%b9%b6%e5%8f%91%20-%20http%3a%2f%2feuthpic.github.io%2ftech%2f%25E5%2585%25B3%25E4%25BA%258E%25E5%25B9%25B6%25E5%258F%2591%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 关于并发 on telegram" href="https://telegram.me/share/url?text=%e5%85%b3%e4%ba%8e%e5%b9%b6%e5%8f%91&url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E5%2585%25B3%25E4%25BA%258E%25E5%25B9%25B6%25E5%258F%2591%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg>
+</a>
+</div>
+</footer>
+</article>
+</main>
+<footer class=footer>
+<span>&copy; 2022 <a href=http://euthpic.github.io/>乱花渐欲迷人眼</a></span>
+<span>
+Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a>
+</span>
+</footer>
+<a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a>
+<script>let menu=document.getElementById('menu');menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
+<script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script>
+<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
+</body>
+</html>

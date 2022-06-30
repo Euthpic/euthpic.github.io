@@ -1,0 +1,317 @@
+<!doctype html><html lang=zh dir=auto>
+<head><meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=robots content="index, follow">
+<title>线程池Executors | 乱花渐欲迷人眼</title>
+<meta name=keywords content>
+<meta name=description content="线程池好处 重用存在的线程,减少对象创建,销毁的开销 可有效控制最大并发线程数 提供定时执行,定期执行等功能. ThreadPoolExecutor 线程池可以通过ThreadPool">
+<meta name=author content="Guangfa">
+<link rel=canonical href=http://euthpic.github.io/tech/%E7%BA%BF%E7%A8%8B%E6%B1%A0executors/>
+<meta name=yandex-verification content="73b1a797f62c0e98">
+<link crossorigin=anonymous href=/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css integrity="sha256-yIlj/i15RiAA/Q+xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as=style>
+<script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=http://euthpic.github.io/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=http://euthpic.github.io/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=http://euthpic.github.io/favicon-32x32.png>
+<link rel=apple-touch-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<link rel=mask-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<meta name=theme-color content="#2e2e33">
+<meta name=msapplication-TileColor content="#2e2e33">
+<meta name=generator content="Hugo 0.89.4">
+<noscript>
+<style>#theme-toggle,.top-link{display:none}</style>
+<style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style>
+</noscript>
+<script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(a,e,f,g,b,c,d){a.GoogleAnalyticsObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=1,c.src=g,d.parentNode.insertBefore(c,d)}(window,document,'script','https://www.google-analytics.com/analytics.js','ga'),ga('create','UA-136094326-1','auto'),ga('send','pageview'))</script><meta property="og:title" content="线程池Executors">
+<meta property="og:description" content="线程池好处 重用存在的线程,减少对象创建,销毁的开销 可有效控制最大并发线程数 提供定时执行,定期执行等功能. ThreadPoolExecutor 线程池可以通过ThreadPool">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://euthpic.github.io/tech/%E7%BA%BF%E7%A8%8B%E6%B1%A0executors/"><meta property="og:image" content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="article:section" content="tech">
+<meta property="article:published_time" content="2020-06-02T17:27:19+08:00">
+<meta property="article:modified_time" content="2020-06-02T17:27:19+08:00"><meta property="og:site_name" content="乱花渐欲迷人眼">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:image content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name=twitter:title content="线程池Executors">
+<meta name=twitter:description content="线程池好处 重用存在的线程,减少对象创建,销毁的开销 可有效控制最大并发线程数 提供定时执行,定期执行等功能. ThreadPoolExecutor 线程池可以通过ThreadPool">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Teches","item":"http://euthpic.github.io/tech/"},{"@type":"ListItem","position":2,"name":"线程池Executors","item":"http://euthpic.github.io/tech/%E7%BA%BF%E7%A8%8B%E6%B1%A0executors/"}]}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"线程池Executors","name":"线程池Executors","description":"线程池好处 重用存在的线程,减少对象创建,销毁的开销 可有效控制最大并发线程数 提供定时执行,定期执行等功能. ThreadPoolExecutor 线程池可以通过ThreadPool","keywords":[],"articleBody":"线程池好处  重用存在的线程,减少对象创建,销毁的开销 可有效控制最大并发线程数 提供定时执行,定期执行等功能.   ThreadPoolExecutor 线程池可以通过ThreadPoolExecutor生成,以下是它的构造参数:\npublic TheadPoolExecutor(int corePoolSize, int maximumPoolSize,long keepAliveTime,TimeUnit unit, BlockingQueueRunnable workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler) 几个核心参数的作用:\n corePoolSize: 核心线程数量 maximumPoolSize: 最大线程数 workQueue: 任务队列,存储等待执行的任务(有界阻塞) keepAliveTime: 线程没有任务执行时最多保持多久时间 unit: 上面的时间单位 threadFactory: 线程工厂,用于创建线程 rejectHandler: 当队列已满时如何处理任务的策略   任务执行 线程池执行过程,亦即execute()方法的调用过程:\n 提交一个任务,若线程池里的线程数小于corePoolSize时,创建一个新线程去处理提交任务. 如果线程数已经大于等于corePoolSize,新提交的任务会被放入任务队列workQueue排队等待执行. 如果线程数已经大于等于corePoolSize,并且任务队列也已经满了,会判断线程数是否达到maximumPoolSize,若未达到,则创建一个非核心线程来执行提交的任务. 如果线程数已经达到maximumPoolSize,新任务到来之时会采用拒绝策略处理.   四种拒绝策略  AbortPolicy(默认,抛出一个异常) DiscardPolicy(直接丢弃新任务) DiscardOldestPolicy(丢弃队列里最老的任务,将当前任务继续提交给线程池) CallerRunsPolicy(交给线程池调用所在的线程进行处理,即此任务会从异步执行变为同步执行)   线程池异常处理   异常需要主动在任务中用try catch捕获,不会抛出到主线程.\n  如果调用的是submit()方法,异常也可以在FutureTask的get()方法处抛出.\n  也可以为工作线程设置UncaughtExceptionHandler来处理异常.\n  ExecutorService threadPool = Executors.newFixedThreadPool(1, r - { Thread t = new Thread(r); t.setUncaughtExceptionHandler( (t1, e) - { System.out.println(t1.getName() + \"线程抛出的异常\"+e); }); return t; }); threadPool.execute(()-{ Object object = null; System.out.print(\"result## \" + object.toString()); });  工作队列 种类有:\n ArrayBlockingQueue LinkedBlockingQueue DelayQueue PriorityBlockingQueue SynchronousQueue  ArrayBlockingQueue: 用数组实现的有界阻塞队列,FIFO\nLinkedBlockingQueue: 用链表实现的阻塞队列,FIFO,容量可以进行设置,若不设置的话默认无边界.newFixedThreadPool,newSingleThreadExecutor线程池使用了这个队列\nDelayedWorkQueue: 一个任务定期执行的延迟队列,根据指定的执行时间从小到大排序,否则根据入队的先后排序.newScheduledThreadPool线程池使用了这个队列\nPriorityBlockingQueue: 具有优先级的无界阻塞队列\nSynchronousQueue: 一个不存储元素的阻塞队列,只负责移交数据,每个插入操作必须等待另一个线程取出,否则一直处于阻塞状态.newCachedThreadPool线程池使用了这个队列。\n Executors创建的几种常用的线程池   newFixedThreadPool (固定数目线程的线程池) :\n  newCachedThreadPool(线程无限的线程池)\n  newSingleThreadExecutor(单线程的线程池)\n  newScheduledThreadPool(定时或周期执行的线程池)\n  newFixedThreadPool特点 :\n 核心线程数和最大线程数大小一样(数量由用户指定,必须) 没有所谓的非空闲时间,即keepAliveTime为0 阻塞队列为无界队列LinkedBlockingQueue fixed的意思即队列大小适应任务数量,来多少处理多少 不会丢弃任务,但是任务积压过多会导致内存溢出. 适用于CPU密集任务,不适用IO密集任务  newCachedThreadPool特点:\n 核心线程数为0,即所有线程都是非核心线程 最大线程数为Integer.MAX_VALUE 阻塞队列是SynchronousQueue 非核心线程空闲存活为60s 适用并发执行大量短期的小任务  newSingleThreadExecutor特点:\n 核心线程和最大线程都是1 阻塞队列是LinkedBlockingQueue keepAliveTime为0 适用于串行执行任务 串行任务的数量一般不是很大,因此不用担心内存爆炸的问题  newScheduledThreadPool特点:\n 最大线程数是Integer.MAX_VALUE 阻塞队列是DelayedWorkQueue keepAliveTime为0 可选延迟策略有两种:  scheduleAtFixedRate() ：按某种速率周期执行 scheduleWithFixedDelay()：在某个延迟后执行     线程池状态  running: 运行态 shutdown: 调用shutdown()方法后进入此阶段,不再处理新任务,任务队列的任务处理完后会进入tidying stop: 调用shutdownNow()方法后进入此阶段,新任务与任务队列的任务都不处理,当各线程完成后进入tidying tidying: 该状态表明所有任务都运行完毕,可以准备进行销毁 terminated: tidying阶段调用terminated()后进入此阶段(该方法什么也不做),表示线程池彻底终止.   一些思考题   为什么newCachedThreadPool要使用SynchronousQueue队列?\n原因有两个:\n SynchronousQueue结构简单,消费速度比较快,高并发下效率更高些. SynchronousQueue适用于生产与消费速率一致的情况,而当队列中有新任务之后,newCachedThreadPool能马上新建线程去消费任务,因此能发挥SynchronousQueue的高性能优势    ","wordCount":"2131","inLanguage":"zh","datePublished":"2020-06-02T17:27:19+08:00","dateModified":"2020-06-02T17:27:19+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/%E7%BA%BF%E7%A8%8B%E6%B1%A0executors/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
+</head>
+<body id=top>
+<script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
+<header class=header>
+<nav class=nav>
+<div class=logo>
+<a href=http://euthpic.github.io/ accesskey=h title="🏡 乱花渐欲迷人眼 (Alt + H)">🏡 乱花渐欲迷人眼</a>
+<span class=logo-switches>
+<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+</span>
+</div>
+<ul id=menu>
+<li>
+<a href=http://euthpic.github.io/categories/ title="📔 系列">
+<span>📔 系列</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/tags/ title="🏷️ 标签">
+<span>🏷️ 标签</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/search/ title="🔍 搜索 (Alt + /)" accesskey=/>
+<span>🔍 搜索</span>
+</a>
+</li>
+<li>
+<a href=https://travellings.link title=🚇>
+<span>🚇</span>
+</a>
+</li>
+</ul>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-header>
+<div class=breadcrumbs><a href=http://euthpic.github.io/>主页</a>&nbsp;»&nbsp;<a href=http://euthpic.github.io/tech/>Teches</a></div>
+<h1 class=post-title>
+线程池Executors
+</h1>
+<div class=post-meta><span title="2020-06-02 17:27:19 +0800 CST">June 2, 2020</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;Guangfa&nbsp;|&nbsp;<a href=https://github.com/euthpic/euthpic.github.io/edit/main/content/tech/%e7%ba%bf%e7%a8%8b%e6%b1%a0Executors.md rel="noopener noreferrer" target=_blank>PR</a>
+</div>
+</header> <div class=toc>
+<details open>
+<summary accesskey=c title="(Alt + C)">
+<span class=details>目录</span>
+</summary>
+<div class=inner><ul>
+<li>
+<a href=#%e7%ba%bf%e7%a8%8b%e6%b1%a0%e5%a5%bd%e5%a4%84 aria-label=线程池好处>线程池好处</a></li>
+<li>
+<a href=#threadpoolexecutor aria-label=ThreadPoolExecutor>ThreadPoolExecutor</a></li>
+<li>
+<a href=#%e4%bb%bb%e5%8a%a1%e6%89%a7%e8%a1%8c aria-label=任务执行>任务执行</a></li>
+<li>
+<a href=#%e5%9b%9b%e7%a7%8d%e6%8b%92%e7%bb%9d%e7%ad%96%e7%95%a5 aria-label=四种拒绝策略>四种拒绝策略</a></li>
+<li>
+<a href=#%e7%ba%bf%e7%a8%8b%e6%b1%a0%e5%bc%82%e5%b8%b8%e5%a4%84%e7%90%86 aria-label=线程池异常处理>线程池异常处理</a></li>
+<li>
+<a href=#%e5%b7%a5%e4%bd%9c%e9%98%9f%e5%88%97 aria-label=工作队列>工作队列</a></li>
+<li>
+<a href=#executors%e5%88%9b%e5%bb%ba%e7%9a%84%e5%87%a0%e7%a7%8d%e5%b8%b8%e7%94%a8%e7%9a%84%e7%ba%bf%e7%a8%8b%e6%b1%a0 aria-label=Executors创建的几种常用的线程池>Executors创建的几种常用的线程池</a></li>
+<li>
+<a href=#%e7%ba%bf%e7%a8%8b%e6%b1%a0%e7%8a%b6%e6%80%81 aria-label=线程池状态>线程池状态</a></li>
+<li>
+<a href=#%e4%b8%80%e4%ba%9b%e6%80%9d%e8%80%83%e9%a2%98 aria-label=一些思考题>一些思考题</a>
+</li>
+</ul>
+</div>
+</details>
+</div>
+<div class=post-content><h3 id=线程池好处>线程池好处</h3>
+<ul>
+<li>重用存在的线程,减少对象创建,销毁的开销</li>
+<li>可有效控制最大并发线程数</li>
+<li>提供定时执行,定期执行等功能.</li>
+</ul>
+<hr>
+<h3 id=threadpoolexecutor>ThreadPoolExecutor</h3>
+<p>线程池可以通过ThreadPoolExecutor生成,以下是它的构造参数:</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#66d9ef>public</span> <span style=color:#a6e22e>TheadPoolExecutor</span><span style=color:#f92672>(</span><span style=color:#66d9ef>int</span> corePoolSize<span style=color:#f92672>,</span> <span style=color:#66d9ef>int</span> maximumPoolSize<span style=color:#f92672>,</span><span style=color:#66d9ef>long</span> keepAliveTime<span style=color:#f92672>,</span>TimeUnit unit<span style=color:#f92672>,</span>
+   BlockingQueue<span style=color:#f92672>&lt;</span>Runnable<span style=color:#f92672>&gt;</span> workQueue<span style=color:#f92672>,</span>
+   ThreadFactory threadFactory<span style=color:#f92672>,</span>
+   RejectedExecutionHandler handler<span style=color:#f92672>)</span> 
+
+</code></pre></div><p>几个核心参数的作用:</p>
+<ul>
+<li>corePoolSize: 核心线程数量</li>
+<li>maximumPoolSize: 最大线程数</li>
+<li>workQueue: 任务队列,存储等待执行的任务(有界阻塞)</li>
+<li>keepAliveTime: 线程没有任务执行时最多保持多久时间</li>
+<li>unit: 上面的时间单位</li>
+<li>threadFactory: 线程工厂,用于创建线程</li>
+<li>rejectHandler: 当队列已满时如何处理任务的策略</li>
+</ul>
+<hr>
+<h3 id=任务执行>任务执行</h3>
+<p>线程池执行过程,亦即execute()方法的调用过程:</p>
+<p><img loading=lazy src=https://user-gold-cdn.xitu.io/2019/7/7/16bca03a5a6fd78f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1 alt=img>
+</p>
+<ul>
+<li>提交一个任务,若线程池里的线程数小于corePoolSize时,创建一个新线程去处理提交任务.</li>
+<li>如果线程数已经大于等于corePoolSize,新提交的任务会被放入任务队列workQueue排队等待执行.</li>
+<li>如果线程数已经大于等于corePoolSize,并且任务队列也已经满了,会判断线程数是否达到maximumPoolSize,若未达到,则创建一个非核心线程来执行提交的任务.</li>
+<li>如果线程数已经达到maximumPoolSize,新任务到来之时会采用拒绝策略处理.</li>
+</ul>
+<hr>
+<h3 id=四种拒绝策略>四种拒绝策略</h3>
+<ul>
+<li>AbortPolicy(默认,抛出一个异常)</li>
+<li>DiscardPolicy(直接丢弃新任务)</li>
+<li>DiscardOldestPolicy(丢弃队列里最老的任务,将当前任务继续提交给线程池)</li>
+<li>CallerRunsPolicy(交给线程池调用所在的线程进行处理,即此任务会从异步执行变为同步执行)</li>
+</ul>
+<hr>
+<h3 id=线程池异常处理>线程池异常处理</h3>
+<ul>
+<li>
+<p>异常需要主动在任务中用try catch捕获,不会抛出到主线程.</p>
+</li>
+<li>
+<p>如果调用的是submit()方法,异常也可以在FutureTask的get()方法处抛出.</p>
+</li>
+<li>
+<p>也可以为工作线程设置UncaughtExceptionHandler来处理异常.</p>
+</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>ExecutorService threadPool <span style=color:#f92672>=</span> Executors<span style=color:#f92672>.</span><span style=color:#a6e22e>newFixedThreadPool</span><span style=color:#f92672>(</span>1<span style=color:#f92672>,</span> r <span style=color:#f92672>-&gt;</span> <span style=color:#f92672>{</span>
+            Thread t <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Thread<span style=color:#f92672>(</span>r<span style=color:#f92672>);</span>
+            t<span style=color:#f92672>.</span><span style=color:#a6e22e>setUncaughtExceptionHandler</span><span style=color:#f92672>(</span>
+                    <span style=color:#f92672>(</span>t1<span style=color:#f92672>,</span> e<span style=color:#f92672>)</span> <span style=color:#f92672>-&gt;</span> <span style=color:#f92672>{</span>
+                        System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>println</span><span style=color:#f92672>(</span>t1<span style=color:#f92672>.</span><span style=color:#a6e22e>getName</span><span style=color:#f92672>()</span> <span style=color:#f92672>+</span> <span style=color:#e6db74>&#34;线程抛出的异常&#34;</span><span style=color:#f92672>+</span>e<span style=color:#f92672>);</span>
+                    <span style=color:#f92672>});</span>
+            <span style=color:#66d9ef>return</span> t<span style=color:#f92672>;</span>
+           <span style=color:#f92672>});</span>
+        threadPool<span style=color:#f92672>.</span><span style=color:#a6e22e>execute</span><span style=color:#f92672>(()-&gt;{</span>
+            Object object <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span><span style=color:#f92672>;</span>
+            System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>print</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;result## &#34;</span> <span style=color:#f92672>+</span> object<span style=color:#f92672>.</span><span style=color:#a6e22e>toString</span><span style=color:#f92672>());</span>
+        <span style=color:#f92672>});</span>
+
+</code></pre></div><hr>
+<h3 id=工作队列>工作队列</h3>
+<p>种类有:</p>
+<ul>
+<li>ArrayBlockingQueue</li>
+<li>LinkedBlockingQueue</li>
+<li>DelayQueue</li>
+<li>PriorityBlockingQueue</li>
+<li>SynchronousQueue</li>
+</ul>
+<p>ArrayBlockingQueue: 用数组实现的有界阻塞队列,FIFO</p>
+<p>LinkedBlockingQueue: 用链表实现的阻塞队列,FIFO,容量可以进行设置,若不设置的话默认无边界.newFixedThreadPool,newSingleThreadExecutor线程池使用了这个队列</p>
+<p>DelayedWorkQueue: 一个任务定期执行的延迟队列,根据指定的执行时间从小到大排序,否则根据入队的先后排序.newScheduledThreadPool线程池使用了这个队列</p>
+<p>PriorityBlockingQueue: 具有优先级的无界阻塞队列</p>
+<p>SynchronousQueue: 一个不存储元素的阻塞队列,只负责移交数据,每个插入操作必须等待另一个线程取出,否则一直处于阻塞状态.newCachedThreadPool线程池使用了这个队列。</p>
+<hr>
+<h3 id=executors创建的几种常用的线程池>Executors创建的几种常用的线程池</h3>
+<ul>
+<li>
+<p>newFixedThreadPool (固定数目线程的线程池) :</p>
+</li>
+<li>
+<p>newCachedThreadPool(线程无限的线程池)</p>
+</li>
+<li>
+<p>newSingleThreadExecutor(单线程的线程池)</p>
+</li>
+<li>
+<p>newScheduledThreadPool(定时或周期执行的线程池)</p>
+</li>
+</ul>
+<p>newFixedThreadPool特点 :</p>
+<ul>
+<li>核心线程数和最大线程数大小一样(数量由用户指定,必须)</li>
+<li>没有所谓的非空闲时间,即keepAliveTime为0</li>
+<li>阻塞队列为无界队列LinkedBlockingQueue</li>
+<li>fixed的意思即队列大小适应任务数量,来多少处理多少</li>
+<li>不会丢弃任务,但是任务积压过多会导致内存溢出.</li>
+<li>适用于CPU密集任务,不适用IO密集任务</li>
+</ul>
+<p>newCachedThreadPool特点:</p>
+<ul>
+<li>核心线程数为0,即所有线程都是非核心线程</li>
+<li>最大线程数为Integer.MAX_VALUE</li>
+<li>阻塞队列是SynchronousQueue</li>
+<li>非核心线程空闲存活为60s</li>
+<li>适用并发执行大量短期的小任务</li>
+</ul>
+<p>newSingleThreadExecutor特点:</p>
+<ul>
+<li>核心线程和最大线程都是1</li>
+<li>阻塞队列是LinkedBlockingQueue</li>
+<li>keepAliveTime为0</li>
+<li>适用于串行执行任务</li>
+<li>串行任务的数量一般不是很大,因此不用担心内存爆炸的问题</li>
+</ul>
+<p>newScheduledThreadPool特点:</p>
+<ul>
+<li>最大线程数是Integer.MAX_VALUE</li>
+<li>阻塞队列是DelayedWorkQueue</li>
+<li>keepAliveTime为0</li>
+<li>可选延迟策略有两种:
+<ul>
+<li>scheduleAtFixedRate() ：按某种速率周期执行</li>
+<li>scheduleWithFixedDelay()：在某个延迟后执行</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id=线程池状态>线程池状态</h3>
+<p><img loading=lazy src=https://tvax1.sinaimg.cn/large/006P3Jr6gy1h3qiy6kp6lj30kc081mya.jpg alt=image>
+</p>
+<ul>
+<li>running: 运行态</li>
+<li>shutdown: 调用shutdown()方法后进入此阶段,不再处理新任务,任务队列的任务处理完后会进入tidying</li>
+<li>stop: 调用shutdownNow()方法后进入此阶段,新任务与任务队列的任务都不处理,当各线程完成后进入tidying</li>
+<li>tidying: 该状态表明所有任务都运行完毕,可以准备进行销毁</li>
+<li>terminated: tidying阶段调用terminated()后进入此阶段(该方法什么也不做),表示线程池彻底终止.</li>
+</ul>
+<hr>
+<h3 id=一些思考题>一些思考题</h3>
+<ol>
+<li>
+<p>为什么newCachedThreadPool要使用SynchronousQueue队列?</p>
+<p>原因有两个:</p>
+<ul>
+<li>SynchronousQueue结构简单,消费速度比较快,高并发下效率更高些.</li>
+<li>SynchronousQueue适用于生产与消费速率一致的情况,而当队列中有新任务之后,newCachedThreadPool能马上新建线程去消费任务,因此能发挥SynchronousQueue的高性能优势</li>
+</ul>
+</li>
+</ol>
+</div>
+<footer class=post-footer>
+<nav class=paginav>
+<a class=prev href=http://euthpic.github.io/tech/%E5%85%B3%E4%BA%8E%E5%B9%B6%E5%8F%91/>
+<span class=title>« 上一页</span>
+<br>
+<span>关于并发</span>
+</a>
+<a class=next href=http://euthpic.github.io/tech/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/>
+<span class=title>下一页 »</span>
+<br>
+<span>线程安全</span>
+</a>
+</nav>
+<div class=share-buttons>
+<a target=_blank rel="noopener noreferrer" aria-label="share 线程池Executors on twitter" href="https://twitter.com/intent/tweet/?text=%e7%ba%bf%e7%a8%8b%e6%b1%a0Executors&url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E7%25BA%25BF%25E7%25A8%258B%25E6%25B1%25A0executors%2f&hashtags="><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 线程池Executors on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E7%25BA%25BF%25E7%25A8%258B%25E6%25B1%25A0executors%2f&title=%e7%ba%bf%e7%a8%8b%e6%b1%a0Executors&summary=%e7%ba%bf%e7%a8%8b%e6%b1%a0Executors&source=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E7%25BA%25BF%25E7%25A8%258B%25E6%25B1%25A0executors%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 线程池Executors on reddit" href="https://reddit.com/submit?url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E7%25BA%25BF%25E7%25A8%258B%25E6%25B1%25A0executors%2f&title=%e7%ba%bf%e7%a8%8b%e6%b1%a0Executors"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 线程池Executors on facebook" href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E7%25BA%25BF%25E7%25A8%258B%25E6%25B1%25A0executors%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 线程池Executors on whatsapp" href="https://api.whatsapp.com/send?text=%e7%ba%bf%e7%a8%8b%e6%b1%a0Executors%20-%20http%3a%2f%2feuthpic.github.io%2ftech%2f%25E7%25BA%25BF%25E7%25A8%258B%25E6%25B1%25A0executors%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 线程池Executors on telegram" href="https://telegram.me/share/url?text=%e7%ba%bf%e7%a8%8b%e6%b1%a0Executors&url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E7%25BA%25BF%25E7%25A8%258B%25E6%25B1%25A0executors%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg>
+</a>
+</div>
+</footer>
+</article>
+</main>
+<footer class=footer>
+<span>&copy; 2022 <a href=http://euthpic.github.io/>乱花渐欲迷人眼</a></span>
+<span>
+Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a>
+</span>
+</footer>
+<a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a>
+<script>let menu=document.getElementById('menu');menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
+<script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script>
+<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
+</body>
+</html>

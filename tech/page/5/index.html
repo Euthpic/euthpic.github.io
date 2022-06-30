@@ -74,63 +74,63 @@
 </header>
 <article class=post-entry>
 <header class=entry-header>
-<h2>Scala简易笔记
+<h2>B+树 vs. B-树
 </h2>
 </header>
 <section class=entry-content>
-<p>看完&lt;快学scala>的一些笔记. 该书的课后练习参考答案: https://github.com/vybae/scala-hello 类型推断错误有时候ide检测不出来 ide联想到的api不能总是及时展...</p>
+<p>前言 MySQL的主要索引是B+树,为了之后能更好地专注MySQL本身的内容,所以把底层存储结构B+树的内容抽出来先单独分析. 为什么MySQL...</p>
 </section>
-<footer class=entry-footer><span title="2020-07-14 14:00:29 +0800 CST">July 14, 2020</span>&nbsp;·&nbsp;9 分钟&nbsp;·&nbsp;Guangfa</footer>
-<a class=entry-link aria-label="post link to Scala简易笔记" href=http://euthpic.github.io/tech/scala%E7%AE%80%E6%98%93%E7%AC%94%E8%AE%B0/></a>
+<footer class=entry-footer><span title="2020-06-18 16:27:19 +0800 CST">June 18, 2020</span>&nbsp;·&nbsp;3 分钟&nbsp;·&nbsp;Guangfa</footer>
+<a class=entry-link aria-label="post link to B+树 vs. B-树" href=http://euthpic.github.io/tech/b+%E6%A0%91-vs.-b-%E6%A0%91/></a>
 </article>
 <article class=post-entry>
 <header class=entry-header>
-<h2>Scala基础练习
+<h2>SQL语句是如何执行的
 </h2>
 </header>
 <section class=entry-content>
-<p>import java.io.{PrintWriter} import scala.collection.mutable import scala.io.{Source, StdIn} import scala.reflect.io.File case class Person(id: Int, name: String, age: Int) /** * Scala 基本笔记 */ object ScalaLesson extends App { /** * 基础-算术 */ def lesson1() = { println(1.+(2)) println(2.-(2)) println(2.*(2)) println(2./(2)) println(10 max 2) } /** * 基础-重载 */ def lesson2() = { val str = "Hello"(2) //等同...</p>
+<p>思维导图 前言 整理了MySQL的笔记后,我做了上面这张图.不过看了林晓斌老师的专栏后,我在这篇文章里并不打算直接陷入这些细节中了,而是从各个常...</p>
 </section>
-<footer class=entry-footer><span title="2020-07-13 15:14:19 +0800 CST">July 13, 2020</span>&nbsp;·&nbsp;14 分钟&nbsp;·&nbsp;Guangfa</footer>
-<a class=entry-link aria-label="post link to Scala基础练习" href=http://euthpic.github.io/tech/scala%E5%9F%BA%E7%A1%80%E7%BB%83%E4%B9%A0/></a>
+<footer class=entry-footer><span title="2020-06-16 10:27:19 +0800 CST">June 16, 2020</span>&nbsp;·&nbsp;8 分钟&nbsp;·&nbsp;Guangfa</footer>
+<a class=entry-link aria-label="post link to SQL语句是如何执行的" href=http://euthpic.github.io/tech/sql%E8%AF%AD%E5%8F%A5%E6%98%AF%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8C%E7%9A%84/></a>
 </article>
 <article class=post-entry>
 <header class=entry-header>
-<h2>Redis主从同步原理
+<h2>队列同步器AQS
 </h2>
 </header>
 <section class=entry-content>
-<p>前面我们提到的持久化,内存淘汰,管道等机制都是Redis在单个实例上的功能,但是随着系统并发量的不断升高,单个实例的redis就很难继续满足...</p>
+<p>概念: 队列同步器AQS是AbstractQueuedSynchronizer的简称,是JUC的核心类.AQS使用了一个int类型的变量表示同...</p>
 </section>
-<footer class=entry-footer><span title="2020-06-25 22:44:19 +0800 CST">June 25, 2020</span>&nbsp;·&nbsp;7 分钟&nbsp;·&nbsp;Guangfa</footer>
-<a class=entry-link aria-label="post link to Redis主从同步原理" href=http://euthpic.github.io/tech/redis%E4%B8%BB%E4%BB%8E%E5%90%8C%E6%AD%A5%E5%8E%9F%E7%90%86/></a>
+<footer class=entry-footer><span title="2020-06-02 20:27:19 +0800 CST">June 2, 2020</span>&nbsp;·&nbsp;6 分钟&nbsp;·&nbsp;Guangfa</footer>
+<a class=entry-link aria-label="post link to 队列同步器AQS" href=http://euthpic.github.io/tech/%E9%98%9F%E5%88%97%E5%90%8C%E6%AD%A5%E5%99%A8aqs/></a>
 </article>
 <article class=post-entry>
 <header class=entry-header>
-<h2>Redis内存淘汰机制与IO模型
+<h2>并发容器Collections
 </h2>
 </header>
 <section class=entry-content>
-<p>过期key的删除策略 Redis所有的键都可以设置过期时间. 思考一个问题,所有到期的键都一定会被删除吗? 假设同一时间内redis上有大量的ke...</p>
+<p>含义: JUC是java.util.concurrent工具包的简称,专门负责处理线程 ArrayList -> CopyOnWriteArrayList 内部持有一个可重入锁ReentrantLock,增...</p>
 </section>
-<footer class=entry-footer><span title="2020-06-25 21:44:19 +0800 CST">June 25, 2020</span>&nbsp;·&nbsp;12 分钟&nbsp;·&nbsp;Guangfa</footer>
-<a class=entry-link aria-label="post link to Redis内存淘汰机制与IO模型" href=http://euthpic.github.io/tech/redis%E5%86%85%E5%AD%98%E6%B7%98%E6%B1%B0%E6%9C%BA%E5%88%B6%E4%B8%8Eio%E6%A8%A1%E5%9E%8B/></a>
+<footer class=entry-footer><span title="2020-06-02 19:27:19 +0800 CST">June 2, 2020</span>&nbsp;·&nbsp;4 分钟&nbsp;·&nbsp;Guangfa</footer>
+<a class=entry-link aria-label="post link to 并发容器Collections" href=http://euthpic.github.io/tech/%E5%B9%B6%E5%8F%91%E5%AE%B9%E5%99%A8collections/></a>
 </article>
 <article class=post-entry>
 <header class=entry-header>
-<h2>Redis持久化原理
+<h2>关于并发
 </h2>
 </header>
 <section class=entry-content>
-<p>上一次我们介绍了Redis的数据类型,应用场景,单线程模型以及与Memcached的比较.今天继续介绍它的持久化. 持久化 Redis的数据是存...</p>
+<p>前面我们介绍map和list的时候说过,它们是线程不安全的. 在并发环境下,线程安全是必须要关注的问题,所以今天这篇文章就围绕线程安全这个话题...</p>
 </section>
-<footer class=entry-footer><span title="2020-06-25 20:44:19 +0800 CST">June 25, 2020</span>&nbsp;·&nbsp;8 分钟&nbsp;·&nbsp;Guangfa</footer>
-<a class=entry-link aria-label="post link to Redis持久化原理" href=http://euthpic.github.io/tech/redis%E6%8C%81%E4%B9%85%E5%8C%96%E5%8E%9F%E7%90%86/></a>
+<footer class=entry-footer><span title="2020-06-02 18:27:19 +0800 CST">June 2, 2020</span>&nbsp;·&nbsp;11 分钟&nbsp;·&nbsp;Guangfa</footer>
+<a class=entry-link aria-label="post link to 关于并发" href=http://euthpic.github.io/tech/%E5%85%B3%E4%BA%8E%E5%B9%B6%E5%8F%91/></a>
 </article>
 <footer class=page-footer>
 <nav class=pagination>
-<a class=prev href=http://euthpic.github.io/tech/page/2/>« 上一页</a>
-<a class=next href=http://euthpic.github.io/tech/page/4/>下一页 »</a>
+<a class=prev href=http://euthpic.github.io/tech/page/4/>« 上一页</a>
+<a class=next href=http://euthpic.github.io/tech/page/6/>下一页 »</a>
 </nav>
 </footer>
 </main>

@@ -1,0 +1,245 @@
+<!doctype html><html lang=zh dir=auto>
+<head><meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=robots content="index, follow">
+<title>关于缓存 | 乱花渐欲迷人眼</title>
+<meta name=keywords content>
+<meta name=description content="何时该用缓存 某些应用消耗大量CPU去计算,例如正则表达式,就可以考虑将结果缓存下来 数据库连接池比较繁忙,经常报出连接不够的报警,也该考虑缓存">
+<meta name=author content="Guangfa">
+<link rel=canonical href=http://euthpic.github.io/tech/%E7%BC%93%E5%AD%98/>
+<meta name=yandex-verification content="73b1a797f62c0e98">
+<link crossorigin=anonymous href=/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css integrity="sha256-yIlj/i15RiAA/Q+xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as=style>
+<script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=http://euthpic.github.io/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=http://euthpic.github.io/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=http://euthpic.github.io/favicon-32x32.png>
+<link rel=apple-touch-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<link rel=mask-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<meta name=theme-color content="#2e2e33">
+<meta name=msapplication-TileColor content="#2e2e33">
+<meta name=generator content="Hugo 0.89.4">
+<noscript>
+<style>#theme-toggle,.top-link{display:none}</style>
+<style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style>
+</noscript>
+<script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(a,e,f,g,b,c,d){a.GoogleAnalyticsObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=1,c.src=g,d.parentNode.insertBefore(c,d)}(window,document,'script','https://www.google-analytics.com/analytics.js','ga'),ga('create','UA-136094326-1','auto'),ga('send','pageview'))</script><meta property="og:title" content="关于缓存">
+<meta property="og:description" content="何时该用缓存 某些应用消耗大量CPU去计算,例如正则表达式,就可以考虑将结果缓存下来 数据库连接池比较繁忙,经常报出连接不够的报警,也该考虑缓存">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://euthpic.github.io/tech/%E7%BC%93%E5%AD%98/"><meta property="og:image" content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="article:section" content="tech">
+<meta property="article:published_time" content="2020-06-02T16:27:19+08:00">
+<meta property="article:modified_time" content="2020-06-02T16:27:19+08:00"><meta property="og:site_name" content="乱花渐欲迷人眼">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:image content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name=twitter:title content="关于缓存">
+<meta name=twitter:description content="何时该用缓存 某些应用消耗大量CPU去计算,例如正则表达式,就可以考虑将结果缓存下来 数据库连接池比较繁忙,经常报出连接不够的报警,也该考虑缓存">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Teches","item":"http://euthpic.github.io/tech/"},{"@type":"ListItem","position":2,"name":"关于缓存","item":"http://euthpic.github.io/tech/%E7%BC%93%E5%AD%98/"}]}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"关于缓存","name":"关于缓存","description":"何时该用缓存 某些应用消耗大量CPU去计算,例如正则表达式,就可以考虑将结果缓存下来 数据库连接池比较繁忙,经常报出连接不够的报警,也该考虑缓存","keywords":[],"articleBody":"何时该用缓存  某些应用消耗大量CPU去计算,例如正则表达式,就可以考虑将结果缓存下来 数据库连接池比较繁忙,经常报出连接不够的报警,也该考虑缓存  缓存的选择 ​\t单机缓存用guava或者caffeine,分布式用redis.\n​\t本地缓存用guava或者caffeine,远程用redis.\n​\t数据量不是很大,数据更新频率较低,可以使用本地缓存guava;如果数据量更新频繁,也想使用进程缓存的话,可以将其过期时间设置为较短,或者设置较短的自动刷新时间.\n二级缓存方案 ​\t利用 Caffeine 做一级缓存，Redis 作为二级缓存，步骤如下：\n 首先去 Caffeine 中查询数据，如果有直接返回。如果没有则进行第 2 步。 再去 Redis 中查询，如果查询到了返回数据并在 Caffeine 中填充此数据。如果没有查到则进行第 3 步。 最后去 MySQL 中查询，如果查询到了返回数据并在 Redis，Caffeine 中依次填充此数据。  对于 Caffeine 的缓存，如果有数据更新，只能删除更新数据的那台机器上的缓存，其他机器只能通过超时来过期缓存，超时设定可以有两种策略：\n 设置成写入后多少时间后过期。 设置成写入后多少时间刷新。  对于 Redis 的缓存更新，其他机器立刻可见，但是也必须要设置超时时间，其时间比 Caffeine 的过期长。\n缓存更新 ​\t一般来说缓存的更新有两种情况：\n 先删除缓存，再更新数据库。 先更新数据库，再删除缓存。  1.先删除缓存再更新DB\n结论：产生脏数据的概率较大（若出现脏数据，则意味着再不更新的情况下，查询得到的数据均为旧的数据）(这种情况问题可能出在写数据库期间)\n比如：两个并发操作，一个是更新操作，另一个是查询操作，更新操作删除缓存后，查询操作没有命中缓存，先把老数据读出来后放到缓存中，然后更新操作更新了数据库。于是，在缓存中的数据还是老的数据，导致缓存中的数据是脏的，而且还一直这样脏下去了。\n2.先更新DB再删除缓存（使用场景多）\n结论：产生脏数据的概率较小，但是会出现一致性的问题；若更新操作的时候，同时进行查询操作，若hit，则查询得到的数据是旧的数据。但是不会影响后面的查询。（代价较小）(这种情况问题可能出现在删除缓存期间)\n（ 一个是查询操作，一个是更新操作的并发，首先，没有了删除cache数据的操作了，而是先更新了数据库中的数据，此时，缓存依然有效，所以，并发的查询操作拿的是没有更新的数据，但是，更新操作马上让缓存的失效了，后续的查询操作再把数据从数据库中拉出来。而不会像文章开头的那个逻辑产生的问题，后续的查询操作一直都在取老的数据。）\n该设计模式产生脏数据的可能情况：\n一个是读操作，但是没有命中缓存，然后就到数据库中取数据，此时来了一个写操作，写完数据库后，让缓存失效;然后,之前的那个读操作再把老的数据放进去，所以，会造成脏数据。\n该情况出现的概率可能非常低，因为这个条件需要发生在读缓存时缓存失效，而且并发着有一个写操作。而实际上数据库的写操作会比读操作慢得多，而且还要锁表，而读操作必需在写操作前进入数据库操作，而又要晚于写操作更新缓存，所有的这些条件都具备的概率基本并不大。\n缓存挖坑三剑客 缓存穿透  定义:\t查询的数据在数据库不存在,所以缓存中也不会有,永远都无法命中而会去数据库查询,给数据库增加了无用的请求 解决方案: 对于返回为NULL的数据依然缓存一个自定义的值,并且设置较短的超时时间来减少缓存的维护成本.对于抛出异常的返回不进行缓存 优化思路: 制定一些规则过滤一些不可能存在的数据，小数据用 BitMap，大数据可以用布隆过滤器。比如你的订单 ID 明显是在一个范围 1-1000，如果不是 1-1000 之内的数据那其实可以直接给过滤掉。  缓存雪崩  定义:\t是指缓存不可用或者大量缓存由于超时时间相同在同一时间段失效,大量请求直接访问数据库,数据库压力过大导致系统雪崩 解决方案:  采用多级缓存,不同级别缓存设置的超时时间不同 缓存根据类别来设置过期时间,例如热门数据过期时间长(或永不过期),冷门数据过期时间短   优化思路:  缓存击穿   定义:\t跟缓存雪崩很像,都是由于缓存过期导致大量请求直接访问数据库,不同的是雪崩是一大片同时失效(面),击穿是某个热点数据失效(点).\n  解决方案:\n 加分布式锁:加载数据的时候可以利用分布式锁锁住这个数据的key,在redis中直接使用setNX操作即可,对于获取到这个锁的线程,查询数据库更新缓存,其他线程采取重试策略,这样数据库同一时间只能有一个线程来访问. 异步加载:对热点数据采取到期自动刷新的策略,而不是到期自动淘汰.    优化思路:\n  缓存的监控 ​\t缓存上线之后统计获取缓存的情况(成功,不存在,过期还是失败等),继而可有效对于统计情况来对缓存的参数进行优化\n一般避免以上情况发生我们从三个时间段去分析下：\n 事前：Redis 高可用，主从+哨兵，Redis cluster，避免全盘崩溃。 事中：本地 ehcache 缓存 + Hystrix 限流+降级，避免MySQL 被打死。 事后：Redis 持久化 RDB+AOF，一旦重启，自动从磁盘上加载数据，快速恢复缓存数据。   一致性哈希 简单哈希可用于数据分区,但机器变动的时候可能会发生数据迁移.而一致性哈希算法可减少因机器变动而带来的数据迁移量)仅会影响相邻的机器.\n ","wordCount":"2072","inLanguage":"zh","datePublished":"2020-06-02T16:27:19+08:00","dateModified":"2020-06-02T16:27:19+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/%E7%BC%93%E5%AD%98/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
+</head>
+<body id=top>
+<script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
+<header class=header>
+<nav class=nav>
+<div class=logo>
+<a href=http://euthpic.github.io/ accesskey=h title="🏡 乱花渐欲迷人眼 (Alt + H)">🏡 乱花渐欲迷人眼</a>
+<span class=logo-switches>
+<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+</span>
+</div>
+<ul id=menu>
+<li>
+<a href=http://euthpic.github.io/categories/ title="📔 系列">
+<span>📔 系列</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/tags/ title="🏷️ 标签">
+<span>🏷️ 标签</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/search/ title="🔍 搜索 (Alt + /)" accesskey=/>
+<span>🔍 搜索</span>
+</a>
+</li>
+<li>
+<a href=https://travellings.link title=🚇>
+<span>🚇</span>
+</a>
+</li>
+</ul>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-header>
+<div class=breadcrumbs><a href=http://euthpic.github.io/>主页</a>&nbsp;»&nbsp;<a href=http://euthpic.github.io/tech/>Teches</a></div>
+<h1 class=post-title>
+关于缓存
+</h1>
+<div class=post-meta><span title="2020-06-02 16:27:19 +0800 CST">June 2, 2020</span>&nbsp;·&nbsp;5 分钟&nbsp;·&nbsp;Guangfa&nbsp;|&nbsp;<a href=https://github.com/euthpic/euthpic.github.io/edit/main/content/tech/%e7%bc%93%e5%ad%98.md rel="noopener noreferrer" target=_blank>PR</a>
+</div>
+</header> <div class=toc>
+<details open>
+<summary accesskey=c title="(Alt + C)">
+<span class=details>目录</span>
+</summary>
+<div class=inner><ul>
+<li>
+<a href=#%e4%bd%95%e6%97%b6%e8%af%a5%e7%94%a8%e7%bc%93%e5%ad%98 aria-label=何时该用缓存>何时该用缓存</a></li>
+<li>
+<a href=#%e7%bc%93%e5%ad%98%e7%9a%84%e9%80%89%e6%8b%a9 aria-label=缓存的选择>缓存的选择</a></li>
+<li>
+<a href=#%e4%ba%8c%e7%ba%a7%e7%bc%93%e5%ad%98%e6%96%b9%e6%a1%88 aria-label=二级缓存方案>二级缓存方案</a></li>
+<li>
+<a href=#%e7%bc%93%e5%ad%98%e6%9b%b4%e6%96%b0 aria-label=缓存更新>缓存更新</a></li>
+<li>
+<a href=#%e7%bc%93%e5%ad%98%e6%8c%96%e5%9d%91%e4%b8%89%e5%89%91%e5%ae%a2 aria-label=缓存挖坑三剑客>缓存挖坑三剑客</a><ul>
+<li>
+<a href=#%e7%bc%93%e5%ad%98%e7%a9%bf%e9%80%8f aria-label=缓存穿透>缓存穿透</a></li>
+<li>
+<a href=#%e7%bc%93%e5%ad%98%e9%9b%aa%e5%b4%a9 aria-label=缓存雪崩>缓存雪崩</a></li>
+<li>
+<a href=#%e7%bc%93%e5%ad%98%e5%87%bb%e7%a9%bf aria-label=缓存击穿>缓存击穿</a></li></ul>
+</li>
+<li>
+<a href=#%e7%bc%93%e5%ad%98%e7%9a%84%e7%9b%91%e6%8e%a7 aria-label=缓存的监控>缓存的监控</a></li>
+<li>
+<a href=#%e4%b8%80%e8%87%b4%e6%80%a7%e5%93%88%e5%b8%8c aria-label=一致性哈希>一致性哈希</a>
+</li>
+</ul>
+</div>
+</details>
+</div>
+<div class=post-content><h3 id=何时该用缓存>何时该用缓存</h3>
+<ul>
+<li>某些应用消耗大量CPU去计算,例如正则表达式,就可以考虑将结果缓存下来</li>
+<li>数据库连接池比较繁忙,经常报出连接不够的报警,也该考虑缓存</li>
+</ul>
+<h3 id=缓存的选择>缓存的选择</h3>
+<p>​ 单机缓存用guava或者caffeine,分布式用redis.</p>
+<p>​ 本地缓存用guava或者caffeine,远程用redis.</p>
+<p>​ 数据量不是很大,数据更新频率较低,可以使用本地缓存guava;如果数据量更新频繁,也想使用进程缓存的话,可以将其过期时间设置为较短,或者设置较短的自动刷新时间.</p>
+<h3 id=二级缓存方案>二级缓存方案</h3>
+<p>​ 利用 Caffeine 做一级缓存，Redis 作为二级缓存，步骤如下：</p>
+<ul>
+<li>首先去 Caffeine 中查询数据，如果有直接返回。如果没有则进行第 2 步。</li>
+<li>再去 Redis 中查询，如果查询到了返回数据并在 Caffeine 中填充此数据。如果没有查到则进行第 3 步。</li>
+<li>最后去 MySQL 中查询，如果查询到了返回数据并在 Redis，Caffeine 中依次填充此数据。</li>
+</ul>
+<p>对于 Caffeine 的缓存，如果有数据更新，只能删除更新数据的那台机器上的缓存，其他机器只能通过超时来过期缓存，超时设定可以有两种策略：</p>
+<ul>
+<li>设置成写入后多少时间后过期。</li>
+<li>设置成写入后多少时间刷新。</li>
+</ul>
+<p>对于 Redis 的缓存更新，其他机器立刻可见，但是也必须要设置超时时间，其时间比 Caffeine 的过期长。</p>
+<h3 id=缓存更新>缓存更新</h3>
+<p>​ 一般来说缓存的更新有两种情况：</p>
+<ul>
+<li>先删除缓存，再更新数据库。</li>
+<li>先更新数据库，再删除缓存。</li>
+</ul>
+<p><strong>1.先删除缓存再更新DB</strong></p>
+<p>结论：<strong>产生脏数据的概率较大</strong>（若出现脏数据，则意味着再不更新的情况下，查询得到的数据均为旧的数据）(这种情况问题可能出在写数据库期间)</p>
+<p>比如：两个并发操作，一个是更新操作，另一个是查询操作，更新操作删除缓存后，查询操作没有命中缓存，先把老数据读出来后放到缓存中，然后更新操作更新了数据库。于是，在缓存中的数据还是老的数据，导致缓存中的数据是脏的，而且还一直这样脏下去了。</p>
+<p><strong>2.先更新DB再删除缓存（使用场景多）</strong></p>
+<p>结论：<strong>产生脏数据的概率较小，但是会出现一致性的问题</strong>；若更新操作的时候，同时进行查询操作，若hit，则查询得到的数据是旧的数据。但是不会影响后面的查询。（代价较小）(这种情况问题可能出现在删除缓存期间)</p>
+<p>（ 一个是查询操作，一个是更新操作的并发，首先，没有了删除cache数据的操作了，而是先更新了数据库中的数据，此时，缓存依然有效，所以，并发的查询操作拿的是没有更新的数据，但是，更新操作马上让缓存的失效了，后续的查询操作再把数据从数据库中拉出来。而不会像文章开头的那个逻辑产生的问题，后续的查询操作一直都在取老的数据。）</p>
+<p>该设计模式产生脏数据的可能情况：</p>
+<p>一个是读操作，但是没有命中缓存，然后就到数据库中取数据，此时来了一个写操作，写完数据库后，让缓存失效;然后,之前的那个读操作再把老的数据放进去，所以，会造成脏数据。</p>
+<p>该情况出现的概率可能非常低，因为这个条件需要发生在读缓存时缓存失效，而且并发着有一个写操作。而实际上数据库的写操作会比读操作慢得多，而且还要锁表，而读操作必需在写操作前进入数据库操作，而又要晚于写操作更新缓存，所有的这些条件都具备的概率基本并不大。</p>
+<h3 id=缓存挖坑三剑客>缓存挖坑三剑客</h3>
+<h4 id=缓存穿透>缓存穿透</h4>
+<ul>
+<li>定义: 查询的数据在数据库不存在,所以缓存中也不会有,永远都无法命中而会去数据库查询,给数据库增加了无用的请求</li>
+<li>解决方案: 对于返回为NULL的数据依然缓存一个自定义的值,并且设置较短的超时时间来减少缓存的维护成本.对于抛出异常的返回不进行缓存</li>
+<li>优化思路: 制定一些规则过滤一些不可能存在的数据，小数据用 <strong>BitMap</strong>，大数据可以用<strong>布隆过滤器</strong>。比如你的订单 ID 明显是在一个范围 1-1000，如果不是 1-1000 之内的数据那其实可以直接给过滤掉。</li>
+</ul>
+<h4 id=缓存雪崩>缓存雪崩</h4>
+<ul>
+<li>定义: 是指缓存不可用或者大量缓存由于超时时间相同在同一时间段失效,大量请求直接访问数据库,数据库压力过大导致系统雪崩</li>
+<li>解决方案:
+<ul>
+<li>采用多级缓存,不同级别缓存设置的超时时间不同</li>
+<li>缓存根据类别来设置过期时间,例如热门数据过期时间长(或永不过期),冷门数据过期时间短</li>
+</ul>
+</li>
+<li>优化思路:</li>
+</ul>
+<h4 id=缓存击穿>缓存击穿</h4>
+<ul>
+<li>
+<p>定义: 跟缓存雪崩很像,都是由于缓存过期导致大量请求直接访问数据库,不同的是雪崩是一大片同时失效(面),击穿是某个热点数据失效(点).</p>
+</li>
+<li>
+<p>解决方案:</p>
+<ul>
+<li>加分布式锁:加载数据的时候可以利用分布式锁锁住这个数据的key,在redis中直接使用setNX操作即可,对于获取到这个锁的线程,查询数据库更新缓存,其他线程采取重试策略,这样数据库同一时间只能有一个线程来访问.</li>
+<li>异步加载:对热点数据采取到期自动刷新的策略,而不是到期自动淘汰.</li>
+</ul>
+</li>
+<li>
+<p>优化思路:</p>
+</li>
+</ul>
+<h3 id=缓存的监控>缓存的监控</h3>
+<p>​ 缓存上线之后统计获取缓存的情况(成功,不存在,过期还是失败等),继而可有效对于统计情况来对缓存的参数进行优化</p>
+<p><img loading=lazy src=https://user-gold-cdn.xitu.io/2018/8/22/1656232e7719c707?imageView2/0/w/1280/h/960/format/webp/ignore-error/1 alt=img>
+</p>
+<p>一般避免以上情况发生我们从三个时间段去分析下：</p>
+<ul>
+<li>事前：<strong>Redis</strong> 高可用，主从+哨兵，<strong>Redis cluster</strong>，避免全盘崩溃。</li>
+<li>事中：本地 <strong>ehcache</strong> 缓存 + <strong>Hystrix</strong> 限流+降级，避免<strong>MySQL</strong> 被打死。</li>
+<li>事后：<strong>Redis</strong> 持久化 <strong>RDB</strong>+<strong>AOF</strong>，一旦重启，自动从磁盘上加载数据，快速恢复缓存数据。</li>
+</ul>
+<hr>
+<h3 id=一致性哈希>一致性哈希</h3>
+<p>简单哈希可用于数据分区,但机器变动的时候可能会发生数据迁移.而一致性哈希算法可减少因机器变动而带来的数据迁移量)仅会影响相邻的机器.</p>
+<hr>
+</div>
+<footer class=post-footer>
+<nav class=paginav>
+<a class=prev href=http://euthpic.github.io/tech/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/>
+<span class=title>« 上一页</span>
+<br>
+<span>线程安全</span>
+</a>
+<a class=next href=http://euthpic.github.io/tech/jvm%E5%8E%9F%E7%90%86/>
+<span class=title>下一页 »</span>
+<br>
+<span>JVM原理</span>
+</a>
+</nav>
+<div class=share-buttons>
+<a target=_blank rel="noopener noreferrer" aria-label="share 关于缓存 on twitter" href="https://twitter.com/intent/tweet/?text=%e5%85%b3%e4%ba%8e%e7%bc%93%e5%ad%98&url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E7%25BC%2593%25E5%25AD%2598%2f&hashtags="><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 关于缓存 on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E7%25BC%2593%25E5%25AD%2598%2f&title=%e5%85%b3%e4%ba%8e%e7%bc%93%e5%ad%98&summary=%e5%85%b3%e4%ba%8e%e7%bc%93%e5%ad%98&source=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E7%25BC%2593%25E5%25AD%2598%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 关于缓存 on reddit" href="https://reddit.com/submit?url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E7%25BC%2593%25E5%25AD%2598%2f&title=%e5%85%b3%e4%ba%8e%e7%bc%93%e5%ad%98"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 关于缓存 on facebook" href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E7%25BC%2593%25E5%25AD%2598%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 关于缓存 on whatsapp" href="https://api.whatsapp.com/send?text=%e5%85%b3%e4%ba%8e%e7%bc%93%e5%ad%98%20-%20http%3a%2f%2feuthpic.github.io%2ftech%2f%25E7%25BC%2593%25E5%25AD%2598%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share 关于缓存 on telegram" href="https://telegram.me/share/url?text=%e5%85%b3%e4%ba%8e%e7%bc%93%e5%ad%98&url=http%3a%2f%2feuthpic.github.io%2ftech%2f%25E7%25BC%2593%25E5%25AD%2598%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg>
+</a>
+</div>
+</footer>
+</article>
+</main>
+<footer class=footer>
+<span>&copy; 2022 <a href=http://euthpic.github.io/>乱花渐欲迷人眼</a></span>
+<span>
+Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a>
+</span>
+</footer>
+<a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a>
+<script>let menu=document.getElementById('menu');menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
+<script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script>
+<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
+</body>
+</html>
