@@ -1,0 +1,281 @@
+<!doctype html><html lang=zh dir=auto>
+<head><meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=robots content="index, follow">
+<title>Nacos源码的小小研究 | 乱花渐欲迷人眼</title>
+<meta name=keywords content>
+<meta name=description content="Naocs NacosServiceRegistryAutoConfiguration : 服务注册入口类 NacosAutoServiceRegistration : 自动注册服务流程 NacosServiceRegistry : 服务注册实现类 NacosRegistration : 服务注册实体,包含注册服务所需要的信息 NacosNamingMaintainService : 服务治理类(service) NacosNamingService : 服务">
+<meta name=author content="Guangfa">
+<link rel=canonical href=http://euthpic.github.io/tech/nacos%E6%BA%90%E7%A0%81%E7%9A%84%E5%B0%8F%E5%B0%8F%E7%A0%94%E7%A9%B6/>
+<meta name=yandex-verification content="73b1a797f62c0e98">
+<link crossorigin=anonymous href=/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css integrity="sha256-yIlj/i15RiAA/Q+xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as=style>
+<script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=http://euthpic.github.io/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=http://euthpic.github.io/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=http://euthpic.github.io/favicon-32x32.png>
+<link rel=apple-touch-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<link rel=mask-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<meta name=theme-color content="#2e2e33">
+<meta name=msapplication-TileColor content="#2e2e33">
+<meta name=generator content="Hugo 0.89.4">
+<noscript>
+<style>#theme-toggle,.top-link{display:none}</style>
+<style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style>
+</noscript>
+<script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(a,e,f,g,b,c,d){a.GoogleAnalyticsObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=1,c.src=g,d.parentNode.insertBefore(c,d)}(window,document,'script','https://www.google-analytics.com/analytics.js','ga'),ga('create','UA-136094326-1','auto'),ga('send','pageview'))</script><meta property="og:title" content="Nacos源码的小小研究">
+<meta property="og:description" content="Naocs NacosServiceRegistryAutoConfiguration : 服务注册入口类 NacosAutoServiceRegistration : 自动注册服务流程 NacosServiceRegistry : 服务注册实现类 NacosRegistration : 服务注册实体,包含注册服务所需要的信息 NacosNamingMaintainService : 服务治理类(service) NacosNamingService : 服务">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://euthpic.github.io/tech/nacos%E6%BA%90%E7%A0%81%E7%9A%84%E5%B0%8F%E5%B0%8F%E7%A0%94%E7%A9%B6/"><meta property="og:image" content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="article:section" content="tech">
+<meta property="article:published_time" content="2020-12-06T14:06:10+08:00">
+<meta property="article:modified_time" content="2020-12-06T14:06:10+08:00"><meta property="og:site_name" content="乱花渐欲迷人眼">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:image content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name=twitter:title content="Nacos源码的小小研究">
+<meta name=twitter:description content="Naocs NacosServiceRegistryAutoConfiguration : 服务注册入口类 NacosAutoServiceRegistration : 自动注册服务流程 NacosServiceRegistry : 服务注册实现类 NacosRegistration : 服务注册实体,包含注册服务所需要的信息 NacosNamingMaintainService : 服务治理类(service) NacosNamingService : 服务">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Teches","item":"http://euthpic.github.io/tech/"},{"@type":"ListItem","position":2,"name":"Nacos源码的小小研究","item":"http://euthpic.github.io/tech/nacos%E6%BA%90%E7%A0%81%E7%9A%84%E5%B0%8F%E5%B0%8F%E7%A0%94%E7%A9%B6/"}]}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Nacos源码的小小研究","name":"Nacos源码的小小研究","description":"Naocs NacosServiceRegistryAutoConfiguration : 服务注册入口类 NacosAutoServiceRegistration : 自动注册服务流程 NacosServiceRegistry : 服务注册实现类 NacosRegistration : 服务注册实体,包含注册服务所需要的信息 NacosNamingMaintainService : 服务治理类(service) NacosNamingService : 服务","keywords":[],"articleBody":"Naocs NacosServiceRegistryAutoConfiguration : 服务注册入口类 NacosAutoServiceRegistration : 自动注册服务流程 NacosServiceRegistry : 服务注册实现类 NacosRegistration : 服务注册实体,包含注册服务所需要的信息 NacosNamingMaintainService : 服务治理类(service) NacosNamingService : 服务实例(instance) NamingProxy : 网络代理类 NacosRegistrationCustomizer : 2020.9新版本中加入,用于向NacosRegistration中注入配置 CacheData : 维护配置项和其下注册的所有监听器的实例 BeatInfo : 心跳包信息 NacosDiscoveryAutoConfiguration: 服务发现入口 NacosDiscoveryProperties : 服务注册,发现相关的配置类 NacosServiceDiscovery : 服务发现的实现过程,为NacosDiscovery模块提供nacos上的service和instance信息. NacosDiscoveryClientConfiguration : NacosServiceInstance : 服务实例(instance)实体信息,只在服务发现模块使用 NacosDiscoveryClient : 服务信息提供类,提供getInstances和getServices方法 EventDispatcher : 当instances信息更新时,给监听者们发布事件消息. NacosWatch : 监听EventDispatcher发布的消息,并同步到NacosDiscoveryProperties的元数据中 配置管理 服务注册  服务注册的入口类是NacosServiceRegistryAutoConfiguration,这里定义了三个重要的bean :NacosServiceRegistry,NacosRegistration,NacosAutoServiceRegistration 如果项目集成了spring-cloud-starter-alibaba-nacos-discovery，服务启动后默认是自动注册的。如果想看自动注册的过程，可以从NacosAutoServiceRegistration开始着手 NacosServiceRegistry : 提供了register()方法给NacosAutoServiceRegistration进行服务注册.依赖NacosNamingService NacosRegistration : 服务注册实体,包含注册服务所需要的信息.提供了customize()方法给用户注入配置. NacosRegistrationCustomizer : 方便用户自定义 NacosRegistrationCustomizer 实现，向 NacosRegistration 中注入配置 NacosDiscoveryProperties : 服务注册相关的配置类,读取application.yml里以spring.cloud.nacos.discovery为前缀的配置项 NacosNamingMaintainService : 服务治理类(service),包含在nacos上创建服务,查询服务,删除服务等功能.通过调用关系可以发现该类是在NacosServiceRegistry的setStatus()方法(控制instance上线或下线)中被创建的,也就是nacos的服务是懒加载的,当需要对实例进行上线下线时,才会去获取对应的service,如果service不存在才会创建.而setStauts()是在ServiceRegistryEndpoint中被调用(spring cloud的类) NacosNamingService : 服务实例(instance)管理,包括把实例注册到服务上,订阅/取消订阅服务等功能. NamingProxy : 发起http请求的方法,基本上对于nacos服务器的所有网络请求都需要调用这里的callServer()  服务注册主流程 :\n/** *NacosAutoServiceRegistration * Register the local service with the {@link ServiceRegistry}. */ protected void register() { this.serviceRegistry.register(getRegistration()); } /** * NacosServiceRegistry */ public void register(Registration registration) { namingService.registerInstance(serviceId, group, instance); } /** * NacosNamingService */ public void registerInstance(String serviceName, String groupName, Instance instance) throws NacosException { serverProxy.registerService(groupedServiceName, groupName, instance); } NacosAutoServiceRegistration中有两个事件监听器.\n一个是onNacosDiscoveryInfoChangedEvent().当监听到NacosDiscoveryProperties的配置信息改变时就会重新注册.\n@EventListener public void onNacosDiscoveryInfoChangedEvent(NacosDiscoveryInfoChangedEvent event) { restart(); } private void restart() { this.stop(); this.start(); } 另一个是在父类AbstractAutoServiceRegistration中定义的事件监听器,这是因为实现了ApplicationListener接口(需要先了解spring boot的事件监听机制).直接看onApplicationEvent()即可.\n@Override public void onApplicationEvent(WebServerInitializedEvent event) { bind(event); } @Deprecated public void bind(WebServerInitializedEvent event) { ApplicationContext context = event.getApplicationContext(); if (context instanceof ConfigurableWebServerApplicationContext) { if (\"management\".equals(((ConfigurableWebServerApplicationContext) context) .getServerNamespace())) { return; } } this.port.compareAndSet(0, event.getWebServer().getPort()); this.start(); } public void start() { if (!isEnabled()) { if (logger.isDebugEnabled()) { logger.debug(\"Discovery Lifecycle disabled. Not starting\"); } return; } // only initialize if nonSecurePort is greater than 0 and it isn't already running \t// because of containerPortInitializer below \tif (!this.running.get()) { this.context.publishEvent( new InstancePreRegisteredEvent(this, getRegistration())); register(); if (shouldRegisterManagement()) { registerManagement(); } this.context.publishEvent( new InstanceRegisteredEvent(this, getConfiguration())); this.running.compareAndSet(false, true); } } 可以看到,服务注册是在WebServer启动完毕之后调用的.\n此外,spring boot和nacos大量使用了**事件发布(ApplicationContext.publishEvent()) - 事件监听(@EventListener)  ) **的模式来控制各流程的执行顺序,这个特性需要好好掌握.\nSpring 在实现的时候,通过设计模式(装饰),实现流程,又把关键部分丢给开发自己实现,提高了拓展性,然后巧妙的结合了观察者模式(变种),在合适的时间注册服务.\n服务发现  NacosDiscoveryAutoConfiguration : 服务发现的入口,包含NacosDiscoveryProperties和NacosServiceDiscovery两个bean.该类上有两个注解 : @ConditionalOnDiscoveryEnabled和@ConditionalOnNacosDiscoveryEnabled(都引入了@ConditionalOnProperty),也就是当配置项\"spring.cloud.discovery.enabled\"和\"spring.cloud.nacos.discovery.enabled\"都为true时才进行自动装配.由于这里设置了matchIfMissing = true,缺省值是true,所以默认是自动装配,不需要填写相关配置.也就是引入了nacos的相关包之后服务发现就自动开启了,不需要在Application类加上@EnableDiscoveryClient注解. @EnableDiscoveryClient原先是用于自动启用服务注册功能,以便其他服务发现本服务.在Spring的官方文档中已经声明**@EnableDiscoveryClient不是必须的了(从Spring Cloud Edgware开始),所有DiscoveryClient类型的bean都会自动注册**. NacosDiscoveryProperties : 是nacos的配置类,虽然从名字上看只属于服务发现这一模块,但实际上服务发现的配置也是由该类提供.负责读取并提供\"spring.cloud.nacos.discovery\"前缀的配置.overrideFromEnv()方法负责注入配置属性.此外,enrichNacosDiscoveryProperties()允许用户在配置文件里自定义额外的nacos配置. @PostConstruct  : 上面这个类的init()方法里面用到,作用是当该类的依赖注入完成后,且该类被投入使用前,执行包含该注解的方法.作用类似于构造方法/构造代码块,目的是完成该类的初始化工作,之后才能服务于其他类. NacosServiceInstance : 服务实例(instance)实体信息,只在服务发现模块使用. NacosServiceDiscovery : 服务发现实现类,包含服务发现的过程,为NacosDiscovery模块提供nacos上的service和instance信息,并实现instance向serviceInstance的转换.依赖NacosServiceManager提供的namingService.这里需要注意的是虽然可以直接从NacosServiceManager得到服务信息,但是用户直接依赖的是NacosServiceDiscovery而不是NacosServiceManager,这样的设计的依据可能是单一职责原则,NacosServiceManager负责管理service,而对外提供服务的职责由NacosServiceDiscovery承担. NacosDiscoveryClientConfiguration : 加载NacosServiceDiscovery和NacosWatch两个bean. NacosDiscoveryClient : 服务信息提供类,仅对外提供NacosServiceDiscovery的getInstances和getServices方法(职责划分得很细嘛).也就是说nacos组件外想获取服务和实例信息的话都应该通过这个类获取. NacosWatch: 负责监听EventDispatcher中发布的instances更新事件,并同步到NacosDiscoveryProperties的元数据中.   Feign FeignClientsRegistrar : 注册实现类 @EnableFeignClients @EnableDiscoveryClient @FeignClient ","wordCount":"3181","inLanguage":"zh","datePublished":"2020-12-06T14:06:10+08:00","dateModified":"2020-12-06T14:06:10+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/nacos%E6%BA%90%E7%A0%81%E7%9A%84%E5%B0%8F%E5%B0%8F%E7%A0%94%E7%A9%B6/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
+</head>
+<body id=top>
+<script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
+<header class=header>
+<nav class=nav>
+<div class=logo>
+<a href=http://euthpic.github.io/ accesskey=h title="🏡 乱花渐欲迷人眼 (Alt + H)">🏡 乱花渐欲迷人眼</a>
+<span class=logo-switches>
+<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+</span>
+</div>
+<ul id=menu>
+<li>
+<a href=http://euthpic.github.io/categories/ title="📔 系列">
+<span>📔 系列</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/tags/ title="🏷️ 标签">
+<span>🏷️ 标签</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/search/ title="🔍 搜索 (Alt + /)" accesskey=/>
+<span>🔍 搜索</span>
+</a>
+</li>
+<li>
+<a href=https://travellings.link title=🚇>
+<span>🚇</span>
+</a>
+</li>
+</ul>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-header>
+<div class=breadcrumbs><a href=http://euthpic.github.io/>主页</a>&nbsp;»&nbsp;<a href=http://euthpic.github.io/tech/>Teches</a></div>
+<h1 class=post-title>
+Nacos源码的小小研究
+</h1>
+<div class=post-meta><span title="2020-12-06 14:06:10 +0800 CST">December 6, 2020</span>&nbsp;·&nbsp;7 分钟&nbsp;·&nbsp;Guangfa&nbsp;|&nbsp;<a href=https://github.com/euthpic/euthpic.github.io/edit/main/content/tech/Nacos%e6%ba%90%e7%a0%81%e7%9a%84%e5%b0%8f%e5%b0%8f%e7%a0%94%e7%a9%b6.md rel="noopener noreferrer" target=_blank>PR</a>
+</div>
+</header> <div class=toc>
+<details open>
+<summary accesskey=c title="(Alt + C)">
+<span class=details>目录</span>
+</summary>
+<div class=inner><ul>
+<li>
+<a href=#naocs aria-label=Naocs>Naocs</a><ul>
+<li>
+<a href=#%e9%85%8d%e7%bd%ae%e7%ae%a1%e7%90%86 aria-label=配置管理>配置管理</a></li>
+<li>
+<a href=#%e6%9c%8d%e5%8a%a1%e6%b3%a8%e5%86%8c aria-label=服务注册>服务注册</a></li>
+<li>
+<a href=#%e6%9c%8d%e5%8a%a1%e5%8f%91%e7%8e%b0 aria-label=服务发现>服务发现</a></li></ul>
+</li>
+<li>
+<a href=#feign aria-label=Feign>Feign</a>
+</li>
+</ul>
+</div>
+</details>
+</div>
+<div class=post-content><h2 id=naocs>Naocs</h2>
+<pre tabindex=0><code>NacosServiceRegistryAutoConfiguration : 服务注册入口类
+NacosAutoServiceRegistration : 自动注册服务流程
+NacosServiceRegistry : 服务注册实现类
+NacosRegistration : 服务注册实体,包含注册服务所需要的信息
+NacosNamingMaintainService : 服务治理类(service)
+NacosNamingService : 服务实例(instance)
+NamingProxy : 网络代理类
+NacosRegistrationCustomizer : 2020.9新版本中加入,用于向NacosRegistration中注入配置
+CacheData : 维护配置项和其下注册的所有监听器的实例
+BeatInfo : 心跳包信息
+
+
+NacosDiscoveryAutoConfiguration: 服务发现入口
+NacosDiscoveryProperties : 服务注册,发现相关的配置类
+NacosServiceDiscovery : 服务发现的实现过程,为NacosDiscovery模块提供nacos上的service和instance信息.
+NacosDiscoveryClientConfiguration : 
+NacosServiceInstance : 服务实例(instance)实体信息,只在服务发现模块使用
+NacosDiscoveryClient : 服务信息提供类,提供getInstances和getServices方法
+EventDispatcher : 当instances信息更新时,给监听者们发布事件消息.
+NacosWatch : 监听EventDispatcher发布的消息,并同步到NacosDiscoveryProperties的元数据中
+</code></pre><h3 id=配置管理>配置管理</h3>
+<h3 id=服务注册>服务注册</h3>
+<ul>
+<li>服务注册的入口类是<strong>NacosServiceRegistryAutoConfiguration</strong>,这里定义了三个重要的bean :<strong>NacosServiceRegistry</strong>,<strong>NacosRegistration</strong>,<strong>NacosAutoServiceRegistration</strong></li>
+<li>如果项目集成了spring-cloud-starter-alibaba-nacos-discovery，服务启动后默认是自动注册的。如果想看自动注册的过程，可以从<strong>NacosAutoServiceRegistration</strong>开始着手</li>
+<li><strong>NacosServiceRegistry</strong> : 提供了register()方法给NacosAutoServiceRegistration进行服务注册.依赖NacosNamingService</li>
+<li><strong>NacosRegistration</strong> : 服务注册实体,包含注册服务所需要的信息.提供了customize()方法给用户注入配置.</li>
+<li><strong>NacosRegistrationCustomizer</strong> : 方便用户自定义 NacosRegistrationCustomizer 实现，向 NacosRegistration 中注入配置</li>
+<li><strong>NacosDiscoveryProperties</strong> : 服务注册相关的配置类,读取application.yml里以spring.cloud.nacos.discovery为前缀的配置项</li>
+<li><strong>NacosNamingMaintainService</strong> : 服务治理类(service),包含在nacos上创建服务,查询服务,删除服务等功能.通过调用关系可以发现该类是在NacosServiceRegistry的setStatus()方法(控制instance上线或下线)中被创建的,也就是nacos的服务是懒加载的,当需要对实例进行上线下线时,才会去获取对应的service,如果service不存在才会创建.而setStauts()是在ServiceRegistryEndpoint中被调用(spring cloud的类)</li>
+<li><strong>NacosNamingService</strong> : 服务实例(instance)管理,包括把实例注册到服务上,订阅/取消订阅服务等功能.</li>
+<li><strong>NamingProxy</strong> : 发起http请求的方法,基本上对于nacos服务器的所有网络请求都需要调用这里的callServer()</li>
+</ul>
+<p>服务注册主流程 :</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>	<span style=color:#75715e>/**
+</span><span style=color:#75715e>	 *NacosAutoServiceRegistration
+</span><span style=color:#75715e>	 * Register the local service with the {@link ServiceRegistry}.
+</span><span style=color:#75715e>	 */</span>
+	<span style=color:#66d9ef>protected</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>register</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+		<span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>serviceRegistry</span><span style=color:#f92672>.</span><span style=color:#a6e22e>register</span><span style=color:#f92672>(</span>getRegistration<span style=color:#f92672>());</span>
+	<span style=color:#f92672>}</span>
+
+	<span style=color:#75715e>/**
+</span><span style=color:#75715e>	 * NacosServiceRegistry
+</span><span style=color:#75715e>	 */</span>
+	<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>register</span><span style=color:#f92672>(</span>Registration registration<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+		namingService<span style=color:#f92672>.</span><span style=color:#a6e22e>registerInstance</span><span style=color:#f92672>(</span>serviceId<span style=color:#f92672>,</span> group<span style=color:#f92672>,</span> instance<span style=color:#f92672>);</span>
+	<span style=color:#f92672>}</span>
+
+
+	<span style=color:#75715e>/**
+</span><span style=color:#75715e>	 * NacosNamingService
+</span><span style=color:#75715e>	 */</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>registerInstance</span><span style=color:#f92672>(</span>String serviceName<span style=color:#f92672>,</span> String groupName<span style=color:#f92672>,</span> Instance instance<span style=color:#f92672>)</span> <span style=color:#66d9ef>throws</span> NacosException <span style=color:#f92672>{</span>
+		serverProxy<span style=color:#f92672>.</span><span style=color:#a6e22e>registerService</span><span style=color:#f92672>(</span>groupedServiceName<span style=color:#f92672>,</span> groupName<span style=color:#f92672>,</span> instance<span style=color:#f92672>);</span>       <span style=color:#f92672>}</span>
+</code></pre></div><p>NacosAutoServiceRegistration中有两个事件监听器.</p>
+<p>一个是<strong>onNacosDiscoveryInfoChangedEvent</strong>().当监听到NacosDiscoveryProperties的配置信息改变时就会重新注册.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>	<span style=color:#a6e22e>@EventListener</span>
+	<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>onNacosDiscoveryInfoChangedEvent</span><span style=color:#f92672>(</span>NacosDiscoveryInfoChangedEvent event<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+		restart<span style=color:#f92672>();</span>
+	<span style=color:#f92672>}</span>
+
+	<span style=color:#66d9ef>private</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>restart</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+		<span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>stop</span><span style=color:#f92672>();</span>
+		<span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>start</span><span style=color:#f92672>();</span>
+	<span style=color:#f92672>}</span>
+</code></pre></div><p>另一个是在父类AbstractAutoServiceRegistration中定义的事件监听器,这是因为实现了ApplicationListener接口(需要先了解spring boot的事件监听机制).直接看<strong>onApplicationEvent</strong>()即可.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java>	<span style=color:#a6e22e>@Override</span>
+	<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>onApplicationEvent</span><span style=color:#f92672>(</span>WebServerInitializedEvent event<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+		bind<span style=color:#f92672>(</span>event<span style=color:#f92672>);</span>
+	<span style=color:#f92672>}</span>
+
+	<span style=color:#a6e22e>@Deprecated</span>
+	<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>bind</span><span style=color:#f92672>(</span>WebServerInitializedEvent event<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+		ApplicationContext context <span style=color:#f92672>=</span> event<span style=color:#f92672>.</span><span style=color:#a6e22e>getApplicationContext</span><span style=color:#f92672>();</span>
+		<span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>context <span style=color:#66d9ef>instanceof</span> ConfigurableWebServerApplicationContext<span style=color:#f92672>)</span> <span style=color:#f92672>{</span>
+			<span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span><span style=color:#e6db74>&#34;management&#34;</span><span style=color:#f92672>.</span><span style=color:#a6e22e>equals</span><span style=color:#f92672>(((</span>ConfigurableWebServerApplicationContext<span style=color:#f92672>)</span> context<span style=color:#f92672>)</span>
+					<span style=color:#f92672>.</span><span style=color:#a6e22e>getServerNamespace</span><span style=color:#f92672>()))</span> <span style=color:#f92672>{</span>
+				<span style=color:#66d9ef>return</span><span style=color:#f92672>;</span>
+			<span style=color:#f92672>}</span>
+		<span style=color:#f92672>}</span>
+		<span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>port</span><span style=color:#f92672>.</span><span style=color:#a6e22e>compareAndSet</span><span style=color:#f92672>(</span>0<span style=color:#f92672>,</span> event<span style=color:#f92672>.</span><span style=color:#a6e22e>getWebServer</span><span style=color:#f92672>().</span><span style=color:#a6e22e>getPort</span><span style=color:#f92672>());</span>
+		<span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>start</span><span style=color:#f92672>();</span>
+	<span style=color:#f92672>}</span>
+
+	<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>start</span><span style=color:#f92672>()</span> <span style=color:#f92672>{</span>
+		<span style=color:#66d9ef>if</span> <span style=color:#f92672>(!</span>isEnabled<span style=color:#f92672>())</span> <span style=color:#f92672>{</span>
+			<span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>logger<span style=color:#f92672>.</span><span style=color:#a6e22e>isDebugEnabled</span><span style=color:#f92672>())</span> <span style=color:#f92672>{</span>
+				logger<span style=color:#f92672>.</span><span style=color:#a6e22e>debug</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;Discovery Lifecycle disabled. Not starting&#34;</span><span style=color:#f92672>);</span>
+			<span style=color:#f92672>}</span>
+			<span style=color:#66d9ef>return</span><span style=color:#f92672>;</span>
+		<span style=color:#f92672>}</span>
+
+		<span style=color:#75715e>// only initialize if nonSecurePort is greater than 0 and it isn&#39;t already running
+</span><span style=color:#75715e></span>		<span style=color:#75715e>// because of containerPortInitializer below
+</span><span style=color:#75715e></span>		<span style=color:#66d9ef>if</span> <span style=color:#f92672>(!</span><span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>running</span><span style=color:#f92672>.</span><span style=color:#a6e22e>get</span><span style=color:#f92672>())</span> <span style=color:#f92672>{</span>
+			<span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>context</span><span style=color:#f92672>.</span><span style=color:#a6e22e>publishEvent</span><span style=color:#f92672>(</span>
+					<span style=color:#66d9ef>new</span> InstancePreRegisteredEvent<span style=color:#f92672>(</span><span style=color:#66d9ef>this</span><span style=color:#f92672>,</span> getRegistration<span style=color:#f92672>()));</span>
+			register<span style=color:#f92672>();</span>
+			<span style=color:#66d9ef>if</span> <span style=color:#f92672>(</span>shouldRegisterManagement<span style=color:#f92672>())</span> <span style=color:#f92672>{</span>
+				registerManagement<span style=color:#f92672>();</span>
+			<span style=color:#f92672>}</span>
+			<span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>context</span><span style=color:#f92672>.</span><span style=color:#a6e22e>publishEvent</span><span style=color:#f92672>(</span>
+					<span style=color:#66d9ef>new</span> InstanceRegisteredEvent<span style=color:#f92672>&lt;&gt;(</span><span style=color:#66d9ef>this</span><span style=color:#f92672>,</span> getConfiguration<span style=color:#f92672>()));</span>
+			<span style=color:#66d9ef>this</span><span style=color:#f92672>.</span><span style=color:#a6e22e>running</span><span style=color:#f92672>.</span><span style=color:#a6e22e>compareAndSet</span><span style=color:#f92672>(</span><span style=color:#66d9ef>false</span><span style=color:#f92672>,</span> <span style=color:#66d9ef>true</span><span style=color:#f92672>);</span>
+		<span style=color:#f92672>}</span>
+
+	<span style=color:#f92672>}</span>
+</code></pre></div><p>可以看到,服务注册是在WebServer启动完毕之后调用的.</p>
+<p>此外,spring boot和nacos大量使用了**事件发布(ApplicationContext.publishEvent()) -> 事件监听(<a href=/EventListener>@EventListener) </a> ) **的模式来控制各流程的执行顺序,这个特性需要好好掌握.</p>
+<p>Spring 在实现的时候,通过设计模式(装饰),实现流程,又把关键部分丢给开发自己实现,提高了拓展性,然后巧妙的结合了观察者模式(变种),在合适的时间注册服务.</p>
+<h3 id=服务发现>服务发现</h3>
+<ul>
+<li><strong>NacosDiscoveryAutoConfiguration</strong> : 服务发现的入口,包含<strong>NacosDiscoveryProperties</strong>和<strong>NacosServiceDiscovery</strong>两个bean.该类上有两个注解 : @ConditionalOnDiscoveryEnabled和@ConditionalOnNacosDiscoveryEnabled(都引入了@ConditionalOnProperty),也就是当配置项"spring.cloud.discovery.enabled"和"spring.cloud.nacos.discovery.enabled"都为true时才进行自动装配.由于这里设置了matchIfMissing = true,缺省值是true,所以默认是自动装配,不需要填写相关配置.也就是<strong>引入了nacos的相关包之后服务发现就自动开启了,不需要在Application类加上@EnableDiscoveryClient注解</strong>.</li>
+<li><strong>@EnableDiscoveryClient</strong>原先是用于自动启用服务注册功能,以便其他服务发现本服务.在Spring的官方文档中已经声明**@EnableDiscoveryClient不是必须的了(从Spring Cloud Edgware开始),所有DiscoveryClient类型的bean都会自动注册**.</li>
+<li><strong>NacosDiscoveryProperties</strong> : 是nacos的配置类,虽然从名字上看只属于服务发现这一模块,但实际上服务发现的配置也是由该类提供.负责读取并提供"spring.cloud.nacos.discovery"前缀的配置.overrideFromEnv()方法负责注入配置属性.此外,enrichNacosDiscoveryProperties()允许用户在配置文件里自定义额外的nacos配置.</li>
+<li><strong><a href=/PostConstruct>@PostConstruct </a></strong> : 上面这个类的init()方法里面用到,作用是当该类的依赖注入完成后,且该类被投入使用前,执行包含该注解的方法.作用类似于构造方法/构造代码块,目的是完成该类的初始化工作,之后才能服务于其他类.</li>
+<li><strong>NacosServiceInstance</strong> : 服务实例(instance)实体信息,只在服务发现模块使用.</li>
+<li><strong>NacosServiceDiscovery</strong> : 服务发现实现类,包含服务发现的过程,为NacosDiscovery模块提供nacos上的service和instance信息,并实现instance向serviceInstance的转换.依赖NacosServiceManager提供的namingService.这里需要注意的是虽然可以直接从NacosServiceManager得到服务信息,但是用户直接依赖的是NacosServiceDiscovery而不是NacosServiceManager,这样的设计的依据可能是单一职责原则,NacosServiceManager负责管理service,而对外提供服务的职责由NacosServiceDiscovery承担.</li>
+<li><strong>NacosDiscoveryClientConfiguration</strong> : 加载NacosServiceDiscovery和NacosWatch两个bean.</li>
+<li><strong>NacosDiscoveryClient</strong> : 服务信息提供类,仅对外提供NacosServiceDiscovery的getInstances和getServices方法(职责划分得很细嘛).也就是说nacos组件外想获取服务和实例信息的话都应该通过这个类获取.</li>
+<li><strong>NacosWatch</strong>: 负责监听EventDispatcher中发布的instances更新事件,并同步到NacosDiscoveryProperties的元数据中.</li>
+<li></li>
+</ul>
+<h2 id=feign>Feign</h2>
+<pre tabindex=0><code>FeignClientsRegistrar : 注册实现类
+@EnableFeignClients
+@EnableDiscoveryClient
+@FeignClient
+</code></pre>
+</div>
+<footer class=post-footer>
+<nav class=paginav>
+<a class=prev href=http://euthpic.github.io/tech/k8s%E7%AC%94%E8%AE%B0/>
+<span class=title>« 上一页</span>
+<br>
+<span>K8s笔记</span>
+</a>
+<a class=next href=http://euthpic.github.io/tech/dapeng-sc%E8%B0%83%E7%A0%94/>
+<span class=title>下一页 »</span>
+<br>
+<span>dapeng-sc调研</span>
+</a>
+</nav>
+<div class=share-buttons>
+<a target=_blank rel="noopener noreferrer" aria-label="share Nacos源码的小小研究 on twitter" href="https://twitter.com/intent/tweet/?text=Nacos%e6%ba%90%e7%a0%81%e7%9a%84%e5%b0%8f%e5%b0%8f%e7%a0%94%e7%a9%b6&url=http%3a%2f%2feuthpic.github.io%2ftech%2fnacos%25E6%25BA%2590%25E7%25A0%2581%25E7%259A%2584%25E5%25B0%258F%25E5%25B0%258F%25E7%25A0%2594%25E7%25A9%25B6%2f&hashtags="><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Nacos源码的小小研究 on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2feuthpic.github.io%2ftech%2fnacos%25E6%25BA%2590%25E7%25A0%2581%25E7%259A%2584%25E5%25B0%258F%25E5%25B0%258F%25E7%25A0%2594%25E7%25A9%25B6%2f&title=Nacos%e6%ba%90%e7%a0%81%e7%9a%84%e5%b0%8f%e5%b0%8f%e7%a0%94%e7%a9%b6&summary=Nacos%e6%ba%90%e7%a0%81%e7%9a%84%e5%b0%8f%e5%b0%8f%e7%a0%94%e7%a9%b6&source=http%3a%2f%2feuthpic.github.io%2ftech%2fnacos%25E6%25BA%2590%25E7%25A0%2581%25E7%259A%2584%25E5%25B0%258F%25E5%25B0%258F%25E7%25A0%2594%25E7%25A9%25B6%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Nacos源码的小小研究 on reddit" href="https://reddit.com/submit?url=http%3a%2f%2feuthpic.github.io%2ftech%2fnacos%25E6%25BA%2590%25E7%25A0%2581%25E7%259A%2584%25E5%25B0%258F%25E5%25B0%258F%25E7%25A0%2594%25E7%25A9%25B6%2f&title=Nacos%e6%ba%90%e7%a0%81%e7%9a%84%e5%b0%8f%e5%b0%8f%e7%a0%94%e7%a9%b6"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Nacos源码的小小研究 on facebook" href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2feuthpic.github.io%2ftech%2fnacos%25E6%25BA%2590%25E7%25A0%2581%25E7%259A%2584%25E5%25B0%258F%25E5%25B0%258F%25E7%25A0%2594%25E7%25A9%25B6%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Nacos源码的小小研究 on whatsapp" href="https://api.whatsapp.com/send?text=Nacos%e6%ba%90%e7%a0%81%e7%9a%84%e5%b0%8f%e5%b0%8f%e7%a0%94%e7%a9%b6%20-%20http%3a%2f%2feuthpic.github.io%2ftech%2fnacos%25E6%25BA%2590%25E7%25A0%2581%25E7%259A%2584%25E5%25B0%258F%25E5%25B0%258F%25E7%25A0%2594%25E7%25A9%25B6%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Nacos源码的小小研究 on telegram" href="https://telegram.me/share/url?text=Nacos%e6%ba%90%e7%a0%81%e7%9a%84%e5%b0%8f%e5%b0%8f%e7%a0%94%e7%a9%b6&url=http%3a%2f%2feuthpic.github.io%2ftech%2fnacos%25E6%25BA%2590%25E7%25A0%2581%25E7%259A%2584%25E5%25B0%258F%25E5%25B0%258F%25E7%25A0%2594%25E7%25A9%25B6%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg>
+</a>
+</div>
+</footer>
+</article>
+</main>
+<footer class=footer>
+<span>&copy; 2022 <a href=http://euthpic.github.io/>乱花渐欲迷人眼</a></span>
+<span>
+Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a>
+</span>
+</footer>
+<a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a>
+<script>let menu=document.getElementById('menu');menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
+<script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script>
+<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
+</body>
+</html>

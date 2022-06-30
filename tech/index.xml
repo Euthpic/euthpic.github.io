@@ -84,6 +84,15 @@
     </item>
     
     <item>
+      <title>Zookeeper笔记</title>
+      <link>http://euthpic.github.io/tech/zookeeper%E7%AC%94%E8%AE%B0/</link>
+      <pubDate>Tue, 24 Aug 2021 16:24:46 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/zookeeper%E7%AC%94%E8%AE%B0/</guid>
+      <description>Znode 结构: path:唯一路径 childNode：子节点 stat:状态属性 type:节点类型 节点类型: 类型 描述 PERSISTENT 持久节点(默认节点) PERSISTENT_SEQUENTIAL 持久序号节</description>
+    </item>
+    
+    <item>
       <title>Telepresence</title>
       <link>http://euthpic.github.io/tech/telepresence/</link>
       <pubDate>Sat, 24 Jul 2021 16:24:46 +0800</pubDate>
@@ -99,6 +108,33 @@
       
       <guid>http://euthpic.github.io/tech/k8s%E7%AC%94%E8%AE%B0/</guid>
       <description>容器本身没有价值,有价值的是容器编排技术 容器(docker)其实是一种沙盒技术,一是可以将应用之间隔离开来,二是方便地将应用&amp;quot;搬来</description>
+    </item>
+    
+    <item>
+      <title>Nacos源码的小小研究</title>
+      <link>http://euthpic.github.io/tech/nacos%E6%BA%90%E7%A0%81%E7%9A%84%E5%B0%8F%E5%B0%8F%E7%A0%94%E7%A9%B6/</link>
+      <pubDate>Sun, 06 Dec 2020 14:06:10 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/nacos%E6%BA%90%E7%A0%81%E7%9A%84%E5%B0%8F%E5%B0%8F%E7%A0%94%E7%A9%B6/</guid>
+      <description>Naocs NacosServiceRegistryAutoConfiguration : 服务注册入口类 NacosAutoServiceRegistration : 自动注册服务流程 NacosServiceRegistry : 服务注册实现类 NacosRegistration : 服务注册实体,包含注册服务所需要的信息 NacosNamingMaintainService : 服务治理类(service) NacosNamingService : 服务</description>
+    </item>
+    
+    <item>
+      <title>dapeng-sc调研</title>
+      <link>http://euthpic.github.io/tech/dapeng-sc%E8%B0%83%E7%A0%94/</link>
+      <pubDate>Sat, 05 Dec 2020 17:06:10 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/dapeng-sc%E8%B0%83%E7%A0%94/</guid>
+      <description>调研目标 项目结构,项目配置,启动脚本的变化 dapeng-sc的主要修改点 nacos(feign)如何注册和发现服务 项目结构,项目配置,启动脚</description>
+    </item>
+    
+    <item>
+      <title>MySQL多表统一主键策略</title>
+      <link>http://euthpic.github.io/tech/mysql%E5%A4%9A%E8%A1%A8%E7%BB%9F%E4%B8%80%E4%B8%BB%E9%94%AE%E7%AD%96%E7%95%A5/</link>
+      <pubDate>Sun, 06 Sep 2020 14:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/mysql%E5%A4%9A%E8%A1%A8%E7%BB%9F%E4%B8%80%E4%B8%BB%E9%94%AE%E7%AD%96%E7%95%A5/</guid>
+      <description>需求背景 有个三级目录(例如国家-省份-城市)的数据要以树的形式展示,由于每一级都是独立的实体,需要单独一张表存储,不同级别的id会重复,于是</description>
     </item>
     
     <item>
@@ -297,6 +333,33 @@
       
       <guid>http://euthpic.github.io/tech/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</guid>
       <description>一. 前言 设计模式是解决问题的方案，学习现有的设计模式可以做到经验复用。拥有设计模式词汇，在沟通时就能用更少的词汇来讨论，并且不需要了解底层细</description>
+    </item>
+    
+    <item>
+      <title>排查线上故障思路</title>
+      <link>http://euthpic.github.io/tech/%E6%8E%92%E6%9F%A5%E7%BA%BF%E4%B8%8A%E6%95%85%E9%9A%9C%E6%80%9D%E8%B7%AF/</link>
+      <pubDate>Fri, 02 Aug 2019 19:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/%E6%8E%92%E6%9F%A5%E7%BA%BF%E4%B8%8A%E6%95%85%E9%9A%9C%E6%80%9D%E8%B7%AF/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>K8s改造</title>
+      <link>http://euthpic.github.io/tech/k8s%E6%94%B9%E9%80%A0/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/k8s%E6%94%B9%E9%80%A0/</guid>
+      <description>遇到问题 yml更新后重新install app,然后pod偶尔一直处于scheduling状态,需要重新install才解决(pvc没有挂载)</description>
+    </item>
+    
+    <item>
+      <title>SpringBoot分层构建Docker镜像</title>
+      <link>http://euthpic.github.io/tech/springboot%E5%88%86%E5%B1%82%E6%9E%84%E5%BB%BAdocker%E9%95%9C%E5%83%8F/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/springboot%E5%88%86%E5%B1%82%E6%9E%84%E5%BB%BAdocker%E9%95%9C%E5%83%8F/</guid>
+      <description>Docker镜像分层 SpringBoot 2.3.x 新增对分层的支持 spring-boot-maven-plugin开启分层编译支持 Dockerfile修改 分层后的Ja</description>
     </item>
     
   </channel>
