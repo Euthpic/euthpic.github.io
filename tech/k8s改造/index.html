@@ -27,13 +27,14 @@
 <meta property="og:description" content="遇到问题 yml更新后重新install app,然后pod偶尔一直处于scheduling状态,需要重新install才解决(pvc没有挂载)">
 <meta property="og:type" content="article">
 <meta property="og:url" content="http://euthpic.github.io/tech/k8s%E6%94%B9%E9%80%A0/"><meta property="og:image" content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="article:section" content="tech">
-<meta property="og:site_name" content="乱花渐欲迷人眼">
+<meta property="article:published_time" content="2021-03-30T12:32:48+08:00">
+<meta property="article:modified_time" content="2021-03-30T12:32:48+08:00"><meta property="og:site_name" content="乱花渐欲迷人眼">
 <meta name=twitter:card content="summary_large_image">
 <meta name=twitter:image content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
 <meta name=twitter:title content="K8s改造">
 <meta name=twitter:description content="遇到问题 yml更新后重新install app,然后pod偶尔一直处于scheduling状态,需要重新install才解决(pvc没有挂载)">
 <script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Teches","item":"http://euthpic.github.io/tech/"},{"@type":"ListItem","position":2,"name":"K8s改造","item":"http://euthpic.github.io/tech/k8s%E6%94%B9%E9%80%A0/"}]}</script>
-<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"K8s改造","name":"K8s改造","description":"遇到问题 yml更新后重新install app,然后pod偶尔一直处于scheduling状态,需要重新install才解决(pvc没有挂载)","keywords":[],"articleBody":"遇到问题  yml更新后重新install app,然后pod偶尔一直处于scheduling状态,需要重新install才解决(pvc没有挂载) helm配置文件更新后(install/upgrade),pod重启会获取到错误的tag,此时要么去jenkins里重新构建一次来更新tag,要么手动修改values.yaml里面的deplyApp里面的tag(可以在rancher里面查看最新的tag是什么) helm配置里的yml解析失败,整数和布尔类型的配置都要用双引号 loki可以收集stdout的日志,如果要看日志文件需要像以前那样进入pod里看. yml更新之后,通过helm upgrade来应用.但是如果修改了metadata的东西,就需要helm install了. configmap的文件更新后,需要使用k apply -f应用更新,然后重新构建pod jenkins任务名不能和项目名一致(keservices),如果因此导致构建失败,需要把任务和对应的项目目录删掉,改名后再重试. 使用k describe来查看pod的情况,最下面的Events含有pod启动过程中的日志,可以排查pod启动失败的原因 环境变量(helm里面定义的配置)优先于本地配置 pod中文乱码问题 使用-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2来替代xmx 一个pod在同一个pvc里最多只能挂载一个目录 含有helm模板的yaml,只能通过helm命令来使用,原生的kubectl无法识别(kube apply -f) 项目内访问服务的方式与yaml中定义的一样,url中的域名使用svc名称+namespace即可. Ingress的networking.k8s.io/v1版本虽然在1.18中已经推荐使用,但查看相关issue发现其实只能在1.19+使用 环境变量区分大小写 集群内调用svc的话,对应的端口是port.集群外调用svc的话,对应的端口时targetPort. configmap里面的配置值不支持整数,如果创建configmap时报错,优先检查下有没有这个问题.为每个配置值都用双引号包起来是比较推荐的做法 在values.yaml里面的configmap不能含有数字配置项,如果必须包含数字,则只能另外新建configmap再引入(可能跟helm的语法规则有关) 通过crd拓展k8s的api helm中的chart = docker中的image, repository = docker中的镜像库, release = 容器 rocketmq修改配置的话需要修改为自己的镜像 外部访问容器遇到问题的排查思路 : 检查http协议有无问题,k8s集群内通过SVC访问的话用http,外部访问的话现在默认是https - 检查容器暴露的targetPort有无问题 - 检查SVC的port是否转发到正确的targetPort - 检查SVC的port是否默认的80,SVC访问的url为svc:port - 检查ingress是否正确转发到了svc - 检查ingress是否有访问日志   ## 失败示例: Events: Type Reason Age From Message ---- ------ ---- ---- ------- Warning FailedScheduling 26s (x701 over 13h) default-scheduler persistentvolumeclaim \"x-pvc\" not found ## 成功示例 Events: Type Reason Age From Message ---- ------ ---- ---- ------- Normal Scheduled 79s default-scheduler Successfully assigned test-oss/x-deploy-9bdcd8d7b-gxqk8 to pt-k8s-c Normal Pulling 78s kubelet Pulling image \"harbor.x.com.cn/product/x:6798daa\" Normal Pulled 75s kubelet Successfully pulled image \"harbor.x.com.cn/product/x:6798daa\" Normal Created 75s kubelet Created container x Normal Started 74s kubelet Started container x 常用命令    k exec -n test-oss x-deploy-769f5f5d98-w7m7g – printenv\n 2. 获取svc信息 k get svc -n test-oss proxy-host-svc -o wide\n 3. 获取异常pod信息 kubectl get pods -n test-oss | grep -v Running\n","wordCount":"1391","inLanguage":"zh","datePublished":"0001-01-01T00:00:00Z","dateModified":"0001-01-01T00:00:00Z","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/k8s%E6%94%B9%E9%80%A0/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"K8s改造","name":"K8s改造","description":"遇到问题 yml更新后重新install app,然后pod偶尔一直处于scheduling状态,需要重新install才解决(pvc没有挂载)","keywords":[],"articleBody":"遇到问题  yml更新后重新install app,然后pod偶尔一直处于scheduling状态,需要重新install才解决(pvc没有挂载) helm配置文件更新后(install/upgrade),pod重启会获取到错误的tag,此时要么去jenkins里重新构建一次来更新tag,要么手动修改values.yaml里面的deplyApp里面的tag(可以在rancher里面查看最新的tag是什么) helm配置里的yml解析失败,整数和布尔类型的配置都要用双引号 loki可以收集stdout的日志,如果要看日志文件需要像以前那样进入pod里看. yml更新之后,通过helm upgrade来应用.但是如果修改了metadata的东西,就需要helm install了. configmap的文件更新后,需要使用k apply -f应用更新,然后重新构建pod jenkins任务名不能和项目名一致(keservices),如果因此导致构建失败,需要把任务和对应的项目目录删掉,改名后再重试. 使用k describe来查看pod的情况,最下面的Events含有pod启动过程中的日志,可以排查pod启动失败的原因 环境变量(helm里面定义的配置)优先于本地配置 pod中文乱码问题 使用-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2来替代xmx 一个pod在同一个pvc里最多只能挂载一个目录 含有helm模板的yaml,只能通过helm命令来使用,原生的kubectl无法识别(kube apply -f) 项目内访问服务的方式与yaml中定义的一样,url中的域名使用svc名称+namespace即可. Ingress的networking.k8s.io/v1版本虽然在1.18中已经推荐使用,但查看相关issue发现其实只能在1.19+使用 环境变量区分大小写 集群内调用svc的话,对应的端口是port.集群外调用svc的话,对应的端口时targetPort. configmap里面的配置值不支持整数,如果创建configmap时报错,优先检查下有没有这个问题.为每个配置值都用双引号包起来是比较推荐的做法 在values.yaml里面的configmap不能含有数字配置项,如果必须包含数字,则只能另外新建configmap再引入(可能跟helm的语法规则有关) 通过crd拓展k8s的api helm中的chart = docker中的image, repository = docker中的镜像库, release = 容器 rocketmq修改配置的话需要修改为自己的镜像 外部访问容器遇到问题的排查思路 : 检查http协议有无问题,k8s集群内通过SVC访问的话用http,外部访问的话现在默认是https - 检查容器暴露的targetPort有无问题 - 检查SVC的port是否转发到正确的targetPort - 检查SVC的port是否默认的80,SVC访问的url为svc:port - 检查ingress是否正确转发到了svc - 检查ingress是否有访问日志   ## 失败示例: Events: Type Reason Age From Message ---- ------ ---- ---- ------- Warning FailedScheduling 26s (x701 over 13h) default-scheduler persistentvolumeclaim \"x-pvc\" not found ## 成功示例 Events: Type Reason Age From Message ---- ------ ---- ---- ------- Normal Scheduled 79s default-scheduler Successfully assigned test-oss/x-deploy-9bdcd8d7b-gxqk8 to pt-k8s-c Normal Pulling 78s kubelet Pulling image \"harbor.x.com.cn/product/x:6798daa\" Normal Pulled 75s kubelet Successfully pulled image \"harbor.x.com.cn/product/x:6798daa\" Normal Created 75s kubelet Created container x Normal Started 74s kubelet Started container x 常用命令    k exec -n test-oss x-deploy-769f5f5d98-w7m7g – printenv\n 2. 获取svc信息 k get svc -n test-oss proxy-host-svc -o wide\n 3. 获取异常pod信息 kubectl get pods -n test-oss | grep -v Running\n","wordCount":"1391","inLanguage":"zh","datePublished":"2021-03-30T12:32:48+08:00","dateModified":"2021-03-30T12:32:48+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/k8s%E6%94%B9%E9%80%A0/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
 </head>
 <body id=top>
 <script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
@@ -77,7 +78,7 @@
 <h1 class=post-title>
 K8s改造
 </h1>
-<div class=post-meta>3 分钟&nbsp;·&nbsp;Guangfa&nbsp;|&nbsp;<a href=https://github.com/euthpic/euthpic.github.io/edit/main/content/tech/K8s%e6%94%b9%e9%80%a0.md rel="noopener noreferrer" target=_blank>PR</a>
+<div class=post-meta><span title="2021-03-30 12:32:48 +0800 CST">March 30, 2021</span>&nbsp;·&nbsp;3 分钟&nbsp;·&nbsp;Guangfa&nbsp;|&nbsp;<a href=https://github.com/euthpic/euthpic.github.io/edit/main/content/tech/K8s%e6%94%b9%e9%80%a0.md rel="noopener noreferrer" target=_blank>PR</a>
 </div>
 </header> <div class=toc>
 <details open>
@@ -155,15 +156,15 @@ Events:
 </div>
 <footer class=post-footer>
 <nav class=paginav>
-<a class=prev href=http://euthpic.github.io/tech/%E6%8E%92%E6%9F%A5%E7%BA%BF%E4%B8%8A%E6%95%85%E9%9A%9C%E6%80%9D%E8%B7%AF/>
+<a class=prev href=http://euthpic.github.io/tech/springboot%E5%88%86%E5%B1%82%E6%9E%84%E5%BB%BAdocker%E9%95%9C%E5%83%8F/>
 <span class=title>« 上一页</span>
 <br>
-<span>排查线上故障思路</span>
+<span>SpringBoot分层构建Docker镜像</span>
 </a>
-<a class=next href=http://euthpic.github.io/tech/springboot%E5%88%86%E5%B1%82%E6%9E%84%E5%BB%BAdocker%E9%95%9C%E5%83%8F/>
+<a class=next href=http://euthpic.github.io/tech/k8s%E7%AC%94%E8%AE%B0/>
 <span class=title>下一页 »</span>
 <br>
-<span>SpringBoot分层构建Docker镜像</span>
+<span>K8s笔记</span>
 </a>
 </nav>
 <div class=share-buttons>
