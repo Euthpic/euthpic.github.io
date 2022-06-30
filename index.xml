@@ -287,7 +287,7 @@
       <pubDate>Tue, 02 Jun 2020 19:27:19 +0800</pubDate>
       
       <guid>http://euthpic.github.io/tech/%E5%B9%B6%E5%8F%91%E5%AE%B9%E5%99%A8collections/</guid>
-      <description>含义: JUC是java.util.concurrent工具包的简称,专门负责处理线程 ArrayList -&amp;gt; CopyOnWriteArrayList 内部持有一个可重入锁ReentrantLock,增</description>
+      <description>含义: JUC是java.util.concurrent工具包的简称,专门负责处理多线程场景 ArrayList -&amp;gt; CopyOnWriteArrayList 内部持有一个可重入锁ReentrantLoc</description>
     </item>
     
     <item>
@@ -368,6 +368,15 @@
       <pubDate>Fri, 02 Aug 2019 19:27:19 +0800</pubDate>
       
       <guid>http://euthpic.github.io/tech/%E6%8E%92%E6%9F%A5%E7%BA%BF%E4%B8%8A%E6%95%85%E9%9A%9C%E6%80%9D%E8%B7%AF/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Synchronized原理</title>
+      <link>http://euthpic.github.io/tech/synchronized%E5%8E%9F%E7%90%86/</link>
+      <pubDate>Tue, 02 Jul 2019 17:27:19 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/synchronized%E5%8E%9F%E7%90%86/</guid>
       <description></description>
     </item>
     

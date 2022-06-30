@@ -217,6 +217,11 @@
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
+    <loc>http://euthpic.github.io/tech/synchronized%E5%8E%9F%E7%90%86/</loc>
+    <lastmod>2019-07-02T17:27:19+08:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
     <loc>http://euthpic.github.io/archives/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
