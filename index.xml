@@ -93,15 +93,6 @@
     </item>
     
     <item>
-      <title>Zookeeper笔记</title>
-      <link>http://euthpic.github.io/tech/zookeeper%E7%AC%94%E8%AE%B0/</link>
-      <pubDate>Tue, 24 Aug 2021 16:24:46 +0800</pubDate>
-      
-      <guid>http://euthpic.github.io/tech/zookeeper%E7%AC%94%E8%AE%B0/</guid>
-      <description>Znode 结构: path:唯一路径 childNode：子节点 stat:状态属性 type:节点类型 节点类型: 类型 描述 PERSISTENT 持久节点(默认节点) PERSISTENT_SEQUENTIAL 持久序号节</description>
-    </item>
-    
-    <item>
       <title>Telepresence</title>
       <link>http://euthpic.github.io/tech/telepresence/</link>
       <pubDate>Sat, 24 Jul 2021 16:24:46 +0800</pubDate>
@@ -111,12 +102,30 @@
     </item>
     
     <item>
+      <title>SpringBoot前后端传参方案</title>
+      <link>http://euthpic.github.io/tech/springboot%E5%89%8D%E5%90%8E%E7%AB%AF%E4%BC%A0%E5%8F%82%E6%96%B9%E6%A1%88/</link>
+      <pubDate>Sat, 10 Jul 2021 16:32:48 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/springboot%E5%89%8D%E5%90%8E%E7%AB%AF%E4%BC%A0%E5%8F%82%E6%96%B9%E6%A1%88/</guid>
+      <description>在工作中遇到一些复杂的数据前端就很容易传不过来,然后开始甩锅&amp;quot;明明是你接收有问题&amp;quot;,所以在这里总结一下常见的传参姿势. 用</description>
+    </item>
+    
+    <item>
       <title>SpringBoot分层构建Docker镜像</title>
       <link>http://euthpic.github.io/tech/springboot%E5%88%86%E5%B1%82%E6%9E%84%E5%BB%BAdocker%E9%95%9C%E5%83%8F/</link>
       <pubDate>Sun, 30 May 2021 16:32:48 +0800</pubDate>
       
       <guid>http://euthpic.github.io/tech/springboot%E5%88%86%E5%B1%82%E6%9E%84%E5%BB%BAdocker%E9%95%9C%E5%83%8F/</guid>
       <description>Docker镜像分层 SpringBoot 2.3.x 新增对分层的支持 spring-boot-maven-plugin开启分层编译支持 Dockerfile修改 分层后的Ja</description>
+    </item>
+    
+    <item>
+      <title>Shell实现自增版本号</title>
+      <link>http://euthpic.github.io/tech/shell%E5%AE%9E%E7%8E%B0%E8%87%AA%E5%A2%9E%E7%89%88%E6%9C%AC%E5%8F%B7/</link>
+      <pubDate>Mon, 26 Apr 2021 14:00:29 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/shell%E5%AE%9E%E7%8E%B0%E8%87%AA%E5%A2%9E%E7%89%88%E6%9C%AC%E5%8F%B7/</guid>
+      <description>我们维护了一个叫做api-parent的项目,作用类似于spring-boot-parent,用于存放并控制各个jar包的版本.原先每次版本</description>
     </item>
     
     <item>
@@ -162,6 +171,15 @@
       
       <guid>http://euthpic.github.io/tech/mysql%E5%A4%9A%E8%A1%A8%E7%BB%9F%E4%B8%80%E4%B8%BB%E9%94%AE%E7%AD%96%E7%95%A5/</guid>
       <description>需求背景 有个三级目录(例如国家-省份-城市)的数据要以树的形式展示,由于每一级都是独立的实体,需要单独一张表存储,不同级别的id会重复,于是</description>
+    </item>
+    
+    <item>
+      <title>Zookeeper笔记</title>
+      <link>http://euthpic.github.io/tech/zookeeper%E7%AC%94%E8%AE%B0/</link>
+      <pubDate>Mon, 24 Aug 2020 16:24:46 +0800</pubDate>
+      
+      <guid>http://euthpic.github.io/tech/zookeeper%E7%AC%94%E8%AE%B0/</guid>
+      <description>Znode 结构: path:唯一路径 childNode：子节点 stat:状态属性 type:节点类型 节点类型: 类型 描述 PERSISTENT 持久节点(默认节点) PERSISTENT_SEQUENTIAL 持久序号节</description>
     </item>
     
     <item>
