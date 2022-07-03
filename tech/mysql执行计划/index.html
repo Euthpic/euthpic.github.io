@@ -1,0 +1,600 @@
+<!doctype html><html lang=zh dir=auto>
+<head><meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=robots content="index, follow">
+<title>MySQL执行计划 | 乱花渐欲迷人眼</title>
+<meta name=keywords content>
+<meta name=description content="EXPLAIN 与desc同义,该命令用于查看MySQL的执行计划,分析SQL语句的执行过程以及优化. EXPLAIN SELECT 1; +----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+ | id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered">
+<meta name=author content="Guangfa">
+<link rel=canonical href=http://euthpic.github.io/tech/mysql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/>
+<meta name=yandex-verification content="73b1a797f62c0e98">
+<link crossorigin=anonymous href=/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css integrity="sha256-yIlj/i15RiAA/Q+xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as=style>
+<script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=http://euthpic.github.io/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=http://euthpic.github.io/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=http://euthpic.github.io/favicon-32x32.png>
+<link rel=apple-touch-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<link rel=mask-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<meta name=theme-color content="#2e2e33">
+<meta name=msapplication-TileColor content="#2e2e33">
+<meta name=generator content="Hugo 0.89.4">
+<noscript>
+<style>#theme-toggle,.top-link{display:none}</style>
+<style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style>
+</noscript>
+<script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(a,e,f,g,b,c,d){a.GoogleAnalyticsObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=1,c.src=g,d.parentNode.insertBefore(c,d)}(window,document,'script','https://www.google-analytics.com/analytics.js','ga'),ga('create','UA-136094326-1','auto'),ga('send','pageview'))</script><meta property="og:title" content="MySQL执行计划">
+<meta property="og:description" content="EXPLAIN 与desc同义,该命令用于查看MySQL的执行计划,分析SQL语句的执行过程以及优化. EXPLAIN SELECT 1; +----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+ | id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://euthpic.github.io/tech/mysql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/"><meta property="og:image" content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="article:section" content="tech">
+<meta property="article:published_time" content="2022-07-03T15:15:20+08:00">
+<meta property="article:modified_time" content="2022-07-03T15:15:20+08:00"><meta property="og:site_name" content="乱花渐欲迷人眼">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:image content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name=twitter:title content="MySQL执行计划">
+<meta name=twitter:description content="EXPLAIN 与desc同义,该命令用于查看MySQL的执行计划,分析SQL语句的执行过程以及优化. EXPLAIN SELECT 1; +----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+ | id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Teches","item":"http://euthpic.github.io/tech/"},{"@type":"ListItem","position":2,"name":"MySQL执行计划","item":"http://euthpic.github.io/tech/mysql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/"}]}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"MySQL执行计划","name":"MySQL执行计划","description":"EXPLAIN 与desc同义,该命令用于查看MySQL的执行计划,分析SQL语句的执行过程以及优化. EXPLAIN SELECT 1; +----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+ | id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered","keywords":[],"articleBody":"EXPLAIN 与desc同义,该命令用于查看MySQL的执行计划,分析SQL语句的执行过程以及优化.\nEXPLAIN SELECT 1; +----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+ | id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra | +----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+ | 1 | SIMPLE | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL | NULL | No tables used | +----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+    列名 描述     id 序号,在一个大的查询语句中每个SELECT关键字都对应一个唯一的id   select_type 查询的类型   table 表名   partitions 匹配的分区信息   type 针对单表的访问方法   possible_keys 可能用到的索引   key 实际上使用的索引   key_len 实际使用到的索引长度   ref 当使用索引列等值查询时，与索引列进行等值匹配的对象信息   rows 预估的需要读取的记录条数   filtered 某个表经过搜索条件过滤后剩余记录条数的百分比   Extra 一些额外的信息    id select查询序号,id相同时执行顺序自上而下,id不同时从高到低执行.\n不是说有多少个select就有多少个id,连接查询没有select但是也会扫描多个表,它们id相同,前面的是驱动表,后面的是被驱动表.\nEXPLAIN SELECT * FROM t1 JOIN t2 ON t1.m1=t2.m2; +----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+--------------------------------------------+ | id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra | +----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+--------------------------------------------+ | 1 | SIMPLE | t1 | NULL | ALL | NULL | NULL | NULL | NULL | 3 | 100.00 | NULL | | 1 | SIMPLE | t2 | NULL | ALL | NULL | NULL | NULL | NULL | 4 | 25.00 | Using where; Using join buffer (hash join) | +----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+--------------------------------------------+ 如果是临时表这里会显示null.比如union最后会开个临时表对数据去重.\nEXPLAIN SELECT * FROM t1 UNION SELECT * FROM t2; +----+--------------+------------+------------+------+---------------+------+---------+------+------+----------+-----------------+ | id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra | +----+--------------+------------+------------+------+---------------+------+---------+------+------+----------+-----------------+ | 1 | PRIMARY | t1 | NULL | ALL | NULL | NULL | NULL | NULL | 3 | 100.00 | NULL | | 2 | UNION | t2 | NULL | ALL | NULL | NULL | NULL | NULL | 4 | 100.00 | NULL | | NULL | UNION RESULT | union1,2 | NULL | ALL | NULL | NULL | NULL | NULL | NULL | NULL | Using temporary | +----+--------------+------------+------------+------+---------------+------+---------+------+------+----------+-----------------+ select_type 查询类型,用于指明该select在整个SQL中扮演什么角色.\n   名称 描述     SIMPLE (简单查询) Simple SELECT (not using UNION or subqueries)   PRIMARY (主要查询) Outermost SELECT   UNION (联合查询) Second or later SELECT statement in a UNION   UNION RESULT (联合结果查询) Result of a UNION   SUBQUERY (子查询) First SELECT in subquery   DEPENDENT SUBQUERY (相关子查询) First SELECT in subquery, dependent on outer query   DEPENDENT UNION (相关联合查询) Second or later SELECT statement in a UNION, dependent on outer query   DERIVED (派生查询) Derived table   MATERIALIZED (物化表查询) Materialized subquery   UNCACHEABLE SUBQUERY (当前子查询) A subquery for which the result cannot be cached and must be re-evaluated for each row of the outer query   UNCACHEABLE UNION (当前联合查询) The second or later select in a UNION that belongs to an uncacheable subquery (see UNCACHEABLE SUBQUERY)   可以看到子查询的类型比较多,它也比较复杂,我暂时也还没看完所以这里就先不深入了.       SIMPLE\nSQL中不包含union和子查询的都算简单查询. 当然,join也算简单查询.\n  EXPLAIN SELECT * FROM t1 JOIN t2 ON t1.m1=t2.m2; +----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+--------------------------------------------+ | id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra | +----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+--------------------------------------------+ | 1 | SIMPLE | t1 | NULL | ALL | NULL | NULL | NULL | NULL | 3 | 100.00 | NULL | | 1 | SIMPLE | t2 | NULL | ALL | NULL | NULL | NULL | NULL | 4 | 25.00 | Using where; Using join buffer (hash join) | +----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+--------------------------------------------+   PRIMARY\n主查询,对于包含union/union all/子查询的查询(可以称为复杂查询)而言,它是由几个小查询组成,其中最左边的查询类型就是PRIMARY.\n  EXPLAIN SELECT * FROM t1 UNION SELECT * FROM t2; +----+--------------+------------+------------+------+---------------+------+---------+------+------+----------+-----------------+ \t| id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra | +----+--------------+------------+------------+------+---------------+------+---------+------+------+----------+-----------------+ \t| 1 | PRIMARY | t1 | NULL | ALL | NULL | NULL | NULL | NULL | 3 | 100.00 | NULL | | 2 | UNION | t2 | NULL | ALL | NULL | NULL | NULL | NULL | 4 | 100.00 | NULL | | NULL | UNION RESULT | union1,2 | NULL | ALL | NULL | NULL | NULL | NULL | NULL | NULL | Using temporary | +----+--------------+------------+------------+------+---------------+------+---------+------+------+----------+-----------------+   UNION\nunion里面位于主查询之后的查询.\n  UNION RESULT\nMySQL使用临时表来完成union查询结果的去重工作,针对该临时表的查询类型.\n  SUBQUERY\n子查询,只会执行一次.\n  DEPENDT SUBQUERY\n相关子查询,与普通的子查询不同,执行过程依赖于外层变量,因此对于外层查询的每一条结果都会执行一次,效率极低,是优化的重点.\n  DEPENDENT UNION\n和union的区别在于执行过程依赖外层查询.\n  EXPLAIN SELECT * FROM s1 WHERE key1 IN (SELECT key1 FROM s2 WHERE key1 = 'a' UNION SELECT key1 FROM s1 WHERE key1 = 'b'); +----+--------------------+------------+------------+------+---------------+----------+---------+-------+-------+----------+--------------------------+ \t| id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra | +----+--------------------+------------+------------+------+---------------+----------+---------+-------+-------+----------+--------------------------+ \t| 1 | PRIMARY | s1 | NULL | ALL | NULL | NULL | NULL | NULL | 97124 | 100.00 | Using where | | 2 | DEPENDENT SUBQUERY | s2 | NULL | ref | idx_key1 | idx_key1 | 303 | const | 1 | 100.00 | Using where; Using index | | 3 | DEPENDENT UNION | s1 | NULL | ref | idx_key1 | idx_key1 | 303 | const | 1 | 100.00 | Using where; Using index | | NULL | UNION RESULT | union2,3 | NULL | ALL | NULL | NULL | NULL | NULL | NULL | NULL | Using temporary | +----+--------------------+------------+------------+------+---------------+----------+---------+-------+-------+----------+--------------------------+ 上面的例子中同时出现了DEPENDENT SUBQUERY和DEPENDENT UNION,但是它们都没有依赖外层变量,单独执行的时候都是简单查询,这个和定义的不一样.\nEXPLAIN SELECT * FROM s1 WHERE key1 IN (SELECT key1 FROM s2 WHERE key1 = 'a' ); 如果把SQL子查询的union拿掉,子查询的类型又会变回SIMPLE,这我暂时还没完全弄懂,先留个坑.\n  DERIVED\n派生子查询.如果在from中出现子查询,MySQL会创建派生表,用于形成派生表的查询即派生子查询.\n  EXPLAIN SELECT * FROM (SELECT key1, count(*) as c FROM s1 GROUP BY key1) AS derived_s1 where c  1; +----+-------------+------------+------------+-------+---------------+----------+---------+------+-------+----------+-------------+ \t| id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra | +----+-------------+------------+------------+-------+---------------+----------+---------+------+-------+----------+-------------+ \t| 1 | PRIMARY | derived2 | NULL | ALL | NULL | NULL | NULL | NULL | 97124 | 100.00 | NULL | | 2 | DERIVED | s1 | NULL | index | idx_key1 | idx_key1 | 303 | NULL | 97124 | 100.00 | Using index | +----+-------------+------------+------------+-------+---------------+----------+---------+------+-------+----------+-------------+ partitions 如果该表进行了分区,就会显示查询了哪个分区.分区功能似乎较少使用,现在数据库压力大的话主流方案都是分库分表.\ntype 执行查询时的访问方式,包括system ,const ,eq_ref ,ref ，fulltext ,ref_or_null ,index_merge ,unique_subquery ,index_subquery ,range ,index ,ALL. 效率一般由高到低.\n  system\n该表只有一行,等于系统表,查询速度最快.\n  const\n该表至多只有一行数据匹配,表示对唯一索引的等值查询.\n  eq_ref\n与const类似,不过是出现在join查询里面,对于被驱动表的唯一索引的等值查询.\n  EXPLAIN SELECT * FROM s1 INNER JOIN s2 ON s1.id=s2.id; +----+-------------+-------+------------+--------+---------------+---------+---------+--------------+-------+----------+-------+ \t| id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra | +----+-------------+-------+------------+--------+---------------+---------+---------+--------------+-------+----------+-------+ \t| 1 | SIMPLE | s1 | NULL | ALL | NULL | NULL | NULL | NULL | 97124 | 100.00 | NULL | | 1 | SIMPLE | s2 | NULL | eq_ref | PRIMARY | PRIMARY | 4 | stuudy.s1.id | 1 | 100.00 | NULL | +----+-------------+-------+------------+--------+---------------+---------+---------+--------------+-------+----------+-------+   ref\n该表可能有多行数据匹配,表示对非唯一索引的等值查询(不包括范围查询)\n  fulltext\n全文索引/倒排索引\n  ref_or_null\n在ref的基础上额外对null进行搜索,也就是该普通索引的索引列可以存null\n  index_merge\n索引合并.在5.0以前MySQL对单表的扫描仅能使用一个索引,后来推出了索引合并,如果and和or两边可以分别使用索引,那就分别走索引,再对两边的结果求交集或并集.\n  EXPLAIN SELECT * FROM s1 WHERE common_field IN (SELECT key3 FROM s2 where s1.key1 = s2.key1) OR key3 = 'a'; +----+--------------------+-------+------------+----------------+-------------------+----------+---------+------+-------+----------+-------------+ \t| id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra | +----+--------------------+-------+------------+----------------+-------------------+----------+---------+------+-------+----------+-------------+ \t| 1 | PRIMARY | s1 | NULL | ALL | idx_key3 | NULL | NULL | NULL | 97124 | 100.00 | Using where | | 2 | DEPENDENT SUBQUERY | s2 | NULL | index_subquery | idx_key1,idx_key3 | idx_key3 | 303 | func | 1 | 10.00 | Using where | +----+--------------------+-------+------------+----------------+-------------------+----------+---------+------+-------+----------+-------------+ 索引合并有三种形式: intersection(交集,对应where A and B),union(并集,对应where A or B),还有sort-union.\n对于sort-union官方文档是这样解释的:\nThe difference between the sort-union algorithm and the union algorithm is that the sort-union algorithm must first fetch row IDs for all rows and sort them before returning any rows. 排序联合算法和联合算法的区别在于， 排序联合算法必须首先获取所有行的行 ID， 并在返回任何行之前对它们进行排序。 SELECT * FROM tbl_name WHERE key_col1  10 OR key_col2  20; SELECT * FROM tbl_name WHERE (key_col1  10 OR key_col2 = 20) AND nonkey_col = 30; 暂时没看懂具体情景是什么\n  unique_subquery\n类似于eq_ref,不过是在相关子查询里面对主键索引进行搜索.形式如value IN (SELECT primary_key FROM single_table WHERE some_expr).虽然官网说unique_subquery是eq_ref在相关子查询里面的特例,但eq_ref是等值查询,而unique_subquery可以是范围查询.\n  EXPLAIN SELECT * FROM s1 WHERE key2 IN (SELECT id FROM s2 where s1.key1 = s2.key1) OR key3 = 'a'; +----+--------------------+-------+------------+-----------------+------------------+---------+---------+------+-------+----------+-------------+ \t| id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra | +----+--------------------+-------+------------+-----------------+------------------+---------+---------+------+-------+----------+-------------+ \t| 1 | PRIMARY | s1 | NULL | ALL | idx_key3 | NULL | NULL | NULL | 97124 | 100.00 | Using where | | 2 | DEPENDENT SUBQUERY | s2 | NULL | unique_subquery | PRIMARY,idx_key1 | PRIMARY | 4 | func | 1 | 10.00 | Using where | +----+--------------------+-------+------------+-----------------+------------------+---------+---------+------+-------+----------+-------------+   index_subquery\n类似于unique_subquery,不过是在相关子查询里面对非主键索引进行搜索.\n  EXPLAIN SELECT * FROM s1 WHERE common_field IN (SELECT key3 FROM s2 where s1.key1 = s2.key1) OR key3 = 'a'; +----+--------------------+-------+------------+----------------+-------------------+----------+---------+------+-------+----------+-------------+ \t| id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra | +----+--------------------+-------+------------+----------------+-------------------+----------+---------+------+-------+----------+-------------+ \t| 1 | PRIMARY | s1 | NULL | ALL | idx_key3 | NULL | NULL | NULL | 97124 | 100.00 | Using where | | 2 | DEPENDENT SUBQUERY | s2 | NULL | index_subquery | idx_key1,idx_key3 | idx_key3 | 303 | func | 1 | 10.00 | Using where | +----+--------------------+-------+------------+----------------+-------------------+----------+---------+------+-------+----------+-------------+   range\n范围查询,情景包括,,=,,like,between,or,in()等操作符.此外官网还列出了=和is null,应该是写错了.\n  EXPLAIN SELECT * FROM s1 WHERE key1 IN ('a', 'b', 'c'); +----+-------------+-------+------------+-------+---------------+----------+---------+------+------+----------+-----------------------+ \t| id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra | +----+-------------+-------+------------+-------+---------------+----------+---------+------+------+----------+-----------------------+ \t| 1 | SIMPLE | s1 | NULL | range | idx_key1 | idx_key1 | 303 | NULL | 3 | 100.00 | Using index condition | +----+-------------+-------+------------+-------+---------------+----------+---------+------+------+----------+-----------------------+  或者 EXPLAIN SELECT * FROM s1 WHERE key1  'a' AND key1  'b'; +----+-------------+-------+------------+-------+---------------+----------+---------+------+------+----------+-----------------------+ \t| id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra | +----+-------------+-------+------------+-------+---------------+----------+---------+------+------+----------+-----------------------+ \t| 1 | SIMPLE | s1 | NULL | range | idx_key1 | idx_key1 | 303 | NULL | 1 | 100.00 | Using index condition | +----+-------------+-------+------------+-------+---------------+----------+---------+------+------+----------+-----------------------+   index\n对非主键索引树的全扫描,字段被索引覆盖,但是无法确定查找范围只能全扫描.\n  EXPLAIN SELECT key_part2 FROM s1 WHERE key_part3 = 'a'; +----+-------------+-------+------------+-------+---------------+--------------+---------+------+-------+----------+--------------------------+ \t| id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra | +----+-------------+-------+------------+-------+---------------+--------------+---------+------+-------+----------+--------------------------+ \t| 1 | SIMPLE | s1 | NULL | index | idx_key_part | idx_key_part | 909 | NULL | 97124 | 10.00 | Using where; Using index | +----+-------------+-------+------------+-------+---------------+--------------+---------+------+-------+----------+--------------------------+ 在上面的例子中,s1仅有idx_key_part这个索引,上面有key_part2和key_part3两列,select的字段被覆盖,但是where的字段无法应用索引进行等值或范围查询,只能全扫描,所以走主键索引或者idx_key_part索引区别不大,普通索引的规模比主键索引小,所以走了普通索引的全扫描.\n  all\n对主键索引树的全扫描,也就是常常提到的全表扫描.性能最差.\n  type是分析SQL执行效率很重要的指标.\n在SIMPLE类型的单表扫描里面,system  const  eq_ref  ref  fulltext  ref_or_null  index_merge  range  index  all\nrange及以上都利用了索引,无需优化.在index和all的情况下访问大表会有点耗时,需要优化,调整SQL或者索引设置等.\n子查询复杂一点,可能会执行多次,不能仅看访问方式,还要结合外层查询来分析具体会扫描多少行,所以一般建议少用子查询.\npossible_key 执行中可能使用到的索引.\nkey 执行中实际用到的索引.\nEXPLAIN SELECT * FROM s1 WHERE key1  'z' AND key3 = 'a'; +----+-------------+-------+------------+------+-------------------+----------+---------+-------+------+----------+-------------+ | id | select_type | table | partitions | type | possible_keys | key | key_len | ref | rows | filtered | Extra | +----+-------------+-------+------------+------+-------------------+----------+---------+-------+------+----------+-------------+ | 1 | SIMPLE | s1 | NULL | ref | idx_key1,idx_key3 | idx_key3 | 303 | const | 1 | 5.00 | Using where | +----+-------------+-------+------------+------+-------------------+----------+---------+-------+------+----------+-------------+ 脑补了这个SQL的执行过程,应该可以有三种方式:\n 走idx_key1索引,找出key1  ‘z’的数据行,然后再筛选出key3 = ‘a’的结果. 走idx_key3索引,找出key3 = ‘a’的数据行,然后再筛选出key1  ‘z’的结果. 使用索引合并,分别从idx_key1和idx_key3中找出key1  ‘z’和key3 = ‘a’的结果,对两个结果集求交集.  走idx_key1索引是range,走idx_key3索引是ref,走索引合并是index_merge,所以选择了最高效的idx_key3索引.\n也存在possible_key为空,但是key有值的情况.这一般发生在type=index的索引覆盖情况下,主键索引和普通索引都要全扫描,但是普通索引数据空间更小,所以MySQL选择遍历普通索引.\nkey_len 使用的索引的字段长度,如果是索引合并,那么就是这些索引的最大字段和.单位是Byte.仅参考表定义的字段类型最大长度,不是实际数据的字段长度.\nref 当使用索引列等值查询,也就是访问方式为const/eq_ref/ref/unique_subquery/index_subquery时,ref显示的就是用于等值查询的字段是什么.值为const表示匹配的是一个常量,值为func表示匹配的是一个函数.\nrows 根据表统计信息和数据采样情况,MySQL预估执行查询需要扫描的行数.\n这个值不一定精确,MySQL无法提前知道有多少行符合条件所以只能数据采样,根据几个数据页的情况推算出总的结果.\nfiltered 最终符合结果的行数占扫描行数的百分比,也可以理解为有效查询的百分比,值越大越好.\n可以说SQL优化最终的目的就是降低rows中预估要扫描的行数,提高filtered中的百分比.\nExtra 一些附加信息,像join查询可以分为Index Nested-Loop Join和Block Nested-Loop Join两种算法,具体采用哪一种就会在extra中写明.这里挑一些常见的进行说明.\n  Using filesort\n需要排序(包括内存排序和外部文件排序),常见于对一个无法使用索引的字段(没建立索引或索引失效)进行order by.\n  Using index\n索引覆盖,使用了普通索引,并且所需字段全部都能从该索引中获得,无须回表\n  Using index condition\n索引下推,走了普通索引,但无法索引覆盖需要回表,此时对索引中包含的字段先做判断,直接过滤掉不满足条件的记录,减少回表次数.\n  Using where\n走了普通索引,但是select或where中还有一些字段不存在于索引中,需要回表获取字段.\n  Using where;Using index\n这个我不知道怎么解释,像前面说的,using where表示索引未覆盖,需要回表,using index表示索引覆盖,无需回表.它们是矛盾的,分开我能理解,合在一起我就很凌乱.官网也没说明.\n  EXPLAIN SELECT a FROM t1 where a  'sad' ; 像这个简单的例子,在a上建了索引,如果是范围查询,那么extra就会显示Using where;Using index ,如果是等值查询,extra就会显示Using index.看了国内外的一些解释都无法说服我,感觉都在瞎说.\nhttps://segmentfault.com/q/1010000004197413\nhttps://stackoverflow.com/questions/25672552/whats-the-difference-between-using-index-and-using-where-using-index-in-the\n  Using index for group-by\n使用了group by,并且group by过程走了索引.这个很少见,我没构造出相关例子,如果能走索引extra会显示Using where;Using index,如果不能就会显示Using temporary,Using filesort.\n  Using join buffer\n使用了连接缓冲区,情景是join查询\n  Using temporary\n使用了临时表,常见于order by和group by.\n  如何利用执行计划 ","wordCount":"5174","inLanguage":"zh","datePublished":"2022-07-03T15:15:20+08:00","dateModified":"2022-07-03T15:15:20+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/mysql%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
+</head>
+<body id=top>
+<script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
+<header class=header>
+<nav class=nav>
+<div class=logo>
+<a href=http://euthpic.github.io/ accesskey=h title="🏡 乱花渐欲迷人眼 (Alt + H)">🏡 乱花渐欲迷人眼</a>
+<span class=logo-switches>
+<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+</span>
+</div>
+<ul id=menu>
+<li>
+<a href=http://euthpic.github.io/categories/ title="📔 系列">
+<span>📔 系列</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/tags/ title="🏷️ 标签">
+<span>🏷️ 标签</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/search/ title="🔍 搜索 (Alt + /)" accesskey=/>
+<span>🔍 搜索</span>
+</a>
+</li>
+<li>
+<a href=https://travellings.link title=🚇>
+<span>🚇</span>
+</a>
+</li>
+</ul>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-header>
+<div class=breadcrumbs><a href=http://euthpic.github.io/>主页</a>&nbsp;»&nbsp;<a href=http://euthpic.github.io/tech/>Teches</a></div>
+<h1 class=post-title>
+MySQL执行计划
+</h1>
+<div class=post-meta><span title="2022-07-03 15:15:20 +0800 CST">July 3, 2022</span>&nbsp;·&nbsp;11 分钟&nbsp;·&nbsp;Guangfa&nbsp;|&nbsp;<a href=https://github.com/euthpic/euthpic.github.io/edit/main/content/tech/MySQL%e6%89%a7%e8%a1%8c%e8%ae%a1%e5%88%92.md rel="noopener noreferrer" target=_blank>PR</a>
+</div>
+</header> <div class=toc>
+<details open>
+<summary accesskey=c title="(Alt + C)">
+<span class=details>目录</span>
+</summary>
+<div class=inner><ul>
+<li>
+<a href=#explain aria-label=EXPLAIN>EXPLAIN</a></li>
+<li>
+<a href=#id aria-label=id>id</a></li>
+<li>
+<a href=#select_type aria-label=select_type>select_type</a></li>
+<li>
+<a href=#partitions aria-label=partitions>partitions</a></li>
+<li>
+<a href=#type aria-label=type>type</a></li>
+<li>
+<a href=#possible_key aria-label=possible_key>possible_key</a></li>
+<li>
+<a href=#key aria-label=key>key</a></li>
+<li>
+<a href=#key_len aria-label=key_len>key_len</a></li>
+<li>
+<a href=#ref aria-label=ref>ref</a></li>
+<li>
+<a href=#rows aria-label=rows>rows</a></li>
+<li>
+<a href=#filtered aria-label=filtered>filtered</a></li>
+<li>
+<a href=#extra aria-label=Extra>Extra</a></li>
+<li>
+<a href=#%e5%a6%82%e4%bd%95%e5%88%a9%e7%94%a8%e6%89%a7%e8%a1%8c%e8%ae%a1%e5%88%92 aria-label=如何利用执行计划>如何利用执行计划</a>
+</li>
+</ul>
+</div>
+</details>
+</div>
+<div class=post-content><h3 id=explain>EXPLAIN</h3>
+<p>与desc同义,该命令用于查看MySQL的执行计划,分析SQL语句的执行过程以及优化.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#ae81ff>1</span>;
+<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+
+</span><span style=color:#75715e></span><span style=color:#f92672>|</span> id <span style=color:#f92672>|</span> select_type <span style=color:#f92672>|</span> <span style=color:#66d9ef>table</span> <span style=color:#f92672>|</span> partitions <span style=color:#f92672>|</span> <span style=color:#66d9ef>type</span> <span style=color:#f92672>|</span> possible_keys <span style=color:#f92672>|</span> <span style=color:#66d9ef>key</span>  <span style=color:#f92672>|</span> key_len <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>rows</span> <span style=color:#f92672>|</span> filtered <span style=color:#f92672>|</span> Extra          <span style=color:#f92672>|</span>
+<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+
+</span><span style=color:#75715e></span><span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>SIMPLE</span>      <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span>     <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>No</span> tables used <span style=color:#f92672>|</span>
+<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+
+</span></code></pre></div><table>
+<thead>
+<tr>
+<th>列名</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>序号,在一个大的查询语句中每个SELECT关键字都对应一个唯一的id</td>
+</tr>
+<tr>
+<td>select_type</td>
+<td>查询的类型</td>
+</tr>
+<tr>
+<td>table</td>
+<td>表名</td>
+</tr>
+<tr>
+<td>partitions</td>
+<td>匹配的分区信息</td>
+</tr>
+<tr>
+<td><strong>type</strong></td>
+<td><strong>针对单表的访问方法</strong></td>
+</tr>
+<tr>
+<td>possible_keys</td>
+<td>可能用到的索引</td>
+</tr>
+<tr>
+<td>key</td>
+<td>实际上使用的索引</td>
+</tr>
+<tr>
+<td>key_len</td>
+<td>实际使用到的索引长度</td>
+</tr>
+<tr>
+<td>ref</td>
+<td>当使用索引列等值查询时，与索引列进行等值匹配的对象信息</td>
+</tr>
+<tr>
+<td>rows</td>
+<td>预估的需要读取的记录条数</td>
+</tr>
+<tr>
+<td>filtered</td>
+<td>某个表经过搜索条件过滤后剩余记录条数的百分比</td>
+</tr>
+<tr>
+<td>Extra</td>
+<td>一些额外的信息</td>
+</tr>
+</tbody>
+</table>
+<h3 id=id>id</h3>
+<p>select查询序号,id相同时执行顺序自上而下,id不同时从高到低执行.</p>
+<p>不是说有多少个select就有多少个id,连接查询没有select但是也会扫描多个表,它们id相同,前面的是驱动表,后面的是被驱动表.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> t1 <span style=color:#66d9ef>JOIN</span> t2 <span style=color:#66d9ef>ON</span> t1.m1<span style=color:#f92672>=</span>t2.m2;
+
+<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+--------------------------------------------+
+</span><span style=color:#75715e></span><span style=color:#f92672>|</span> id <span style=color:#f92672>|</span> select_type <span style=color:#f92672>|</span> <span style=color:#66d9ef>table</span> <span style=color:#f92672>|</span> partitions <span style=color:#f92672>|</span> <span style=color:#66d9ef>type</span> <span style=color:#f92672>|</span> possible_keys <span style=color:#f92672>|</span> <span style=color:#66d9ef>key</span>  <span style=color:#f92672>|</span> key_len <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>rows</span> <span style=color:#f92672>|</span> filtered <span style=color:#f92672>|</span> Extra                                      <span style=color:#f92672>|</span>
+<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+--------------------------------------------+
+</span><span style=color:#75715e></span><span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>SIMPLE</span>      <span style=color:#f92672>|</span> t1    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>3</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>                                       <span style=color:#f92672>|</span>
+<span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>SIMPLE</span>      <span style=color:#f92672>|</span> t2    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>4</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>25</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>where</span>; <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>join</span> buffer (hash <span style=color:#66d9ef>join</span>) <span style=color:#f92672>|</span>
+<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+--------------------------------------------+
+</span></code></pre></div><p>如果是临时表这里会显示null.比如union最后会开个临时表对数据去重.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> t1  <span style=color:#66d9ef>UNION</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> t2;
+
+<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------+------------+------------+------+---------------+------+---------+------+------+----------+-----------------+
+</span><span style=color:#75715e></span><span style=color:#f92672>|</span> id <span style=color:#f92672>|</span> select_type  <span style=color:#f92672>|</span> <span style=color:#66d9ef>table</span>      <span style=color:#f92672>|</span> partitions <span style=color:#f92672>|</span> <span style=color:#66d9ef>type</span> <span style=color:#f92672>|</span> possible_keys <span style=color:#f92672>|</span> <span style=color:#66d9ef>key</span>  <span style=color:#f92672>|</span> key_len <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>rows</span> <span style=color:#f92672>|</span> filtered <span style=color:#f92672>|</span> Extra           <span style=color:#f92672>|</span>
+<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------+------------+------------+------+---------------+------+---------+------+------+----------+-----------------+
+</span><span style=color:#75715e></span><span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>PRIMARY</span>      <span style=color:#f92672>|</span> t1         <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>3</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>            <span style=color:#f92672>|</span>
+<span style=color:#f92672>|</span>  <span style=color:#ae81ff>2</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>UNION</span>        <span style=color:#f92672>|</span> t2         <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>4</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>            <span style=color:#f92672>|</span>
+<span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>UNION</span> <span style=color:#66d9ef>RESULT</span> <span style=color:#f92672>|</span> <span style=color:#f92672>&lt;</span>union1,<span style=color:#ae81ff>2</span><span style=color:#f92672>&gt;</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span>     <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>temporary</span> <span style=color:#f92672>|</span>
+<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------+------------+------------+------+---------------+------+---------+------+------+----------+-----------------+
+</span></code></pre></div><h3 id=select_type>select_type</h3>
+<p>查询类型,用于指明该select在整个SQL中扮演什么角色.</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SIMPLE (简单查询)</td>
+<td>Simple SELECT (not using UNION or subqueries)</td>
+</tr>
+<tr>
+<td>PRIMARY (主要查询)</td>
+<td>Outermost SELECT</td>
+</tr>
+<tr>
+<td>UNION (联合查询)</td>
+<td>Second or later SELECT statement in a UNION</td>
+</tr>
+<tr>
+<td>UNION RESULT (联合结果查询)</td>
+<td>Result of a UNION</td>
+</tr>
+<tr>
+<td>SUBQUERY (子查询)</td>
+<td>First SELECT in subquery</td>
+</tr>
+<tr>
+<td>DEPENDENT SUBQUERY (相关子查询)</td>
+<td>First SELECT in subquery, dependent on outer query</td>
+</tr>
+<tr>
+<td>DEPENDENT UNION (相关联合查询)</td>
+<td>Second or later SELECT statement in a UNION, dependent on outer query</td>
+</tr>
+<tr>
+<td>DERIVED (派生查询)</td>
+<td>Derived table</td>
+</tr>
+<tr>
+<td>MATERIALIZED (物化表查询)</td>
+<td>Materialized subquery</td>
+</tr>
+<tr>
+<td>UNCACHEABLE SUBQUERY (当前子查询)</td>
+<td>A subquery for which the result cannot be cached and must be re-evaluated for each row of the outer query</td>
+</tr>
+<tr>
+<td>UNCACHEABLE UNION (当前联合查询)</td>
+<td>The second or later select in a UNION that belongs to an uncacheable subquery (see UNCACHEABLE SUBQUERY)</td>
+</tr>
+<tr>
+<td>可以看到子查询的类型比较多,它也比较复杂,我暂时也还没看完所以这里就先不深入了.</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>
+<p>SIMPLE</p>
+<p>SQL中不包含union和子查询的都算简单查询.
+当然,join也算简单查询.</p>
+</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> t1 <span style=color:#66d9ef>JOIN</span> t2 <span style=color:#66d9ef>ON</span> t1.m1<span style=color:#f92672>=</span>t2.m2;
+
+<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+--------------------------------------------+
+</span><span style=color:#75715e></span><span style=color:#f92672>|</span> id <span style=color:#f92672>|</span> select_type <span style=color:#f92672>|</span> <span style=color:#66d9ef>table</span> <span style=color:#f92672>|</span> partitions <span style=color:#f92672>|</span> <span style=color:#66d9ef>type</span> <span style=color:#f92672>|</span> possible_keys <span style=color:#f92672>|</span> <span style=color:#66d9ef>key</span>  <span style=color:#f92672>|</span> key_len <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>rows</span> <span style=color:#f92672>|</span> filtered <span style=color:#f92672>|</span> Extra                                      <span style=color:#f92672>|</span>
+<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+--------------------------------------------+
+</span><span style=color:#75715e></span><span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>SIMPLE</span>      <span style=color:#f92672>|</span> t1    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>3</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>                                       <span style=color:#f92672>|</span>
+<span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>SIMPLE</span>      <span style=color:#f92672>|</span> t2    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>4</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>25</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>where</span>; <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>join</span> buffer (hash <span style=color:#66d9ef>join</span>) <span style=color:#f92672>|</span>
+<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+--------------------------------------------+
+</span></code></pre></div><ul>
+<li>
+<p>PRIMARY</p>
+<p>主查询,对于包含union/union all/子查询的查询(可以称为复杂查询)而言,它是由几个小查询组成,其中最左边的查询类型就是PRIMARY.</p>
+</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql>	<span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> t1  <span style=color:#66d9ef>UNION</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> t2;
+
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------+------------+------------+------+---------------+------+---------+------+------+----------+-----------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span> id <span style=color:#f92672>|</span> select_type  <span style=color:#f92672>|</span> <span style=color:#66d9ef>table</span>      <span style=color:#f92672>|</span> partitions <span style=color:#f92672>|</span> <span style=color:#66d9ef>type</span> <span style=color:#f92672>|</span> possible_keys <span style=color:#f92672>|</span> <span style=color:#66d9ef>key</span>  <span style=color:#f92672>|</span> key_len <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>rows</span> <span style=color:#f92672>|</span> filtered <span style=color:#f92672>|</span> Extra           <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------+------------+------------+------+---------------+------+---------+------+------+----------+-----------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>PRIMARY</span>      <span style=color:#f92672>|</span> t1         <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>3</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>            <span style=color:#f92672>|</span>
+	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>2</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>UNION</span>        <span style=color:#f92672>|</span> t2         <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>4</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>            <span style=color:#f92672>|</span>
+	<span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>UNION</span> <span style=color:#66d9ef>RESULT</span> <span style=color:#f92672>|</span> <span style=color:#f92672>&lt;</span>union1,<span style=color:#ae81ff>2</span><span style=color:#f92672>&gt;</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span>     <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>temporary</span> <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------+------------+------------+------+---------------+------+---------+------+------+----------+-----------------+
+</span></code></pre></div><ul>
+<li>
+<p>UNION</p>
+<p>union里面位于主查询之后的查询.</p>
+</li>
+<li>
+<p>UNION RESULT</p>
+<p>MySQL使用临时表来完成union查询结果的去重工作,针对该临时表的查询类型.</p>
+</li>
+<li>
+<p>SUBQUERY</p>
+<p>子查询,只会执行一次.</p>
+</li>
+<li>
+<p>DEPENDT SUBQUERY</p>
+<p>相关子查询,与普通的子查询不同,执行过程依赖于外层变量,因此对于外层查询的每一条结果都会执行一次,效率极低,是优化的重点.</p>
+</li>
+<li>
+<p>DEPENDENT UNION</p>
+<p>和union的区别在于执行过程依赖外层查询.</p>
+</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql>	 <span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> s1 <span style=color:#66d9ef>WHERE</span> key1 <span style=color:#66d9ef>IN</span> (<span style=color:#66d9ef>SELECT</span> key1 <span style=color:#66d9ef>FROM</span> s2 <span style=color:#66d9ef>WHERE</span> key1 <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;a&#39;</span> <span style=color:#66d9ef>UNION</span> <span style=color:#66d9ef>SELECT</span> key1 <span style=color:#66d9ef>FROM</span> s1 <span style=color:#66d9ef>WHERE</span> key1 <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;b&#39;</span>);
+
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------------+------------+------------+------+---------------+----------+---------+-------+-------+----------+--------------------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span> id <span style=color:#f92672>|</span> select_type        <span style=color:#f92672>|</span> <span style=color:#66d9ef>table</span>      <span style=color:#f92672>|</span> partitions <span style=color:#f92672>|</span> <span style=color:#66d9ef>type</span> <span style=color:#f92672>|</span> possible_keys <span style=color:#f92672>|</span> <span style=color:#66d9ef>key</span>      <span style=color:#f92672>|</span> key_len <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>   <span style=color:#f92672>|</span> <span style=color:#66d9ef>rows</span>  <span style=color:#f92672>|</span> filtered <span style=color:#f92672>|</span> Extra                    <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------------+------------+------------+------+---------------+----------+---------+-------+-------+----------+--------------------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>PRIMARY</span>            <span style=color:#f92672>|</span> s1         <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>     <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>  <span style=color:#f92672>|</span> <span style=color:#ae81ff>97124</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>where</span>              <span style=color:#f92672>|</span>
+	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>2</span> <span style=color:#f92672>|</span> DEPENDENT SUBQUERY <span style=color:#f92672>|</span> s2         <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>  <span style=color:#f92672>|</span> idx_key1      <span style=color:#f92672>|</span> idx_key1 <span style=color:#f92672>|</span> <span style=color:#ae81ff>303</span>     <span style=color:#f92672>|</span> const <span style=color:#f92672>|</span>     <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>where</span>; <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>index</span> <span style=color:#f92672>|</span>
+	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>3</span> <span style=color:#f92672>|</span> DEPENDENT <span style=color:#66d9ef>UNION</span>    <span style=color:#f92672>|</span> s1         <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>  <span style=color:#f92672>|</span> idx_key1      <span style=color:#f92672>|</span> idx_key1 <span style=color:#f92672>|</span> <span style=color:#ae81ff>303</span>     <span style=color:#f92672>|</span> const <span style=color:#f92672>|</span>     <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>where</span>; <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>index</span> <span style=color:#f92672>|</span>
+	<span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>UNION</span> <span style=color:#66d9ef>RESULT</span>       <span style=color:#f92672>|</span> <span style=color:#f92672>&lt;</span>union2,<span style=color:#ae81ff>3</span><span style=color:#f92672>&gt;</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>     <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>  <span style=color:#f92672>|</span>  <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span>     <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>temporary</span>          <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------------+------------+------------+------+---------------+----------+---------+-------+-------+----------+--------------------------+
+</span></code></pre></div><p>上面的例子中同时出现了DEPENDENT SUBQUERY和DEPENDENT UNION,但是它们都没有依赖外层变量,单独执行的时候都是简单查询,这个和定义的不一样.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> s1 <span style=color:#66d9ef>WHERE</span> key1 <span style=color:#66d9ef>IN</span> (<span style=color:#66d9ef>SELECT</span> key1 <span style=color:#66d9ef>FROM</span> s2 <span style=color:#66d9ef>WHERE</span> key1 <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;a&#39;</span> );
+</code></pre></div><p>如果把SQL子查询的union拿掉,子查询的类型又会变回SIMPLE,这我暂时还没完全弄懂,先留个坑.</p>
+<ul>
+<li>
+<p>DERIVED</p>
+<p>派生子查询.如果在from中出现子查询,MySQL会创建派生表,用于形成派生表的查询即派生子查询.</p>
+</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql>	<span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> (<span style=color:#66d9ef>SELECT</span> key1, <span style=color:#66d9ef>count</span>(<span style=color:#f92672>*</span>) <span style=color:#66d9ef>as</span> <span style=color:#66d9ef>c</span> <span style=color:#66d9ef>FROM</span> s1 <span style=color:#66d9ef>GROUP</span> <span style=color:#66d9ef>BY</span> key1) <span style=color:#66d9ef>AS</span> derived_s1 <span style=color:#66d9ef>where</span> <span style=color:#66d9ef>c</span> <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1</span>;
+
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+------------+------------+-------+---------------+----------+---------+------+-------+----------+-------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span> id <span style=color:#f92672>|</span> select_type <span style=color:#f92672>|</span> <span style=color:#66d9ef>table</span>      <span style=color:#f92672>|</span> partitions <span style=color:#f92672>|</span> <span style=color:#66d9ef>type</span>  <span style=color:#f92672>|</span> possible_keys <span style=color:#f92672>|</span> <span style=color:#66d9ef>key</span>      <span style=color:#f92672>|</span> key_len <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>rows</span>  <span style=color:#f92672>|</span> filtered <span style=color:#f92672>|</span> Extra       <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+------------+------------+-------+---------------+----------+---------+------+-------+----------+-------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>PRIMARY</span>     <span style=color:#f92672>|</span> <span style=color:#f92672>&lt;</span>derived2<span style=color:#f92672>&gt;</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>   <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>     <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#ae81ff>97124</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>        <span style=color:#f92672>|</span>
+	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>2</span> <span style=color:#f92672>|</span> DERIVED     <span style=color:#f92672>|</span> s1         <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>index</span> <span style=color:#f92672>|</span> idx_key1      <span style=color:#f92672>|</span> idx_key1 <span style=color:#f92672>|</span> <span style=color:#ae81ff>303</span>     <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#ae81ff>97124</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>index</span> <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+------------+------------+-------+---------------+----------+---------+------+-------+----------+-------------+
+</span></code></pre></div><h3 id=partitions>partitions</h3>
+<p>如果该表进行了分区,就会显示查询了哪个分区.分区功能似乎较少使用,现在数据库压力大的话主流方案都是分库分表.</p>
+<h3 id=type>type</h3>
+<p>执行查询时的访问方式,包括<strong>system</strong> ,<strong>const</strong> ,<strong>eq_ref</strong> ,<strong>ref</strong> ，<strong>fulltext</strong> ,<strong>ref_or_null</strong> ,<strong>index_merge</strong> ,<strong>unique_subquery</strong> ,<strong>index_subquery</strong> ,<strong>range</strong> ,<strong>index</strong> ,<strong>ALL</strong>.
+效率一般由高到低.</p>
+<ul>
+<li>
+<p>system</p>
+<p>该表只有一行,等于系统表,查询速度最快.</p>
+</li>
+<li>
+<p>const</p>
+<p>该表至多只有一行数据匹配,表示对唯一索引的等值查询.</p>
+</li>
+<li>
+<p>eq_ref</p>
+<p>与const类似,不过是出现在join查询里面,对于被驱动表的唯一索引的等值查询.</p>
+</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql>	<span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> s1 <span style=color:#66d9ef>INNER</span> <span style=color:#66d9ef>JOIN</span> s2 <span style=color:#66d9ef>ON</span> s1.id<span style=color:#f92672>=</span>s2.id;
+
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+--------+---------------+---------+---------+--------------+-------+----------+-------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span> id <span style=color:#f92672>|</span> select_type <span style=color:#f92672>|</span> <span style=color:#66d9ef>table</span> <span style=color:#f92672>|</span> partitions <span style=color:#f92672>|</span> <span style=color:#66d9ef>type</span>   <span style=color:#f92672>|</span> possible_keys <span style=color:#f92672>|</span> <span style=color:#66d9ef>key</span>     <span style=color:#f92672>|</span> key_len <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>rows</span>  <span style=color:#f92672>|</span> filtered <span style=color:#f92672>|</span> Extra <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+--------+---------------+---------+---------+--------------+-------+----------+-------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>SIMPLE</span>      <span style=color:#f92672>|</span> s1    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>         <span style=color:#f92672>|</span> <span style=color:#ae81ff>97124</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>  <span style=color:#f92672>|</span>
+	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>SIMPLE</span>      <span style=color:#f92672>|</span> s2    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> eq_ref <span style=color:#f92672>|</span> <span style=color:#66d9ef>PRIMARY</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#f92672>|</span> <span style=color:#ae81ff>4</span>       <span style=color:#f92672>|</span> stuudy.s1.id <span style=color:#f92672>|</span>     <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>  <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+--------+---------------+---------+---------+--------------+-------+----------+-------+
+</span></code></pre></div><ul>
+<li>
+<p>ref</p>
+<p>该表可能有多行数据匹配,表示对非唯一索引的等值查询(不包括范围查询)</p>
+</li>
+<li>
+<p>fulltext</p>
+<p>全文索引/倒排索引</p>
+</li>
+<li>
+<p>ref_or_null</p>
+<p>在ref的基础上额外对null进行搜索,也就是该普通索引的索引列可以存null</p>
+</li>
+<li>
+<p>index_merge</p>
+<p>索引合并.在5.0以前MySQL对单表的扫描仅能使用一个索引,后来推出了索引合并,如果and和or两边可以分别使用索引,那就分别走索引,再对两边的结果求交集或并集.</p>
+</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql>	<span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> s1 <span style=color:#66d9ef>WHERE</span> common_field <span style=color:#66d9ef>IN</span> (<span style=color:#66d9ef>SELECT</span> key3 <span style=color:#66d9ef>FROM</span> s2 <span style=color:#66d9ef>where</span> s1.key1 <span style=color:#f92672>=</span> s2.key1) <span style=color:#66d9ef>OR</span> key3 <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;a&#39;</span>;
+
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------------+-------+------------+----------------+-------------------+----------+---------+------+-------+----------+-------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span> id <span style=color:#f92672>|</span> select_type        <span style=color:#f92672>|</span> <span style=color:#66d9ef>table</span> <span style=color:#f92672>|</span> partitions <span style=color:#f92672>|</span> <span style=color:#66d9ef>type</span>           <span style=color:#f92672>|</span> possible_keys     <span style=color:#f92672>|</span> <span style=color:#66d9ef>key</span>      <span style=color:#f92672>|</span> key_len <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>rows</span>  <span style=color:#f92672>|</span> filtered <span style=color:#f92672>|</span> Extra       <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------------+-------+------------+----------------+-------------------+----------+---------+------+-------+----------+-------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>PRIMARY</span>            <span style=color:#f92672>|</span> s1    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>            <span style=color:#f92672>|</span> idx_key3          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>     <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#ae81ff>97124</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>where</span> <span style=color:#f92672>|</span>
+	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>2</span> <span style=color:#f92672>|</span> DEPENDENT SUBQUERY <span style=color:#f92672>|</span> s2    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> index_subquery <span style=color:#f92672>|</span> idx_key1,idx_key3 <span style=color:#f92672>|</span> idx_key3 <span style=color:#f92672>|</span> <span style=color:#ae81ff>303</span>     <span style=color:#f92672>|</span> func <span style=color:#f92672>|</span>     <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>10</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>where</span> <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------------+-------+------------+----------------+-------------------+----------+---------+------+-------+----------+-------------+
+</span></code></pre></div><p>索引合并有三种形式: intersection(交集,对应where A and B),union(并集,对应where A or B),还有sort-union.</p>
+<p>对于sort-union官方文档是这样解释的:</p>
+<pre tabindex=0><code>The difference between the sort-union algorithm and the union algorithm 
+is that the sort-union algorithm must first fetch row IDs for all rows 
+and sort them before returning any rows.
+排序联合算法和联合算法的区别在于，
+排序联合算法必须首先获取所有行的行 ID，
+并在返回任何行之前对它们进行排序。
+</code></pre><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> tbl_name
+  <span style=color:#66d9ef>WHERE</span> key_col1 <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>10</span> <span style=color:#66d9ef>OR</span> key_col2 <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>20</span>;
+
+<span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> tbl_name
+  <span style=color:#66d9ef>WHERE</span> (key_col1 <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>10</span> <span style=color:#66d9ef>OR</span> key_col2 <span style=color:#f92672>=</span> <span style=color:#ae81ff>20</span>) <span style=color:#66d9ef>AND</span> nonkey_col <span style=color:#f92672>=</span> <span style=color:#ae81ff>30</span>;
+</code></pre></div><p>暂时没看懂具体情景是什么</p>
+<ul>
+<li>
+<p>unique_subquery</p>
+<p>类似于eq_ref,不过是在相关子查询里面对主键索引进行搜索.形式如value IN (SELECT primary_key FROM single_table WHERE some_expr).虽然官网说unique_subquery是eq_ref在相关子查询里面的特例,但eq_ref是等值查询,而unique_subquery可以是范围查询.</p>
+</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql>	<span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> s1 <span style=color:#66d9ef>WHERE</span> key2 <span style=color:#66d9ef>IN</span> (<span style=color:#66d9ef>SELECT</span> id <span style=color:#66d9ef>FROM</span> s2 <span style=color:#66d9ef>where</span> s1.key1 <span style=color:#f92672>=</span> s2.key1) <span style=color:#66d9ef>OR</span> key3 <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;a&#39;</span>;
+
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------------+-------+------------+-----------------+------------------+---------+---------+------+-------+----------+-------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span> id <span style=color:#f92672>|</span> select_type        <span style=color:#f92672>|</span> <span style=color:#66d9ef>table</span> <span style=color:#f92672>|</span> partitions <span style=color:#f92672>|</span> <span style=color:#66d9ef>type</span>            <span style=color:#f92672>|</span> possible_keys    <span style=color:#f92672>|</span> <span style=color:#66d9ef>key</span>     <span style=color:#f92672>|</span> key_len <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>rows</span>  <span style=color:#f92672>|</span> filtered <span style=color:#f92672>|</span> Extra       <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------------+-------+------------+-----------------+------------------+---------+---------+------+-------+----------+-------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>PRIMARY</span>            <span style=color:#f92672>|</span> s1    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>             <span style=color:#f92672>|</span> idx_key3         <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#ae81ff>97124</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>where</span> <span style=color:#f92672>|</span>
+	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>2</span> <span style=color:#f92672>|</span> DEPENDENT SUBQUERY <span style=color:#f92672>|</span> s2    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> unique_subquery <span style=color:#f92672>|</span> <span style=color:#66d9ef>PRIMARY</span>,idx_key1 <span style=color:#f92672>|</span> <span style=color:#66d9ef>PRIMARY</span> <span style=color:#f92672>|</span> <span style=color:#ae81ff>4</span>       <span style=color:#f92672>|</span> func <span style=color:#f92672>|</span>     <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>10</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>where</span> <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------------+-------+------------+-----------------+------------------+---------+---------+------+-------+----------+-------------+
+</span></code></pre></div><ul>
+<li>
+<p>index_subquery</p>
+<p>类似于unique_subquery,不过是在相关子查询里面对非主键索引进行搜索.</p>
+</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql>	<span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> s1 <span style=color:#66d9ef>WHERE</span> common_field <span style=color:#66d9ef>IN</span> (<span style=color:#66d9ef>SELECT</span> key3 <span style=color:#66d9ef>FROM</span> s2 <span style=color:#66d9ef>where</span> s1.key1 <span style=color:#f92672>=</span> s2.key1) <span style=color:#66d9ef>OR</span> key3 <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;a&#39;</span>;
+
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------------+-------+------------+----------------+-------------------+----------+---------+------+-------+----------+-------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span> id <span style=color:#f92672>|</span> select_type        <span style=color:#f92672>|</span> <span style=color:#66d9ef>table</span> <span style=color:#f92672>|</span> partitions <span style=color:#f92672>|</span> <span style=color:#66d9ef>type</span>           <span style=color:#f92672>|</span> possible_keys     <span style=color:#f92672>|</span> <span style=color:#66d9ef>key</span>      <span style=color:#f92672>|</span> key_len <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>rows</span>  <span style=color:#f92672>|</span> filtered <span style=color:#f92672>|</span> Extra       <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------------+-------+------------+----------------+-------------------+----------+---------+------+-------+----------+-------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>PRIMARY</span>            <span style=color:#f92672>|</span> s1    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ALL</span>            <span style=color:#f92672>|</span> idx_key3          <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>     <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#ae81ff>97124</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>where</span> <span style=color:#f92672>|</span>
+	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>2</span> <span style=color:#f92672>|</span> DEPENDENT SUBQUERY <span style=color:#f92672>|</span> s2    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> index_subquery <span style=color:#f92672>|</span> idx_key1,idx_key3 <span style=color:#f92672>|</span> idx_key3 <span style=color:#f92672>|</span> <span style=color:#ae81ff>303</span>     <span style=color:#f92672>|</span> func <span style=color:#f92672>|</span>     <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>10</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>where</span> <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+--------------------+-------+------------+----------------+-------------------+----------+---------+------+-------+----------+-------------+
+</span></code></pre></div><ul>
+<li>
+<p>range</p>
+<p>范围查询,情景包括&lt;>,&lt;,>,&lt;=,>=,&lt;=>,like,between,or,in()等操作符.此外官网还列出了=和is null,应该是写错了.</p>
+</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql>	<span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> s1 <span style=color:#66d9ef>WHERE</span> key1 <span style=color:#66d9ef>IN</span> (<span style=color:#e6db74>&#39;a&#39;</span>, <span style=color:#e6db74>&#39;b&#39;</span>, <span style=color:#e6db74>&#39;c&#39;</span>);
+
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+-------+---------------+----------+---------+------+------+----------+-----------------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span> id <span style=color:#f92672>|</span> select_type <span style=color:#f92672>|</span> <span style=color:#66d9ef>table</span> <span style=color:#f92672>|</span> partitions <span style=color:#f92672>|</span> <span style=color:#66d9ef>type</span>  <span style=color:#f92672>|</span> possible_keys <span style=color:#f92672>|</span> <span style=color:#66d9ef>key</span>      <span style=color:#f92672>|</span> key_len <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>rows</span> <span style=color:#f92672>|</span> filtered <span style=color:#f92672>|</span> Extra                 <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+-------+---------------+----------+---------+------+------+----------+-----------------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>SIMPLE</span>      <span style=color:#f92672>|</span> s1    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> range <span style=color:#f92672>|</span> idx_key1      <span style=color:#f92672>|</span> idx_key1 <span style=color:#f92672>|</span> <span style=color:#ae81ff>303</span>     <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>3</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>index</span> condition <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+-------+---------------+----------+---------+------+------+----------+-----------------------+
+</span><span style=color:#75715e></span>
+	<span style=color:#960050;background-color:#1e0010>或者</span>
+
+	 <span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> s1 <span style=color:#66d9ef>WHERE</span> key1 <span style=color:#f92672>&gt;</span> <span style=color:#e6db74>&#39;a&#39;</span> <span style=color:#66d9ef>AND</span> key1 <span style=color:#f92672>&lt;</span> <span style=color:#e6db74>&#39;b&#39;</span>;
+
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+-------+---------------+----------+---------+------+------+----------+-----------------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span> id <span style=color:#f92672>|</span> select_type <span style=color:#f92672>|</span> <span style=color:#66d9ef>table</span> <span style=color:#f92672>|</span> partitions <span style=color:#f92672>|</span> <span style=color:#66d9ef>type</span>  <span style=color:#f92672>|</span> possible_keys <span style=color:#f92672>|</span> <span style=color:#66d9ef>key</span>      <span style=color:#f92672>|</span> key_len <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>rows</span> <span style=color:#f92672>|</span> filtered <span style=color:#f92672>|</span> Extra                 <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+-------+---------------+----------+---------+------+------+----------+-----------------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>SIMPLE</span>      <span style=color:#f92672>|</span> s1    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> range <span style=color:#f92672>|</span> idx_key1      <span style=color:#f92672>|</span> idx_key1 <span style=color:#f92672>|</span> <span style=color:#ae81ff>303</span>     <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span>   <span style=color:#ae81ff>100</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>index</span> condition <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+-------+---------------+----------+---------+------+------+----------+-----------------------+
+</span></code></pre></div><ul>
+<li>
+<p>index</p>
+<p>对非主键索引树的全扫描,字段被索引覆盖,但是无法确定查找范围只能全扫描.</p>
+</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql>	<span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> key_part2 <span style=color:#66d9ef>FROM</span> s1 <span style=color:#66d9ef>WHERE</span> key_part3 <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;a&#39;</span>;
+
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+-------+---------------+--------------+---------+------+-------+----------+--------------------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span> id <span style=color:#f92672>|</span> select_type <span style=color:#f92672>|</span> <span style=color:#66d9ef>table</span> <span style=color:#f92672>|</span> partitions <span style=color:#f92672>|</span> <span style=color:#66d9ef>type</span>  <span style=color:#f92672>|</span> possible_keys <span style=color:#f92672>|</span> <span style=color:#66d9ef>key</span>          <span style=color:#f92672>|</span> key_len <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>  <span style=color:#f92672>|</span> <span style=color:#66d9ef>rows</span>  <span style=color:#f92672>|</span> filtered <span style=color:#f92672>|</span> Extra                    <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+-------+---------------+--------------+---------+------+-------+----------+--------------------------+
+</span><span style=color:#75715e></span>	<span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>SIMPLE</span>      <span style=color:#f92672>|</span> s1    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>index</span> <span style=color:#f92672>|</span> idx_key_part  <span style=color:#f92672>|</span> idx_key_part <span style=color:#f92672>|</span> <span style=color:#ae81ff>909</span>     <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span> <span style=color:#f92672>|</span> <span style=color:#ae81ff>97124</span> <span style=color:#f92672>|</span>    <span style=color:#ae81ff>10</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>where</span>; <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>index</span> <span style=color:#f92672>|</span>
+	<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+-------+---------------+--------------+---------+------+-------+----------+--------------------------+
+</span></code></pre></div><p>在上面的例子中,s1仅有idx_key_part这个索引,上面有key_part2和key_part3两列,select的字段被覆盖,但是where的字段无法应用索引进行等值或范围查询,只能全扫描,所以走主键索引或者idx_key_part索引区别不大,普通索引的规模比主键索引小,所以走了普通索引的全扫描.</p>
+<ul>
+<li>
+<p>all</p>
+<p>对主键索引树的全扫描,也就是常常提到的全表扫描.性能最差.</p>
+</li>
+</ul>
+<p>type是分析SQL执行效率很重要的指标.</p>
+<p>在SIMPLE类型的单表扫描里面,system > const > eq_ref > ref > fulltext > ref_or_null > index_merge > range > index > all</p>
+<p>range及以上都利用了索引,无需优化.在index和all的情况下访问大表会有点耗时,需要优化,调整SQL或者索引设置等.</p>
+<p>子查询复杂一点,可能会执行多次,不能仅看访问方式,还要结合外层查询来分析具体会扫描多少行,所以一般建议少用子查询.</p>
+<h3 id=possible_key>possible_key</h3>
+<p>执行中可能使用到的索引.</p>
+<h3 id=key>key</h3>
+<p>执行中实际用到的索引.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> <span style=color:#f92672>*</span> <span style=color:#66d9ef>FROM</span> s1 <span style=color:#66d9ef>WHERE</span> key1 <span style=color:#f92672>&gt;</span> <span style=color:#e6db74>&#39;z&#39;</span> <span style=color:#66d9ef>AND</span> key3 <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;a&#39;</span>;
+
+<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+------+-------------------+----------+---------+-------+------+----------+-------------+
+</span><span style=color:#75715e></span><span style=color:#f92672>|</span> id <span style=color:#f92672>|</span> select_type <span style=color:#f92672>|</span> <span style=color:#66d9ef>table</span> <span style=color:#f92672>|</span> partitions <span style=color:#f92672>|</span> <span style=color:#66d9ef>type</span> <span style=color:#f92672>|</span> possible_keys     <span style=color:#f92672>|</span> <span style=color:#66d9ef>key</span>      <span style=color:#f92672>|</span> key_len <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>   <span style=color:#f92672>|</span> <span style=color:#66d9ef>rows</span> <span style=color:#f92672>|</span> filtered <span style=color:#f92672>|</span> Extra       <span style=color:#f92672>|</span>
+<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+------+-------------------+----------+---------+-------+------+----------+-------------+
+</span><span style=color:#75715e></span><span style=color:#f92672>|</span>  <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>SIMPLE</span>      <span style=color:#f92672>|</span> s1    <span style=color:#f92672>|</span> <span style=color:#66d9ef>NULL</span>       <span style=color:#f92672>|</span> <span style=color:#66d9ef>ref</span>  <span style=color:#f92672>|</span> idx_key1,idx_key3 <span style=color:#f92672>|</span> idx_key3 <span style=color:#f92672>|</span> <span style=color:#ae81ff>303</span>     <span style=color:#f92672>|</span> const <span style=color:#f92672>|</span>    <span style=color:#ae81ff>1</span> <span style=color:#f92672>|</span>     <span style=color:#ae81ff>5</span>.<span style=color:#ae81ff>00</span> <span style=color:#f92672>|</span> <span style=color:#66d9ef>Using</span> <span style=color:#66d9ef>where</span> <span style=color:#f92672>|</span>
+<span style=color:#f92672>+</span><span style=color:#75715e>----+-------------+-------+------------+------+-------------------+----------+---------+-------+------+----------+-------------+
+</span></code></pre></div><p>脑补了这个SQL的执行过程,应该可以有三种方式:</p>
+<ol>
+<li>走idx_key1索引,找出key1 > &lsquo;z&rsquo;的数据行,然后再筛选出key3 = &lsquo;a&rsquo;的结果.</li>
+<li>走idx_key3索引,找出key3 = &lsquo;a&rsquo;的数据行,然后再筛选出key1 > &lsquo;z&rsquo;的结果.</li>
+<li>使用索引合并,分别从idx_key1和idx_key3中找出key1 > &lsquo;z&rsquo;和key3 = &lsquo;a&rsquo;的结果,对两个结果集求交集.</li>
+</ol>
+<p>走idx_key1索引是range,走idx_key3索引是ref,走索引合并是index_merge,所以选择了最高效的idx_key3索引.</p>
+<p>也存在possible_key为空,但是key有值的情况.这一般发生在type=index的索引覆盖情况下,主键索引和普通索引都要全扫描,但是普通索引数据空间更小,所以MySQL选择遍历普通索引.</p>
+<h3 id=key_len>key_len</h3>
+<p>使用的索引的字段长度,如果是索引合并,那么就是这些索引的最大字段和.单位是Byte.仅参考表定义的字段类型最大长度,不是实际数据的字段长度.</p>
+<h3 id=ref>ref</h3>
+<p>当使用索引列等值查询,也就是访问方式为const/eq_ref/ref/unique_subquery/index_subquery时,ref显示的就是用于等值查询的字段是什么.值为const表示匹配的是一个常量,值为func表示匹配的是一个函数.</p>
+<h3 id=rows>rows</h3>
+<p>根据表统计信息和数据采样情况,MySQL预估执行查询需要扫描的行数.</p>
+<p>这个值不一定精确,MySQL无法提前知道有多少行符合条件所以只能数据采样,根据几个数据页的情况推算出总的结果.</p>
+<h3 id=filtered>filtered</h3>
+<p>最终符合结果的行数占扫描行数的百分比,也可以理解为有效查询的百分比,值越大越好.</p>
+<p>可以说SQL优化最终的目的就是降低rows中预估要扫描的行数,提高filtered中的百分比.</p>
+<h3 id=extra>Extra</h3>
+<p>一些附加信息,像join查询可以分为Index Nested-Loop Join和Block Nested-Loop Join两种算法,具体采用哪一种就会在extra中写明.这里挑一些常见的进行说明.</p>
+<ul>
+<li>
+<p>Using filesort</p>
+<p>需要排序(包括内存排序和外部文件排序),常见于对一个无法使用索引的字段(没建立索引或索引失效)进行order by.</p>
+</li>
+<li>
+<p>Using index</p>
+<p>索引覆盖,使用了普通索引,并且所需字段全部都能从该索引中获得,无须回表</p>
+</li>
+<li>
+<p>Using index condition</p>
+<p>索引下推,走了普通索引,但无法索引覆盖需要回表,此时对索引中包含的字段先做判断,直接过滤掉不满足条件的记录,减少回表次数.</p>
+</li>
+<li>
+<p>Using where</p>
+<p>走了普通索引,但是select或where中还有一些字段不存在于索引中,需要回表获取字段.</p>
+</li>
+<li>
+<p>Using where;Using index</p>
+<p>这个我不知道怎么解释,像前面说的,using where表示索引未覆盖,需要回表,using index表示索引覆盖,无需回表.它们是矛盾的,分开我能理解,合在一起我就很凌乱.官网也没说明.</p>
+</li>
+</ul>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=color:#66d9ef>EXPLAIN</span> <span style=color:#66d9ef>SELECT</span> a <span style=color:#66d9ef>FROM</span> t1 <span style=color:#66d9ef>where</span> a <span style=color:#f92672>&gt;</span> <span style=color:#e6db74>&#39;sad&#39;</span>  ;
+</code></pre></div><p>像这个简单的例子,在a上建了索引,如果是范围查询,那么extra就会显示Using where;Using index ,如果是等值查询,extra就会显示Using index.看了国内外的一些解释都无法说服我,感觉都在瞎说.</p>
+<p><a href=https://segmentfault.com/q/1010000004197413>https://segmentfault.com/q/1010000004197413</a></p>
+<p><a href=https://stackoverflow.com/questions/25672552/whats-the-difference-between-using-index-and-using-where-using-index-in-the>https://stackoverflow.com/questions/25672552/whats-the-difference-between-using-index-and-using-where-using-index-in-the</a></p>
+<ul>
+<li>
+<p>Using index for group-by</p>
+<p>使用了group by,并且group by过程走了索引.这个很少见,我没构造出相关例子,如果能走索引extra会显示Using where;Using index,如果不能就会显示Using temporary,Using filesort.</p>
+</li>
+<li>
+<p>Using join buffer</p>
+<p>使用了连接缓冲区,情景是join查询</p>
+</li>
+<li>
+<p>Using temporary</p>
+<p>使用了临时表,常见于order by和group by.</p>
+</li>
+</ul>
+<h3 id=如何利用执行计划>如何利用执行计划</h3>
+</div>
+<footer class=post-footer>
+<nav class=paginav>
+<a class=next href=http://euthpic.github.io/tech/https%E6%95%B0%E5%AD%97%E8%AF%81%E4%B9%A6%E5%92%8C%E6%95%B0%E5%AD%97%E7%AD%BE%E5%90%8D/>
+<span class=title>下一页 »</span>
+<br>
+<span>Https,数字证书和数字签名</span>
+</a>
+</nav>
+<div class=share-buttons>
+<a target=_blank rel="noopener noreferrer" aria-label="share MySQL执行计划 on twitter" href="https://twitter.com/intent/tweet/?text=MySQL%e6%89%a7%e8%a1%8c%e8%ae%a1%e5%88%92&url=http%3a%2f%2feuthpic.github.io%2ftech%2fmysql%25E6%2589%25A7%25E8%25A1%258C%25E8%25AE%25A1%25E5%2588%2592%2f&hashtags="><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share MySQL执行计划 on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2feuthpic.github.io%2ftech%2fmysql%25E6%2589%25A7%25E8%25A1%258C%25E8%25AE%25A1%25E5%2588%2592%2f&title=MySQL%e6%89%a7%e8%a1%8c%e8%ae%a1%e5%88%92&summary=MySQL%e6%89%a7%e8%a1%8c%e8%ae%a1%e5%88%92&source=http%3a%2f%2feuthpic.github.io%2ftech%2fmysql%25E6%2589%25A7%25E8%25A1%258C%25E8%25AE%25A1%25E5%2588%2592%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share MySQL执行计划 on reddit" href="https://reddit.com/submit?url=http%3a%2f%2feuthpic.github.io%2ftech%2fmysql%25E6%2589%25A7%25E8%25A1%258C%25E8%25AE%25A1%25E5%2588%2592%2f&title=MySQL%e6%89%a7%e8%a1%8c%e8%ae%a1%e5%88%92"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share MySQL执行计划 on facebook" href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2feuthpic.github.io%2ftech%2fmysql%25E6%2589%25A7%25E8%25A1%258C%25E8%25AE%25A1%25E5%2588%2592%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share MySQL执行计划 on whatsapp" href="https://api.whatsapp.com/send?text=MySQL%e6%89%a7%e8%a1%8c%e8%ae%a1%e5%88%92%20-%20http%3a%2f%2feuthpic.github.io%2ftech%2fmysql%25E6%2589%25A7%25E8%25A1%258C%25E8%25AE%25A1%25E5%2588%2592%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share MySQL执行计划 on telegram" href="https://telegram.me/share/url?text=MySQL%e6%89%a7%e8%a1%8c%e8%ae%a1%e5%88%92&url=http%3a%2f%2feuthpic.github.io%2ftech%2fmysql%25E6%2589%25A7%25E8%25A1%258C%25E8%25AE%25A1%25E5%2588%2592%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg>
+</a>
+</div>
+</footer>
+</article>
+</main>
+<footer class=footer>
+<span>&copy; 2022 <a href=http://euthpic.github.io/>乱花渐欲迷人眼</a></span>
+<span>
+Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a>
+</span>
+</footer>
+<a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a>
+<script>let menu=document.getElementById('menu');menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
+<script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script>
+<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
+</body>
+</html>
