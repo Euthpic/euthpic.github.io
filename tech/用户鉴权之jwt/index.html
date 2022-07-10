@@ -34,7 +34,7 @@
 <meta name=twitter:title content="用户鉴权之JWT">
 <meta name=twitter:description content="定义 Json Web Token(JWT)是目前最流行的跨域认证解决方案. 传统基于cookie和session的认证流程一般如下: 用户向服务器发送用户名和">
 <script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Teches","item":"http://euthpic.github.io/tech/"},{"@type":"ListItem","position":2,"name":"用户鉴权之JWT","item":"http://euthpic.github.io/tech/%E7%94%A8%E6%88%B7%E9%89%B4%E6%9D%83%E4%B9%8Bjwt/"}]}</script>
-<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"用户鉴权之JWT","name":"用户鉴权之JWT","description":"定义 Json Web Token(JWT)是目前最流行的跨域认证解决方案. 传统基于cookie和session的认证流程一般如下: 用户向服务器发送用户名和","keywords":[],"articleBody":"定义 Json Web Token(JWT)是目前最流行的跨域认证解决方案.\n传统基于cookie和session的认证流程一般如下:\n  用户向服务器发送用户名和密码\n  服务器验证通过后,在当前session里面保存相关数据,比如user role,login time等.\n  服务器向用户返回一个sesson id,写入用户的cookie\n  用户随后的每一次请求,都会通过cookie,将sesson id传回服务器.\n  服务器根据sesson id查找前面保存的数据,从而得知用户的身份.\n  这种模式的问题在于拓展性不好,某用户的身份信息存在于特定的一台机器上,如果是服务器集群,或者跨域的微服务架构,用户访问其他机器的时候就又得重新登录.\nJWT为解决这种场景,提出了一种新思路,服务器索性就不保存session了,数据都保存在客户端,每次请求都发回服务器,服务器要做的只是校验数据有无被篡改,这样就解决了单点和跨域的问题.\nsession-cookie方案其实也可以完善,单机拓展性不好,就把数据丢到Redis集群,借助Redis的高可用和可拓展实现分布式session.我认为基于session和基于token的认证方案是两种截然不同的思路,它们的使用场景并不是完全重合的.\n原理 JWT的原理是,服务器认证后,生成一个JSON对象,发回给用户.\n{\n“姓名”: “张三”,\n“角色”: “管理员”,\n“到期时间”: “2018年7月1日0点0分”\n}\n以后,用户与服务端通信的时候,都要发回这个JSON对象,服务器完全依靠这个对象来鉴别用户.\n这个JSON并不加密,客户端可以看到但不能改动,服务器在生成对象的时候会加上签名(对称加密),用签名来判断数据有无被篡改.\n于是,服务器就不保存任何session状态了,也就是服务器变成无状态了,从而容易实现拓展.\n数据结构 在网络中传输的JWT是一串字符串:\nyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.\neyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.\nSflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\n它是个很长的字符串.中间用.分隔成三部分,它内部并不会分行,这里分行只是为了便于展示.\nJWT的三个部分依次如下:\n   Header(头部)\n  Paylod(负载)\n  Signature(签名)\n   Header.Paylod.Signature\nHeader 报头通常由两部分组成: 令牌的类型(即 JWT)和所使用的签名算法(如 HMAC SHA256或 RSA)。\n例如:\n{\n“alg”: “HS256”,\n“typ”: “JWT”\n}\n然后，对这个 JSON 进行 Base64Url 编码，形成 JWT 的第一部分。\n示例代码:\n// header Map\nMapmap = new HashMap();\nmap.put(“alg”, “HS256”);\nmap.put(“typ”, “JWT”);\nPayload Payload 部分也是一个 JSON 对象，用来存放实际需要传递的数据。JWT 规定了7个官方字段，供选用。\n   iss (issuer)：签发人\n  exp (expiration time)：过期时间\n  sub (subject)：主题\n  aud (audience)：受众\n  nbf (Not Before)：生效时间\n  iat (Issued At)：签发时间\n  jti (JWT ID)：编号\n   除了官方字段，你还可以在这个部分定义私有字段，下面就是一个例子。\n {\n“sub”: “1234567890”,\n“name”: “John Doe”,\n“admin”: true\n}\n 注意，JWT 默认是不加密的，任何人都可以读到，所以不要把秘密信息放在这个部分。\n这个 JSON 对象也要使用 Base64URL 算法转成字符串。\n示例代码:\nJWT.create().withHeader(map) // header\n.withClaim(“iss”, “Service”) // payload\n.withClaim(“aud”, “APP”)\n.withIssuedAt(iatDate) // sign time\n.withExpiresAt(expiresDate) // expire time\n.withClaim(“name”, “cy”) // payload\n.withClaim(“user_id”, “11222”);\nSignature Signature 部分是对前两部分的签名，防止数据篡改。\n首先，需要指定一个密钥（secret）。这个密钥只有服务器才知道，不能泄露给用户。然后，使用 Header 里面指定的签名算法（默认是 HMAC SHA256），按照下面的公式产生签名。\n HMACSHA256(\nbase64UrlEncode(header) + “.” +\nbase64UrlEncode(payload),\nsecret)\n 算出签名以后，把 Header、Payload、Signature 三个部分拼成一个字符串，每个部分之间用\"点\"（.）分隔，就可以返回给用户。\n使用方式 客户端收到服务器返回的 JWT，可以储存在 Cookie 里面，也可以储存在 localStorage。\n此后，客户端每次与服务器通信，都要带上这个 JWT。你可以把它放在 Cookie 里面自动发送，但是这样不能跨域，所以更好的做法是放在 HTTP 请求的头信息Authorization字段里面。\n Authorization: Bearer \n 另一种做法是，跨域的时候，JWT 就放在 POST 请求的数据体里面。\n注意事项    JWT的paylod默认是不加密，但也是可以加密的。生成原始 Token 以后，可以用密钥再加密一次。\n  JWT的paylod不加密的情况下，不能将秘密数据写入 JWT。\n  JWT的paylod默认不加密的原因是客户端也要查看JWT的身份信息.\n  JWT 不仅可以用于认证，也可以用于交换信息。有效使用 JWT，可以降低服务器查询数据库的次数.\n  JWT 的最大缺点是，由于服务器不保存 session 状态，因此无法在使用过程中废止某个 token，或者更改 token 的权限。也就是说，一旦 JWT 签发了，在到期之前就会始终有效，除非服务器部署额外的逻辑。\n  JWT 本身包含了认证信息，一旦泄露，任何人都可以获得该令牌的所有权限。为了减少盗用，JWT 的有效期应该设置得比较短。对于一些比较重要的权限，使用时应该再次对用户进行认证。\n  为了减少盗用，JWT 不应该使用 HTTP 协议明码传输，要使用 HTTPS 协议传输。\n  header包含了签名的加密算法,但这不是展示给客户端的,客户端不需要解密.而是因为服务器默认加密算法更改之后,需要借助header来判断如何解密.\n   ","wordCount":"2054","inLanguage":"zh","datePublished":"2022-07-10T17:27:19+08:00","dateModified":"2022-07-10T17:27:19+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/%E7%94%A8%E6%88%B7%E9%89%B4%E6%9D%83%E4%B9%8Bjwt/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"用户鉴权之JWT","name":"用户鉴权之JWT","description":"定义 Json Web Token(JWT)是目前最流行的跨域认证解决方案. 传统基于cookie和session的认证流程一般如下: 用户向服务器发送用户名和","keywords":[],"articleBody":"定义 Json Web Token(JWT)是目前最流行的跨域认证解决方案.\n传统基于cookie和session的认证流程一般如下:\n 用户向服务器发送用户名和密码 服务器验证通过后,在当前session里面保存相关数据,比如user role,login time等. 服务器向用户返回一个sesson id,写入用户的cookie 用户随后的每一次请求,都会通过cookie,将sesson id传回服务器. 服务器根据sesson id查找前面保存的数据,从而得知用户的身份.  这种模式的问题在于拓展性不好,某用户的身份信息存在于特定的一台机器上,如果是服务器集群,或者跨域的微服务架构,用户访问其他机器的时候就又得重新登录.\nJWT为解决这种场景,提出了一种新思路,服务器索性就不保存session了,数据都保存在客户端,每次请求都发回服务器,服务器要做的只是校验数据有无被篡改,这样就解决了单点和跨域的问题.\nsession-cookie方案其实也可以完善,单机拓展性不好,就把数据丢到Redis集群,借助Redis的高可用和可拓展实现分布式session.我认为基于session和基于token的认证方案是两种截然不同的思路,它们的使用场景并不是完全重合的.\n原理 JWT的原理是,服务器认证后,生成一个JSON对象,发回给用户.\n{ \"姓名\": \"张三\", \"角色\": \"管理员\", \"到期时间\": \"2018年7月1日0点0分\" } 以后,用户与服务端通信的时候,都要发回这个JSON对象,服务器完全依靠这个对象来鉴别用户.\n这个JSON并不加密,客户端可以看到但不能改动,服务器在生成对象的时候会加上签名(对称加密),用签名来判断数据有无被篡改.\n于是,服务器就不保存任何session状态了,也就是服务器变成无状态了,从而容易实现拓展.\n数据结构 在网络中传输的JWT是一串字符串:\nyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9. eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ. SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c 它是个很长的字符串.中间用.分隔成三部分,它内部并不会分行,这里分行只是为了便于展示.\nJWT的三个部分依次如下:\n  Header(头部) Paylod(负载) Signature(签名)   Header.Paylod.Signature Header 报头通常由两部分组成: 令牌的类型(即 JWT)和所使用的签名算法(如 HMAC SHA256或 RSA)。\n例如:\n{ \"alg\": \"HS256\", \"typ\": \"JWT\" } 然后，对这个 JSON 进行 Base64Url 编码，形成 JWT 的第一部分。\n示例代码:\n// header Map MapString, Object map = new HashMap(); map.put(\"alg\", \"HS256\"); map.put(\"typ\", \"JWT\"); Payload Payload 部分也是一个 JSON 对象，用来存放实际需要传递的数据。JWT 规定了7个官方字段，供选用。\n  iss (issuer)：签发人 exp (expiration time)：过期时间 sub (subject)：主题 aud (audience)：受众 nbf (Not Before)：生效时间 iat (Issued At)：签发时间 jti (JWT ID)：编号   除了官方字段，你还可以在这个部分定义私有字段，下面就是一个例子。\n{ \"sub\": \"1234567890\", \"name\": \"John Doe\", \"admin\": true } 注意，JWT 默认是不加密的，任何人都可以读到，所以不要把秘密信息放在这个部分。\n这个 JSON 对象也要使用 Base64URL 算法转成字符串。\n示例代码:\nJWT.create().withHeader(map) // header  .withClaim(\"iss\", \"Service\") // payload  .withClaim(\"aud\", \"APP\") .withIssuedAt(iatDate) // sign time  .withExpiresAt(expiresDate) // expire time  .withClaim(\"name\", \"cy\") // payload  .withClaim(\"user_id\", \"11222\"); Signature Signature 部分是对前两部分的签名，防止数据篡改。\n首先，需要指定一个密钥（secret）。这个密钥只有服务器才知道，不能泄露给用户。然后，使用 Header 里面指定的签名算法（默认是 HMAC SHA256），按照下面的公式产生签名。\nHMACSHA256( base64UrlEncode(header) + \".\" + base64UrlEncode(payload), secret) 算出签名以后，把 Header、Payload、Signature 三个部分拼成一个字符串，每个部分之间用\"点\"（.）分隔，就可以返回给用户。\n使用方式 客户端收到服务器返回的 JWT，可以储存在 Cookie 里面，也可以储存在 localStorage。\n此后，客户端每次与服务器通信，都要带上这个 JWT。你可以把它放在 Cookie 里面自动发送，但是这样不能跨域，所以更好的做法是放在 HTTP 请求的头信息Authorization字段里面。\nAuthorization: Bearer token 另一种做法是，跨域的时候，JWT 就放在 POST 请求的数据体里面。\n注意事项   JWT的paylod默认是不加密，但也是可以加密的。生成原始 Token 以后，可以用密钥再加密一次。 JWT的paylod不加密的情况下，不能将秘密数据写入 JWT。 JWT的paylod默认不加密的原因是客户端也要查看JWT的身份信息. JWT 不仅可以用于认证，也可以用于交换信息。有效使用 JWT，可以降低服务器查询数据库的次数. JWT 的最大缺点是，由于服务器不保存 session 状态，因此无法在使用过程中废止某个 token，或者更改 token 的权限。也就是说，一旦 JWT 签发了，在到期之前就会始终有效，除非服务器部署额外的逻辑。 JWT 本身包含了认证信息，一旦泄露，任何人都可以获得该令牌的所有权限。为了减少盗用，JWT 的有效期应该设置得比较短。对于一些比较重要的权限，使用时应该再次对用户进行认证。 为了减少盗用，JWT 不应该使用 HTTP 协议明码传输，要使用 HTTPS 协议传输。 header包含了签名的加密算法,但这不是展示给客户端的,客户端不需要解密.而是因为服务器默认加密算法更改之后,需要借助header来判断如何解密.   ","wordCount":"2031","inLanguage":"zh","datePublished":"2022-07-10T17:27:19+08:00","dateModified":"2022-07-10T17:27:19+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/%E7%94%A8%E6%88%B7%E9%89%B4%E6%9D%83%E4%B9%8Bjwt/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
 </head>
 <body id=top>
 <script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
@@ -114,158 +114,106 @@
 <p>Json Web Token(JWT)是目前最流行的跨域认证解决方案.</p>
 <p>传统基于cookie和session的认证流程一般如下:</p>
 <ul>
-<li>
-<p>用户向服务器发送用户名和密码</p>
-</li>
-<li>
-<p>服务器验证通过后,在当前session里面保存相关数据,比如user role,login time等.</p>
-</li>
-<li>
-<p>服务器向用户返回一个sesson id,写入用户的cookie</p>
-</li>
-<li>
-<p>用户随后的每一次请求,都会通过cookie,将sesson id传回服务器.</p>
-</li>
-<li>
-<p>服务器根据sesson id查找前面保存的数据,从而得知用户的身份.</p>
-</li>
+<li>用户向服务器发送用户名和密码</li>
+<li>服务器验证通过后,在当前session里面保存相关数据,比如user role,login time等.</li>
+<li>服务器向用户返回一个sesson id,写入用户的cookie</li>
+<li>用户随后的每一次请求,都会通过cookie,将sesson id传回服务器.</li>
+<li>服务器根据sesson id查找前面保存的数据,从而得知用户的身份.</li>
 </ul>
 <p>这种模式的问题在于拓展性不好,某用户的身份信息存在于特定的一台机器上,如果是服务器集群,或者跨域的微服务架构,用户访问其他机器的时候就又得重新登录.</p>
 <p>JWT为解决这种场景,提出了一种新思路,服务器索性就不保存session了,数据都保存在客户端,每次请求都发回服务器,服务器要做的只是校验数据有无被篡改,这样就解决了单点和跨域的问题.</p>
 <p>session-cookie方案其实也可以完善,单机拓展性不好,就把数据丢到Redis集群,借助Redis的高可用和可拓展实现分布式session.我认为基于session和基于token的认证方案是两种截然不同的思路,它们的使用场景并不是完全重合的.</p>
 <h2 id=原理>原理</h2>
 <p>JWT的原理是,服务器认证后,生成一个JSON对象,发回给用户.</p>
-<p>{<br>
- &ldquo;姓名&rdquo;: &ldquo;张三&rdquo;,<br>
- &ldquo;角色&rdquo;: &ldquo;管理员&rdquo;,<br>
- &ldquo;到期时间&rdquo;: &ldquo;2018年7月1日0点0分&rdquo;<br>
-}</p>
-<p>以后,用户与服务端通信的时候,都要发回这个JSON对象,服务器完全依靠这个对象来鉴别用户.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json>{
+  <span style=color:#f92672>&#34;姓名&#34;</span>: <span style=color:#e6db74>&#34;张三&#34;</span>,
+  <span style=color:#f92672>&#34;角色&#34;</span>: <span style=color:#e6db74>&#34;管理员&#34;</span>,
+  <span style=color:#f92672>&#34;到期时间&#34;</span>: <span style=color:#e6db74>&#34;2018年7月1日0点0分&#34;</span>
+}
+</code></pre></div><p>以后,用户与服务端通信的时候,都要发回这个JSON对象,服务器完全依靠这个对象来鉴别用户.</p>
 <p>这个JSON并不加密,客户端可以看到但不能改动,服务器在生成对象的时候会加上签名(对称加密),用签名来判断数据有无被篡改.</p>
 <p>于是,服务器就不保存任何session状态了,也就是服务器变成无状态了,从而容易实现拓展.</p>
 <h2 id=数据结构>数据结构</h2>
 <p>在网络中传输的JWT是一串字符串:</p>
-<p>yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.<br>
-eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.<br>
-SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</p>
-<p>它是个很长的字符串.中间用<code>.</code>分隔成三部分,它内部并不会分行,这里分行只是为了便于展示.</p>
+<pre tabindex=0><code>yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
+eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.
+SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+</code></pre><p>它是个很长的字符串.中间用<code>.</code>分隔成三部分,它内部并不会分行,这里分行只是为了便于展示.</p>
 <p>JWT的三个部分依次如下:</p>
 <blockquote>
 <ul>
-<li>
-<p>Header(头部)</p>
-</li>
-<li>
-<p>Paylod(负载)</p>
-</li>
-<li>
-<p>Signature(签名)</p>
-</li>
+<li>Header(头部)</li>
+<li>Paylod(负载)</li>
+<li>Signature(签名)</li>
 </ul>
 </blockquote>
-<p>Header.Paylod.Signature</p>
-<h4 id=header>Header</h4>
+<pre tabindex=0><code>Header.Paylod.Signature
+</code></pre><h4 id=header>Header</h4>
 <p>报头通常由两部分组成: 令牌的类型(即 JWT)和所使用的签名算法(如 HMAC SHA256或 RSA)。</p>
 <p>例如:</p>
-<p>{<br>
- &ldquo;alg&rdquo;: &ldquo;HS256&rdquo;,<br>
- &ldquo;typ&rdquo;: &ldquo;JWT&rdquo;<br>
-}</p>
-<p>然后，对这个 JSON 进行 Base64Url 编码，形成 JWT 的第一部分。</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json>{
+  <span style=color:#f92672>&#34;alg&#34;</span>: <span style=color:#e6db74>&#34;HS256&#34;</span>,
+  <span style=color:#f92672>&#34;typ&#34;</span>: <span style=color:#e6db74>&#34;JWT&#34;</span>
+}
+</code></pre></div><p>然后，对这个 JSON 进行 Base64Url 编码，形成 JWT 的第一部分。</p>
 <p>示例代码:</p>
-<p>// header Map<br>
-Map&lt;String, Object> map = new HashMap&lt;>();<br>
-map.put(&ldquo;alg&rdquo;, &ldquo;HS256&rdquo;);<br>
-map.put(&ldquo;typ&rdquo;, &ldquo;JWT&rdquo;);</p>
-<h4 id=payload>Payload</h4>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#75715e>// header Map
+</span><span style=color:#75715e></span>Map<span style=color:#f92672>&lt;</span>String<span style=color:#f92672>,</span> Object<span style=color:#f92672>&gt;</span> map <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> HashMap<span style=color:#f92672>&lt;&gt;();</span>
+map<span style=color:#f92672>.</span><span style=color:#a6e22e>put</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;alg&#34;</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;HS256&#34;</span><span style=color:#f92672>);</span>
+map<span style=color:#f92672>.</span><span style=color:#a6e22e>put</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;typ&#34;</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;JWT&#34;</span><span style=color:#f92672>);</span>
+</code></pre></div><h4 id=payload>Payload</h4>
 <p>Payload 部分也是一个 JSON 对象，用来存放实际需要传递的数据。JWT 规定了7个官方字段，供选用。</p>
 <blockquote>
 <ul>
-<li>
-<p>iss (issuer)：签发人</p>
-</li>
-<li>
-<p>exp (expiration time)：过期时间</p>
-</li>
-<li>
-<p>sub (subject)：主题</p>
-</li>
-<li>
-<p>aud (audience)：受众</p>
-</li>
-<li>
-<p>nbf (Not Before)：生效时间</p>
-</li>
-<li>
-<p>iat (Issued At)：签发时间</p>
-</li>
-<li>
-<p>jti (JWT ID)：编号</p>
-</li>
+<li>iss (issuer)：签发人</li>
+<li>exp (expiration time)：过期时间</li>
+<li>sub (subject)：主题</li>
+<li>aud (audience)：受众</li>
+<li>nbf (Not Before)：生效时间</li>
+<li>iat (Issued At)：签发时间</li>
+<li>jti (JWT ID)：编号</li>
 </ul>
 </blockquote>
 <p>除了官方字段，你还可以在这个部分定义私有字段，下面就是一个例子。</p>
-<blockquote>
-<p>{<br>
-&ldquo;sub&rdquo;: &ldquo;1234567890&rdquo;,<br>
-&ldquo;name&rdquo;: &ldquo;John Doe&rdquo;,<br>
-&ldquo;admin&rdquo;: true<br>
-}</p>
-</blockquote>
-<p>注意，JWT 默认是不加密的，任何人都可以读到，所以不要把秘密信息放在这个部分。</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-javascript data-lang=javascript> {
+   <span style=color:#e6db74>&#34;sub&#34;</span><span style=color:#f92672>:</span> <span style=color:#e6db74>&#34;1234567890&#34;</span>,
+   <span style=color:#e6db74>&#34;name&#34;</span><span style=color:#f92672>:</span> <span style=color:#e6db74>&#34;John Doe&#34;</span>,
+   <span style=color:#e6db74>&#34;admin&#34;</span><span style=color:#f92672>:</span> <span style=color:#66d9ef>true</span>
+ }
+</code></pre></div><p>注意，JWT 默认是不加密的，任何人都可以读到，所以不要把秘密信息放在这个部分。</p>
 <p>这个 JSON 对象也要使用 Base64URL 算法转成字符串。</p>
 <p>示例代码:</p>
-<p>JWT.create().withHeader(map) // header<br>
-              .withClaim(&ldquo;iss&rdquo;, &ldquo;Service&rdquo;) // payload<br>
-              .withClaim(&ldquo;aud&rdquo;, &ldquo;APP&rdquo;)<br>
-              .withIssuedAt(iatDate) // sign time<br>
-              .withExpiresAt(expiresDate) // expire time<br>
-              .withClaim(&ldquo;name&rdquo;, &ldquo;cy&rdquo;) // payload<br>
-              .withClaim(&ldquo;user_id&rdquo;, &ldquo;11222&rdquo;);</p>
-<h4 id=signature>Signature</h4>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java> JWT<span style=color:#f92672>.</span><span style=color:#a6e22e>create</span><span style=color:#f92672>().</span><span style=color:#a6e22e>withHeader</span><span style=color:#f92672>(</span>map<span style=color:#f92672>)</span> <span style=color:#75715e>// header
+</span><span style=color:#75715e></span>                <span style=color:#f92672>.</span><span style=color:#a6e22e>withClaim</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;iss&#34;</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;Service&#34;</span><span style=color:#f92672>)</span> <span style=color:#75715e>// payload
+</span><span style=color:#75715e></span>                <span style=color:#f92672>.</span><span style=color:#a6e22e>withClaim</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;aud&#34;</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;APP&#34;</span><span style=color:#f92672>)</span>
+                <span style=color:#f92672>.</span><span style=color:#a6e22e>withIssuedAt</span><span style=color:#f92672>(</span>iatDate<span style=color:#f92672>)</span> <span style=color:#75715e>// sign time
+</span><span style=color:#75715e></span>                <span style=color:#f92672>.</span><span style=color:#a6e22e>withExpiresAt</span><span style=color:#f92672>(</span>expiresDate<span style=color:#f92672>)</span> <span style=color:#75715e>// expire time
+</span><span style=color:#75715e></span>                <span style=color:#f92672>.</span><span style=color:#a6e22e>withClaim</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;name&#34;</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;cy&#34;</span><span style=color:#f92672>)</span> <span style=color:#75715e>// payload
+</span><span style=color:#75715e></span>                <span style=color:#f92672>.</span><span style=color:#a6e22e>withClaim</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;user_id&#34;</span><span style=color:#f92672>,</span> <span style=color:#e6db74>&#34;11222&#34;</span><span style=color:#f92672>);</span>
+</code></pre></div><h4 id=signature>Signature</h4>
 <p>Signature 部分是对前两部分的签名，防止数据篡改。</p>
 <p>首先，需要指定一个密钥（secret）。这个密钥只有服务器才知道，不能泄露给用户。然后，使用 Header 里面指定的签名算法（默认是 HMAC SHA256），按照下面的公式产生签名。</p>
-<blockquote>
-<p>HMACSHA256(<br>
-base64UrlEncode(header) + &ldquo;.&rdquo; +<br>
-base64UrlEncode(payload),<br>
-secret)</p>
-</blockquote>
-<p>算出签名以后，把 Header、Payload、Signature 三个部分拼成一个字符串，每个部分之间用"点"（<code>.</code>）分隔，就可以返回给用户。</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-javascript data-lang=javascript><span style=color:#a6e22e>HMACSHA256</span>(
+   <span style=color:#a6e22e>base64UrlEncode</span>(<span style=color:#a6e22e>header</span>) <span style=color:#f92672>+</span> <span style=color:#e6db74>&#34;.&#34;</span> <span style=color:#f92672>+</span>
+   <span style=color:#a6e22e>base64UrlEncode</span>(<span style=color:#a6e22e>payload</span>),
+   <span style=color:#a6e22e>secret</span>)
+</code></pre></div><p>算出签名以后，把 Header、Payload、Signature 三个部分拼成一个字符串，每个部分之间用"点"（<code>.</code>）分隔，就可以返回给用户。</p>
 <h2 id=使用方式>使用方式</h2>
 <p>客户端收到服务器返回的 JWT，可以储存在 Cookie 里面，也可以储存在 localStorage。</p>
 <p>此后，客户端每次与服务器通信，都要带上这个 JWT。你可以把它放在 Cookie 里面自动发送，但是这样不能跨域，所以更好的做法是放在 HTTP 请求的头信息<code>Authorization</code>字段里面。</p>
-<blockquote>
-<p>Authorization: Bearer <token></p>
-</blockquote>
-<p>另一种做法是，跨域的时候，JWT 就放在 POST 请求的数据体里面。</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-javascript data-lang=javascript><span style=color:#a6e22e>Authorization</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>Bearer</span> <span style=color:#f92672>&lt;</span><span style=color:#a6e22e>token</span><span style=color:#f92672>&gt;</span>
+</code></pre></div><p>另一种做法是，跨域的时候，JWT 就放在 POST 请求的数据体里面。</p>
 <h2 id=注意事项>注意事项</h2>
 <blockquote>
 <ul>
-<li>
-<p>JWT的paylod默认是不加密，但也是可以加密的。生成原始 Token 以后，可以用密钥再加密一次。</p>
-</li>
-<li>
-<p>JWT的paylod不加密的情况下，不能将秘密数据写入 JWT。</p>
-</li>
-<li>
-<p>JWT的paylod默认不加密的原因是客户端也要查看JWT的身份信息.</p>
-</li>
-<li>
-<p>JWT 不仅可以用于认证，也可以用于交换信息。有效使用 JWT，可以降低服务器查询数据库的次数.</p>
-</li>
-<li>
-<p>JWT 的最大缺点是，由于服务器不保存 session 状态，因此无法在使用过程中废止某个 token，或者更改 token 的权限。也就是说，一旦 JWT 签发了，在到期之前就会始终有效，除非服务器部署额外的逻辑。</p>
-</li>
-<li>
-<p>JWT 本身包含了认证信息，一旦泄露，任何人都可以获得该令牌的所有权限。为了减少盗用，JWT 的有效期应该设置得比较短。对于一些比较重要的权限，使用时应该再次对用户进行认证。</p>
-</li>
-<li>
-<p>为了减少盗用，JWT 不应该使用 HTTP 协议明码传输，要使用 HTTPS 协议传输。</p>
-</li>
-<li>
-<p>header包含了签名的加密算法,但这不是展示给客户端的,客户端不需要解密.而是因为服务器默认加密算法更改之后,需要借助header来判断如何解密.</p>
-</li>
+<li>JWT的paylod默认是不加密，但也是可以加密的。生成原始 Token 以后，可以用密钥再加密一次。</li>
+<li>JWT的paylod不加密的情况下，不能将秘密数据写入 JWT。</li>
+<li>JWT的paylod默认不加密的原因是客户端也要查看JWT的身份信息.</li>
+<li>JWT 不仅可以用于认证，也可以用于交换信息。有效使用 JWT，可以降低服务器查询数据库的次数.</li>
+<li>JWT 的最大缺点是，由于服务器不保存 session 状态，因此无法在使用过程中废止某个 token，或者更改 token 的权限。也就是说，一旦 JWT 签发了，在到期之前就会始终有效，除非服务器部署额外的逻辑。</li>
+<li>JWT 本身包含了认证信息，一旦泄露，任何人都可以获得该令牌的所有权限。为了减少盗用，JWT 的有效期应该设置得比较短。对于一些比较重要的权限，使用时应该再次对用户进行认证。</li>
+<li>为了减少盗用，JWT 不应该使用 HTTP 协议明码传输，要使用 HTTPS 协议传输。</li>
+<li>header包含了签名的加密算法,但这不是展示给客户端的,客户端不需要解密.而是因为服务器默认加密算法更改之后,需要借助header来判断如何解密.</li>
 </ul>
 </blockquote>
 </div>
