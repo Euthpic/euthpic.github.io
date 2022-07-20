@@ -1,0 +1,510 @@
+<!doctype html><html lang=zh dir=auto>
+<head><meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=robots content="index, follow">
+<title>Netty笔记 | 乱花渐欲迷人眼</title>
+<meta name=keywords content>
+<meta name=description content="优势:并发高,传输快,使用简单 为什么传输快? 零拷贝技术: 传统IO要经历4次复制,4次切换上下文,把文件复制到内核里面的缓存区,再复制到用户态">
+<meta name=author content="Guangfa">
+<link rel=canonical href=http://euthpic.github.io/tech/netty%E7%AC%94%E8%AE%B0/>
+<meta name=yandex-verification content="73b1a797f62c0e98">
+<link crossorigin=anonymous href=/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css integrity="sha256-yIlj/i15RiAA/Q+xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as=style>
+<script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=http://euthpic.github.io/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=http://euthpic.github.io/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=http://euthpic.github.io/favicon-32x32.png>
+<link rel=apple-touch-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<link rel=mask-icon href=http://euthpic.github.io/apple-touch-icon.png>
+<meta name=theme-color content="#2e2e33">
+<meta name=msapplication-TileColor content="#2e2e33">
+<meta name=generator content="Hugo 0.89.4">
+<noscript>
+<style>#theme-toggle,.top-link{display:none}</style>
+<style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--hljs-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51)}.list{background:var(--theme)}.list:not(.dark)::-webkit-scrollbar-track{background:0 0}.list:not(.dark)::-webkit-scrollbar-thumb{border-color:var(--theme)}}</style>
+</noscript>
+<script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(a,e,f,g,b,c,d){a.GoogleAnalyticsObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=1,c.src=g,d.parentNode.insertBefore(c,d)}(window,document,'script','https://www.google-analytics.com/analytics.js','ga'),ga('create','UA-136094326-1','auto'),ga('send','pageview'))</script><meta property="og:title" content="Netty笔记">
+<meta property="og:description" content="优势:并发高,传输快,使用简单 为什么传输快? 零拷贝技术: 传统IO要经历4次复制,4次切换上下文,把文件复制到内核里面的缓存区,再复制到用户态">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://euthpic.github.io/tech/netty%E7%AC%94%E8%AE%B0/"><meta property="og:image" content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="article:section" content="tech">
+<meta property="article:published_time" content="2022-07-20T18:27:19+08:00">
+<meta property="article:modified_time" content="2022-07-20T18:27:19+08:00"><meta property="og:site_name" content="乱花渐欲迷人眼">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:image content="http://euthpic.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name=twitter:title content="Netty笔记">
+<meta name=twitter:description content="优势:并发高,传输快,使用简单 为什么传输快? 零拷贝技术: 传统IO要经历4次复制,4次切换上下文,把文件复制到内核里面的缓存区,再复制到用户态">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Teches","item":"http://euthpic.github.io/tech/"},{"@type":"ListItem","position":2,"name":"Netty笔记","item":"http://euthpic.github.io/tech/netty%E7%AC%94%E8%AE%B0/"}]}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Netty笔记","name":"Netty笔记","description":"优势:并发高,传输快,使用简单 为什么传输快? 零拷贝技术: 传统IO要经历4次复制,4次切换上下文,把文件复制到内核里面的缓存区,再复制到用户态","keywords":[],"articleBody":"优势:并发高,传输快,使用简单\n为什么传输快?\n零拷贝技术: 传统IO要经历4次复制,4次切换上下文,把文件复制到内核里面的缓存区,再复制到用户态里的缓冲区,再复制到socket里的缓冲区(内核态),最后再复制到网卡.零拷贝有两种方式,mmap可以直接从内核缓存复制到socket,sendfile可以直接从内核缓存复制到网卡. 不光netty,kafka和nginx等中间件都使用了零拷贝.\nIO模型: 基于Reactor的IO模型,有单Reactor单线程和单Reactor多线程和主从Reactor多线程模型.\n单线程模型有四个部分,selector负责监听client的请求并转发给dispatcher,dispatcher收到请求后会将其分发给对应的handler,如果是建立连接的请求就会转发到acceptor,acceptor建立连接后会创建对应的handler,其后该连接的请求,例如read和send等都会由对应的handler处理,handler处理完再把数据返回给client.单线程的局限性在于处理任务的handler是单线程的,对于同一个连接的多个请求只能串行处理,有性能瓶颈.\n多线程模型主要区别在于handler,handler只负责响应请求,不再处理具体任务,它会把执行过程交由worker线程处理,如果有多个请求就有多个worker,可以并发处理.\n主从模型是为了解决acceptor的性能瓶颈问题,acceptor不再只是一个线程,而是拓展成了一个线程池.在这个模型下,所有请求都会经过主reactor(有个疑惑,请求直接交由从reactor不好嘛,为啥要多转发一次),主reactor只负责建立连接的请求,使用acceptor线程池处理,然后把读写等请求交由从reactor处理.\nBootstrap/ServerBootstrap: 启动基类\nchannel: 对应网络中的socket,作用包括维护当前连接的状态,连接的端口号,数据缓冲区的大小等,每个request对应一个channel,数据经由channel传入.\nEventLoop: 多路复用程序,轮询各个channel,获取其中的事件并予以响应,是Reactor模型的主体.有多种实现,例如基于select的NioEventLoop,基于Epoll的EpollEventLoop\nNioEventLoop: 维护了一个线程和任务队列，支持异步提交执行任务，线程启动时会调用NioEventLoop的run方法，执行I/O任务和非I/O任务.\nI/O任务，即selectionKey中就绪事件，例如read，write，accept，connect等，由processSelectedKeys方法触发。\n非I/O任务，添加到taskQueue中的任务，如register()，bind()等任务\n在 Netty 的每一个 NioEventLoop 中都有一个 TaskQueue，设计它的目的是在任务提交的速度大于线程的处理速度的时候起到缓冲作用。或者用于异步地处理 Selector 监听到的 IO 事件。\nSelector: NioEventLoop中负责监听事件的线程,一个NioEventLoop对应一个selector,一个selector可监听多个channel.\nNioEventLoopGroup: 主要负责管理eventloop的生命周期,内部维护了一组eventloop,和eventloop的关系可以理解为线程池和线程的关系.netty中分为bossGroup和workerGroup,bossGroup是负责建立连接的线程池(相当于主reactor),workerGroup是负责处理IO等请求的线程池(相当于从reactor).线程池的线程数默认为cpu核心数的两倍\nBossGroup工作过程:\n  轮询注册在其上的 ServerSocketChannel 的 accept 事件（OP_ACCEPT 事件）\n  处理 accept 事件，与客户端建立连接，生成一个 NioSocketChannel，并将其注册到 WorkerGroup 中某个线程上的 Selector 上\n  再去以此循环处理任务队列中的下一个事件\n  WorkerGroup工作过程\n  轮询注册在其上的 NioSocketChannel 的 read/write 事件（OP_READ/OP_WRITE 事件）\n  在对应的 NioSocketChannel 上处理 read/write 事件\n  再去以此循环处理任务队列中的下一个事件\n  ChannelFuture: 异步返回事件处理的结果\nChannelHandler: 就是Reactor中的handler,具体处理channel传过来的事件的组件.\nChannelHandlerContext: 保存Channel相关的上下文信息，同时关联一个ChannelHandler对象\nChannelPipeline: 维护了一个channelHandler的双向链表,channelHandler是以链式调用的形式工作的,pipeline和channel是一对一的关系.\nNetty服务端创建过程:\n/**\n 需要的依赖：    io.netty netty-all 4.1.52.Final     /\npublic static void main(String[] args) throws InterruptedException {\n​\n// 创建 BossGroup 和 WorkerGroup\n// 1. bossGroup 只处理连接请求\n// 2. 业务处理由 workerGroup 来完成\nEventLoopGroup bossGroup = new NioEventLoopGroup();\nEventLoopGroup workerGroup = new NioEventLoopGroup();\n​\ntry {\n// 创建服务器端的启动对象\nServerBootstrap bootstrap = new ServerBootstrap();\n// 配置参数\nbootstrap\n// 设置线程组\n.group(bossGroup, workerGroup)\n// 说明服务器端通道的实现类（便于 Netty 做反射处理）\n.channel(NioServerSocketChannel.class)\n// 设置等待连接的队列的容量（当客户端连接请求速率大\n// 于 NioServerSocketChannel 接收速率的时候，会使用\n// 该队列做缓冲）\n// option()方法用于给服务端的 ServerSocketChannel\n// 添加配置\n.option(ChannelOption.SO_BACKLOG, 128)\n// 设置连接保活\n// childOption()方法用于给服务端 ServerSocketChannel\n// 接收到的 SocketChannel 添加配置\n.childOption(ChannelOption.SO_KEEPALIVE, true)\n// handler()方法用于给 BossGroup 设置业务处理器\n// childHandler()方法用于给 WorkerGroup 设置业务处理器\n.childHandler(\n// 创建一个通道初始化对象\nnew ChannelInitializer() {\n// 向 Pipeline 添加业务处理器\n@Override\nprotected void initChannel(\nSocketChannel socketChannel\n) throws Exception {\nsocketChannel.pipeline().addLast(\nnew NettyServerHandler()\n);\n// 可以继续调用 socketChannel.pipeline().addLast()\n// 添加更多 Handler\n}\n}\n);\n​\nSystem.out.println(“server is ready…\");\n​\n// 绑定端口，启动服务器，生成一个 channelFuture 对象，\n// ChannelFuture 涉及到 Netty 的异步模型，后面展开讲\nChannelFuture channelFuture = bootstrap.bind(8080).sync();\n// 对通道关闭进行监听\nchannelFuture.channel().closeFuture().sync();\n} finally {\nbossGroup.shutdownGracefully();\nworkerGroup.shutdownGracefully();\n}\n}\n​\n/*\n 自定义一个 Handler，需要继承 Netty 规定好的某个 HandlerAdapter（规范） InboundHandler 用于处理数据流入本端（服务端）的 IO 事件 InboundHandler 用于处理数据流出本端（服务端）的 IO 事件\n/\nstatic class NettyServerHandler extends ChannelInboundHandlerAdapter {\n/*\n* 当通道有数据可读时执行\n*\n* @param ctx 上下文对象，可以从中取得相关联的 Pipeline、Channel、客户端地址等\n* @param msg 客户端发送的数据\n* @throws Exception\n/\n@Override\npublic void channelRead(ChannelHandlerContext ctx, Object msg)\nthrows Exception {\n// 接收客户端发来的数据\n​\nSystem.out.println(“client address: \"\n+ ctx.channel().remoteAddress());\n​\n// ByteBuf 是 Netty 提供的类，比 NIO 的 ByteBuffer 性能更高\nByteBuf byteBuf = (ByteBuf) msg;\nSystem.out.println(“data from client: \"\n+ byteBuf.toString(CharsetUtil.UTF_8));\n}\n​\n/*\n* 数据读取完毕后执行\n*\n* @param ctx 上下文对象\n* @throws Exception\n/\n@Override\npublic void channelReadComplete(ChannelHandlerContext ctx)\nthrows Exception {\n// 发送响应给客户端\nctx.writeAndFlush(\n// Unpooled 类是 Netty 提供的专门操作缓冲区的工具\n// 类，copiedBuffer 方法返回的 ByteBuf 对象类似于\n// NIO 中的 ByteBuffer，但性能更高\nUnpooled.copiedBuffer(\n“hello client! i have got your data.”,\nCharsetUtil.UTF_8\n)\n);\n}\n​\n/*\n* 发生异常时执行\n*\n* @param ctx 上下文对象\n* @param cause 异常对象\n* @throws Exception\n*/\n@Override\npublic void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)\nthrows Exception {\n// 关闭与客户端的 Socket 连接\nctx.channel().close();\n}\n}  客户端创建过程\n/**\n 需要的依赖：    io.netty netty-all 4.1.52.Final     /\npublic static void main(String[] args) throws InterruptedException {\n​\n// 客户端只需要一个事件循环组，可以看做 BossGroup\nEventLoopGroup eventLoopGroup = new NioEventLoopGroup();\n​\ntry {\n// 创建客户端的启动对象\nBootstrap bootstrap = new Bootstrap();\n// 配置参数\nbootstrap\n// 设置线程组\n.group(eventLoopGroup)\n// 说明客户端通道的实现类（便于 Netty 做反射处理）\n.channel(NioSocketChannel.class)\n// handler()方法用于给 BossGroup 设置业务处理器\n.handler(\n// 创建一个通道初始化对象\nnew ChannelInitializer() {\n// 向 Pipeline 添加业务处理器\n@Override\nprotected void initChannel(\nSocketChannel socketChannel\n) throws Exception {\nsocketChannel.pipeline().addLast(\nnew NettyClientHandler()\n);\n// 可以继续调用 socketChannel.pipeline().addLast()\n// 添加更多 Handler\n}\n}\n);\n​\nSystem.out.println(“client is ready…\");\n​\n// 启动客户端去连接服务器端，ChannelFuture 涉及到 Netty 的异步模型，后面展开讲\nChannelFuture channelFuture = bootstrap.connect(\n“127.0.0.1”,\n8080).sync();\n// 对通道关闭进行监听\nchannelFuture.channel().closeFuture().sync();\n} finally {\neventLoopGroup.shutdownGracefully();\n}\n}\n​\n/*\n 自定义一个 Handler，需要继承 Netty 规定好的某个 HandlerAdapter（规范） InboundHandler 用于处理数据流入本端（客户端）的 IO 事件 InboundHandler 用于处理数据流出本端（客户端）的 IO 事件\n/\nstatic class NettyClientHandler extends ChannelInboundHandlerAdapter {\n/*\n* 通道就绪时执行\n*\n* @param ctx 上下文对象\n* @throws Exception\n/\n@Override\npublic void channelActive(ChannelHandlerContext ctx)\nthrows Exception {\n// 向服务器发送数据\nctx.writeAndFlush(\n// Unpooled 类是 Netty 提供的专门操作缓冲区的工具\n// 类，copiedBuffer 方法返回的 ByteBuf 对象类似于\n// NIO 中的 ByteBuffer，但性能更高\nUnpooled.copiedBuffer(\n“hello server!”,\nCharsetUtil.UTF_8\n)\n);\n}\n​\n/*\n* 当通道有数据可读时执行\n*\n* @param ctx 上下文对象\n* @param msg 服务器端发送的数据\n* @throws Exception\n/\n@Override\npublic void channelRead(ChannelHandlerContext ctx, Object msg)\nthrows Exception {\n// 接收服务器端发来的数据\n​\nSystem.out.println(“server address: \"\n+ ctx.channel().remoteAddress());\n​\n// ByteBuf 是 Netty 提供的类，比 NIO 的 ByteBuffer 性能更高\nByteBuf byteBuf = (ByteBuf) msg;\nSystem.out.println(“data from server: \"\n+ byteBuf.toString(CharsetUtil.UTF_8));\n}\n​\n/*\n* 发生异常时执行\n*\n* @param ctx 上下文对象\n* @param cause 异常对象\n* @throws Exception\n*/\n@Override\npublic void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)\nthrows Exception {\n// 关闭与服务器端的 Socket 连接\nctx.channel().close();\n}\n}  select: 基于轮询,时间复杂度为O(n),当IO事件触发后,遍历fdset去查找事件对应的fd.在连接数较大的情况下开销也是线性增长.使用数组存储fdset,连接数上限较小.实现简单,兼容性好.\npoll: 和select基本相似,区别在于存储方式是链表,理论上能监听的fd没有数量限制.\nepoll: select和poll的改进版,基于事件驱动,时间复杂度为O(1),实现原理是为每个fd注册一个回调函数,当fd对应的设备发生IO事件时,就会调用这个回调函数,将该fd放入一个链表中,然后服务器从该链表中逐个取出fd来处理.性能随着连接数上涨不会有明显衰退,适合高并发情景.\n水平触发(level-trggered) 只要文件描述符关联的读内核缓冲区非空，有数据可以读取，就一直发出可读信号进行通知， 当文件描述符关联的内核写缓冲区不满，有空间可以写入，就一直发出可写信号进行通知 LT模式支持阻塞和非阻塞两种方式。epoll默认的模式是LT。select和poll都只支持水平.\n边缘触发(edge-triggered) 当文件描述符关联的读内核缓冲区由空转化为非空的时候，则发出可读信号进行通知， 当文件描述符关联的内核写缓冲区由满转化为不满的时候，则发出可写信号进行通知 两者的区别在哪里呢？水平触发是只要读缓冲区有数据，就会一直触发可读信号，而边缘触发仅仅在空变为非空的时候通知一次.\nLT(level triggered)是缺省的工作方式，并且同时支持block和no-block socket.在这种做法中，内核告诉你一个文件描述符是否就绪了，然后你可以对这个就绪的fd进行IO操作。如果你不作任何操作，内核还是会继续通知你的，所以，这种模式编程出错误可能性要小一点。传统的select/poll都是这种模型的代表．\n八股文时间~\nNetty 和 Tomcat 的区别？ Netty 和 Tomcat 最大的区别就在于通信协议，Tomcat 是基于 http 协议的，他的实质是一个基于 http 协议的web容器，但是 Netty 不一样，他能通过编程自定义各种协议，因为 Netty 能够自己编码/解码字节流，完成类似Redis 访问的功能，这就是 Netty 和 Tomcat 最大的区别。\nNetty 发送消息有几种方式？ Netty 有两种发送消息的方式：\n  直接写入 Channel 中，消息从 ChannelPipeline 当中尾部开始移动；\n  写入和 ChannelHandler 绑定的 ChannelHandlerContext 中，消息从 ChannelPipeline 中的下一个 ChannelHandler 中移动。\n  Netty 高性能表现在哪些方面？   IO 线程模型：同步非阻塞，用最少的资源做更多的事。\n  内存零拷贝：尽量减少不必要的内存拷贝，实现了更高效率的传输。\n  内存池设计：申请的内存可以重用，主要指直接内存。内部实现是用一颗二叉查找树管理内存分配情况。\n  串形化处理读写：避免使用锁带来的性能开销。\n  高性能序列化协议：支持 protobuf 等高性能序列化协议。\n  什么是 Netty 的零拷贝？ Netty 的零拷贝主要包含三个方面：\n  Netty 的接收和发送 ByteBuffer 采用 DIRECT BUFFERS，使用堆外直接内存进行 Socket 读写，不需要进行字节缓冲区的二次拷贝。如果使用传统的堆内存（HEAP BUFFERS）进行 Socket 读写，JVM 会将堆内存 Buffer 拷贝一份到直接内存中，然后才写入 Socket 中。相比于堆外直接内存，消息在发送过程中多了一次缓冲区的内存拷贝。\n  Netty 提供了组合 Buffer 对象，可以聚合多个 ByteBuffer 对象，用户可以像操作一个 Buffer 那样方便的对组合 Buffer 进行操作，避免了传统通过内存拷贝的方式将几个小 Buffer 合并成一个大的 Buffer。\n  Netty 的文件传输采用了 transferTo 方法，它可以直接将文件缓冲区的数据发送到目标 Channel，避免了传统通过循环 write 方式导致的内存拷贝问题。\n  Netty 的应用场景有哪些？ 典型的应用有：阿里分布式服务框架 Dubbo，默认使用 Netty 作为基础通信组件，还有 RocketMQ 也是使用 Netty 作为通讯的基础。\n","wordCount":"4680","inLanguage":"zh","datePublished":"2022-07-20T18:27:19+08:00","dateModified":"2022-07-20T18:27:19+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/netty%E7%AC%94%E8%AE%B0/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
+</head>
+<body id=top>
+<script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
+<header class=header>
+<nav class=nav>
+<div class=logo>
+<a href=http://euthpic.github.io/ accesskey=h title="🏡 乱花渐欲迷人眼 (Alt + H)">🏡 乱花渐欲迷人眼</a>
+<span class=logo-switches>
+<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+</span>
+</div>
+<ul id=menu>
+<li>
+<a href=http://euthpic.github.io/categories/ title="📔 系列">
+<span>📔 系列</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/tags/ title="🏷️ 标签">
+<span>🏷️ 标签</span>
+</a>
+</li>
+<li>
+<a href=http://euthpic.github.io/search/ title="🔍 搜索 (Alt + /)" accesskey=/>
+<span>🔍 搜索</span>
+</a>
+</li>
+<li>
+<a href=https://travellings.link title=🚇>
+<span>🚇</span>
+</a>
+</li>
+</ul>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-header>
+<div class=breadcrumbs><a href=http://euthpic.github.io/>主页</a>&nbsp;»&nbsp;<a href=http://euthpic.github.io/tech/>Teches</a></div>
+<h1 class=post-title>
+Netty笔记
+</h1>
+<div class=post-meta><span title="2022-07-20 18:27:19 +0800 CST">July 20, 2022</span>&nbsp;·&nbsp;10 分钟&nbsp;·&nbsp;Guangfa&nbsp;|&nbsp;<a href=https://github.com/euthpic/euthpic.github.io/edit/main/content/tech/Netty%e7%ac%94%e8%ae%b0.md rel="noopener noreferrer" target=_blank>PR</a>
+</div>
+</header> <div class=toc>
+<details open>
+<summary accesskey=c title="(Alt + C)">
+<span class=details>目录</span>
+</summary>
+<div class=inner><ul>
+<li>
+<a href=#%e6%b0%b4%e5%b9%b3%e8%a7%a6%e5%8f%91level-trggered aria-label=水平触发(level-trggered)>水平触发(level-trggered)</a></li>
+<li>
+<a href=#%e8%be%b9%e7%bc%98%e8%a7%a6%e5%8f%91edge-triggered aria-label=边缘触发(edge-triggered)>边缘触发(edge-triggered)</a></li>
+<li>
+<a href=#netty-%e5%92%8c-tomcat-%e7%9a%84%e5%8c%ba%e5%88%ab aria-label="Netty 和 Tomcat 的区别？">Netty 和 Tomcat 的区别？</a></li>
+<li>
+<a href=#netty-%e5%8f%91%e9%80%81%e6%b6%88%e6%81%af%e6%9c%89%e5%87%a0%e7%a7%8d%e6%96%b9%e5%bc%8f aria-label="Netty 发送消息有几种方式？">Netty 发送消息有几种方式？</a></li>
+<li>
+<a href=#netty-%e9%ab%98%e6%80%a7%e8%83%bd%e8%a1%a8%e7%8e%b0%e5%9c%a8%e5%93%aa%e4%ba%9b%e6%96%b9%e9%9d%a2 aria-label="Netty 高性能表现在哪些方面？">Netty 高性能表现在哪些方面？</a></li>
+<li>
+<a href=#%e4%bb%80%e4%b9%88%e6%98%af-netty-%e7%9a%84%e9%9b%b6%e6%8b%b7%e8%b4%9d aria-label="什么是 Netty 的零拷贝？">什么是 Netty 的零拷贝？</a></li>
+<li>
+<a href=#netty-%e7%9a%84%e5%ba%94%e7%94%a8%e5%9c%ba%e6%99%af%e6%9c%89%e5%93%aa%e4%ba%9b aria-label="Netty 的应用场景有哪些？">Netty 的应用场景有哪些？</a>
+</li>
+</ul>
+</div>
+</details>
+</div>
+<div class=post-content><p>优势:并发高,传输快,使用简单</p>
+<p>为什么传输快?</p>
+<p>零拷贝技术: 传统IO要经历4次复制,4次切换上下文,把文件复制到内核里面的缓存区,再复制到用户态里的缓冲区,再复制到socket里的缓冲区(内核态),最后再复制到网卡.零拷贝有两种方式,mmap可以直接从内核缓存复制到socket,sendfile可以直接从内核缓存复制到网卡. 不光netty,kafka和nginx等中间件都使用了零拷贝.</p>
+<p>IO模型: 基于Reactor的IO模型,有单Reactor单线程和单Reactor多线程和主从Reactor多线程模型.</p>
+<p>单线程模型有四个部分,selector负责监听client的请求并转发给dispatcher,dispatcher收到请求后会将其分发给对应的handler,如果是建立连接的请求就会转发到acceptor,acceptor建立连接后会创建对应的handler,其后该连接的请求,例如read和send等都会由对应的handler处理,handler处理完再把数据返回给client.单线程的局限性在于处理任务的handler是单线程的,对于同一个连接的多个请求只能串行处理,有性能瓶颈.</p>
+<p>多线程模型主要区别在于handler,handler只负责响应请求,不再处理具体任务,它会把执行过程交由worker线程处理,如果有多个请求就有多个worker,可以并发处理.</p>
+<p>主从模型是为了解决acceptor的性能瓶颈问题,acceptor不再只是一个线程,而是拓展成了一个线程池.在这个模型下,所有请求都会经过主reactor(有个疑惑,请求直接交由从reactor不好嘛,为啥要多转发一次),主reactor只负责建立连接的请求,使用acceptor线程池处理,然后把读写等请求交由从reactor处理.</p>
+<p>Bootstrap/ServerBootstrap: 启动基类</p>
+<p>channel: 对应网络中的socket,作用包括维护当前连接的状态,连接的端口号,数据缓冲区的大小等,每个request对应一个channel,数据经由channel传入.</p>
+<p>EventLoop: 多路复用程序,轮询各个channel,获取其中的事件并予以响应,是Reactor模型的主体.有多种实现,例如基于select的NioEventLoop,基于Epoll的EpollEventLoop</p>
+<p>NioEventLoop: 维护了一个线程和任务队列，支持异步提交执行任务，线程启动时会调用NioEventLoop的run方法，执行I/O任务和非I/O任务.</p>
+<p>I/O任务，即selectionKey中就绪事件，例如read，write，accept，connect等，由processSelectedKeys方法触发。</p>
+<p>非I/O任务，添加到taskQueue中的任务，如register()，bind()等任务</p>
+<p>在 Netty 的每一个 NioEventLoop 中都有一个 TaskQueue，设计它的目的是在任务提交的速度大于线程的处理速度的时候起到缓冲作用。或者用于异步地处理 Selector 监听到的 IO 事件。</p>
+<p>Selector: NioEventLoop中负责监听事件的线程,一个NioEventLoop对应一个selector,一个selector可监听多个channel.</p>
+<p>NioEventLoopGroup: 主要负责管理eventloop的生命周期,内部维护了一组eventloop,和eventloop的关系可以理解为线程池和线程的关系.netty中分为bossGroup和workerGroup,bossGroup是负责建立连接的线程池(相当于主reactor),workerGroup是负责处理IO等请求的线程池(相当于从reactor).线程池的线程数默认为cpu核心数的两倍</p>
+<p>BossGroup工作过程:</p>
+<ul>
+<li>
+<p>轮询注册在其上的 ServerSocketChannel 的 accept 事件（OP_ACCEPT 事件）</p>
+</li>
+<li>
+<p>处理 accept 事件，与客户端建立连接，生成一个 NioSocketChannel，并将其注册到 WorkerGroup 中某个线程上的 Selector 上</p>
+</li>
+<li>
+<p>再去以此循环处理任务队列中的下一个事件</p>
+</li>
+</ul>
+<p>WorkerGroup工作过程</p>
+<ul>
+<li>
+<p>轮询注册在其上的 NioSocketChannel 的 read/write 事件（OP_READ/OP_WRITE 事件）</p>
+</li>
+<li>
+<p>在对应的 NioSocketChannel 上处理 read/write 事件</p>
+</li>
+<li>
+<p>再去以此循环处理任务队列中的下一个事件</p>
+</li>
+</ul>
+<p>ChannelFuture: 异步返回事件处理的结果</p>
+<p>ChannelHandler: 就是Reactor中的handler,具体处理channel传过来的事件的组件.</p>
+<p>ChannelHandlerContext: 保存Channel相关的上下文信息，同时关联一个ChannelHandler对象</p>
+<p>ChannelPipeline: 维护了一个channelHandler的双向链表,channelHandler是以链式调用的形式工作的,pipeline和channel是一对一的关系.</p>
+<p>Netty服务端创建过程:</p>
+<p>/**</p>
+<ul>
+<li>需要的依赖：</li>
+<li>
+<dependency>
+</li>
+<li><groupid>io.netty</groupid></li>
+<li><artifactid>netty-all</artifactid></li>
+<li><version>4.1.52.Final</version></li>
+<li>
+</dependency>
+</li>
+</ul>
+<p><em>/<br>
+public static void main(String[] args) throws InterruptedException {<br>
+​<br>
+   // 创建 BossGroup 和 WorkerGroup<br>
+   // 1. bossGroup 只处理连接请求<br>
+   // 2. 业务处理由 workerGroup 来完成<br>
+   EventLoopGroup bossGroup = new NioEventLoopGroup();<br>
+   EventLoopGroup workerGroup = new NioEventLoopGroup();<br>
+​<br>
+   try {<br>
+       // 创建服务器端的启动对象<br>
+       ServerBootstrap bootstrap = new ServerBootstrap();<br>
+       // 配置参数<br>
+       bootstrap<br>
+               // 设置线程组<br>
+              .group(bossGroup, workerGroup)<br>
+               // 说明服务器端通道的实现类（便于 Netty 做反射处理）<br>
+              .channel(NioServerSocketChannel.class)<br>
+               // 设置等待连接的队列的容量（当客户端连接请求速率大<br>
+            // 于 NioServerSocketChannel 接收速率的时候，会使用<br>
+               // 该队列做缓冲）<br>
+               // option()方法用于给服务端的 ServerSocketChannel<br>
+               // 添加配置<br>
+              .option(ChannelOption.SO_BACKLOG, 128)<br>
+               // 设置连接保活<br>
+               // childOption()方法用于给服务端 ServerSocketChannel<br>
+               // 接收到的 SocketChannel 添加配置<br>
+              .childOption(ChannelOption.SO_KEEPALIVE, true)<br>
+               // handler()方法用于给 BossGroup 设置业务处理器<br>
+               // childHandler()方法用于给 WorkerGroup 设置业务处理器<br>
+              .childHandler(<br>
+                       // 创建一个通道初始化对象<br>
+                       new ChannelInitializer<socketchannel>() {<br>
+                           // 向 Pipeline 添加业务处理器<br>
+                           @Override<br>
+                           protected void initChannel(<br>
+                                   SocketChannel socketChannel<br>
+                          ) throws Exception {<br>
+                               socketChannel.pipeline().addLast(<br>
+                                       new NettyServerHandler()<br>
+                              );<br>
+                               <br>
+                               // 可以继续调用 socketChannel.pipeline().addLast()<br>
+                               // 添加更多 Handler<br>
+                          }<br>
+                      }<br>
+              );<br>
+​<br>
+       System.out.println(&ldquo;server is ready&mldr;");<br>
+​<br>
+       // 绑定端口，启动服务器，生成一个 channelFuture 对象，<br>
+       // ChannelFuture 涉及到 Netty 的异步模型，后面展开讲<br>
+       ChannelFuture channelFuture = bootstrap.bind(8080).sync();<br>
+       // 对通道关闭进行监听<br>
+       channelFuture.channel().closeFuture().sync();<br>
+  } finally {<br>
+       bossGroup.shutdownGracefully();<br>
+       workerGroup.shutdownGracefully();<br>
+  }<br>
+}<br>
+​<br>
+/</em>*</p>
+<ul>
+<li>自定义一个 Handler，需要继承 Netty 规定好的某个 HandlerAdapter（规范）</li>
+<li>InboundHandler 用于处理数据流入本端（服务端）的 IO 事件</li>
+<li>InboundHandler 用于处理数据流出本端（服务端）的 IO 事件<br>
+<em>/<br>
+static class NettyServerHandler extends ChannelInboundHandlerAdapter {<br>
+   /</em>*<br>
+    * 当通道有数据可读时执行<br>
+    *<br>
+    * @param ctx 上下文对象，可以从中取得相关联的 Pipeline、Channel、客户端地址等<br>
+    * @param msg 客户端发送的数据<br>
+    * @throws Exception<br>
+    <em>/<br>
+   @Override<br>
+   public void channelRead(ChannelHandlerContext ctx, Object msg)<br>
+           throws Exception {<br>
+       // 接收客户端发来的数据<br>
+​<br>
+       System.out.println(&ldquo;client address: "<br>
+               + ctx.channel().remoteAddress());<br>
+​<br>
+       // ByteBuf 是 Netty 提供的类，比 NIO 的 ByteBuffer 性能更高<br>
+       ByteBuf byteBuf = (ByteBuf) msg;<br>
+       System.out.println(&ldquo;data from client: "<br>
+               + byteBuf.toString(CharsetUtil.UTF_8));<br>
+  }<br>
+​<br>
+   /</em>*<br>
+    * 数据读取完毕后执行<br>
+    *<br>
+    * @param ctx 上下文对象<br>
+    * @throws Exception<br>
+    <em>/<br>
+   @Override<br>
+   public void channelReadComplete(ChannelHandlerContext ctx)<br>
+           throws Exception {<br>
+       // 发送响应给客户端<br>
+       ctx.writeAndFlush(<br>
+               // Unpooled 类是 Netty 提供的专门操作缓冲区的工具<br>
+               // 类，copiedBuffer 方法返回的 ByteBuf 对象类似于<br>
+               // NIO 中的 ByteBuffer，但性能更高<br>
+               Unpooled.copiedBuffer(<br>
+                       &ldquo;hello client! i have got your data.&rdquo;,<br>
+                       CharsetUtil.UTF_8<br>
+              )<br>
+      );<br>
+  }<br>
+​<br>
+   /</em>*<br>
+    * 发生异常时执行<br>
+    *<br>
+    * @param ctx   上下文对象<br>
+    * @param cause 异常对象<br>
+    * @throws Exception<br>
+    */<br>
+   @Override<br>
+   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)<br>
+           throws Exception {<br>
+       // 关闭与客户端的 Socket 连接<br>
+       ctx.channel().close();<br>
+  }<br>
+}</li>
+</ul>
+<p>客户端创建过程</p>
+<p>/**</p>
+<ul>
+<li>需要的依赖：</li>
+<li>
+<dependency>
+</li>
+<li><groupid>io.netty</groupid></li>
+<li><artifactid>netty-all</artifactid></li>
+<li><version>4.1.52.Final</version></li>
+<li>
+</dependency>
+</li>
+</ul>
+<p><em>/<br>
+public static void main(String[] args) throws InterruptedException {<br>
+​<br>
+   // 客户端只需要一个事件循环组，可以看做 BossGroup<br>
+   EventLoopGroup eventLoopGroup = new NioEventLoopGroup();<br>
+​<br>
+   try {<br>
+       // 创建客户端的启动对象<br>
+       Bootstrap bootstrap = new Bootstrap();<br>
+       // 配置参数<br>
+       bootstrap<br>
+               // 设置线程组<br>
+              .group(eventLoopGroup)<br>
+               // 说明客户端通道的实现类（便于 Netty 做反射处理）<br>
+              .channel(NioSocketChannel.class)<br>
+               // handler()方法用于给 BossGroup 设置业务处理器<br>
+              .handler(<br>
+                       // 创建一个通道初始化对象<br>
+                       new ChannelInitializer<socketchannel>() {<br>
+                           // 向 Pipeline 添加业务处理器<br>
+                           @Override<br>
+                           protected void initChannel(<br>
+                                   SocketChannel socketChannel<br>
+                          ) throws Exception {<br>
+                               socketChannel.pipeline().addLast(<br>
+                                       new NettyClientHandler()<br>
+                              );<br>
+                               <br>
+                               // 可以继续调用 socketChannel.pipeline().addLast()<br>
+                               // 添加更多 Handler<br>
+                          }<br>
+                      }<br>
+              );<br>
+​<br>
+       System.out.println(&ldquo;client is ready&mldr;");<br>
+​<br>
+       // 启动客户端去连接服务器端，ChannelFuture 涉及到 Netty 的异步模型，后面展开讲<br>
+       ChannelFuture channelFuture = bootstrap.connect(<br>
+               &ldquo;127.0.0.1&rdquo;,<br>
+               8080).sync();<br>
+       // 对通道关闭进行监听<br>
+       channelFuture.channel().closeFuture().sync();<br>
+  } finally {<br>
+       eventLoopGroup.shutdownGracefully();<br>
+  }<br>
+}<br>
+​<br>
+/</em>*</p>
+<ul>
+<li>自定义一个 Handler，需要继承 Netty 规定好的某个 HandlerAdapter（规范）</li>
+<li>InboundHandler 用于处理数据流入本端（客户端）的 IO 事件</li>
+<li>InboundHandler 用于处理数据流出本端（客户端）的 IO 事件<br>
+<em>/<br>
+static class NettyClientHandler extends ChannelInboundHandlerAdapter {<br>
+   /</em>*<br>
+    * 通道就绪时执行<br>
+    *<br>
+    * @param ctx 上下文对象<br>
+    * @throws Exception<br>
+    <em>/<br>
+   @Override<br>
+   public void channelActive(ChannelHandlerContext ctx)<br>
+           throws Exception {<br>
+       // 向服务器发送数据<br>
+       ctx.writeAndFlush(<br>
+               // Unpooled 类是 Netty 提供的专门操作缓冲区的工具<br>
+               // 类，copiedBuffer 方法返回的 ByteBuf 对象类似于<br>
+               // NIO 中的 ByteBuffer，但性能更高<br>
+               Unpooled.copiedBuffer(<br>
+                       &ldquo;hello server!&rdquo;,<br>
+                       CharsetUtil.UTF_8<br>
+              )<br>
+      );<br>
+  }<br>
+​<br>
+   /</em>*<br>
+    * 当通道有数据可读时执行<br>
+    *<br>
+    * @param ctx 上下文对象<br>
+    * @param msg 服务器端发送的数据<br>
+    * @throws Exception<br>
+    <em>/<br>
+   @Override<br>
+   public void channelRead(ChannelHandlerContext ctx, Object msg)<br>
+           throws Exception {<br>
+       // 接收服务器端发来的数据<br>
+​<br>
+       System.out.println(&ldquo;server address: "<br>
+               + ctx.channel().remoteAddress());<br>
+​<br>
+       // ByteBuf 是 Netty 提供的类，比 NIO 的 ByteBuffer 性能更高<br>
+       ByteBuf byteBuf = (ByteBuf) msg;<br>
+       System.out.println(&ldquo;data from server: "<br>
+               + byteBuf.toString(CharsetUtil.UTF_8));<br>
+  }<br>
+​<br>
+   /</em>*<br>
+    * 发生异常时执行<br>
+    *<br>
+    * @param ctx   上下文对象<br>
+    * @param cause 异常对象<br>
+    * @throws Exception<br>
+    */<br>
+   @Override<br>
+   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)<br>
+           throws Exception {<br>
+       // 关闭与服务器端的 Socket 连接<br>
+       ctx.channel().close();<br>
+  }<br>
+}</li>
+</ul>
+<p>select: 基于轮询,时间复杂度为O(n),当IO事件触发后,遍历fdset去查找事件对应的fd.在连接数较大的情况下开销也是线性增长.使用数组存储fdset,连接数上限较小.实现简单,兼容性好.</p>
+<p>poll: 和select基本相似,区别在于存储方式是链表,理论上能监听的fd没有数量限制.</p>
+<p>epoll: select和poll的改进版,基于事件驱动,时间复杂度为O(1),实现原理是为每个fd注册一个回调函数,当fd对应的设备发生IO事件时,就会调用这个回调函数,将该fd放入一个链表中,然后服务器从该链表中逐个取出fd来处理.性能随着连接数上涨不会有明显衰退,适合高并发情景.</p>
+<h3 id=水平触发level-trggered>水平触发(level-trggered)</h3>
+<p>只要文件描述符关联的读内核缓冲区非空，有数据可以读取，就一直发出可读信号进行通知， 当文件描述符关联的内核写缓冲区不满，有空间可以写入，就一直发出可写信号进行通知 LT模式支持阻塞和非阻塞两种方式。epoll默认的模式是LT。select和poll都只支持水平.</p>
+<h3 id=边缘触发edge-triggered>边缘触发(edge-triggered)</h3>
+<p>当文件描述符关联的读内核缓冲区由空转化为非空的时候，则发出可读信号进行通知， 当文件描述符关联的内核写缓冲区由满转化为不满的时候，则发出可写信号进行通知 两者的区别在哪里呢？水平触发是只要读缓冲区有数据，就会一直触发可读信号，而边缘触发仅仅在空变为非空的时候通知一次.</p>
+<p>LT(level triggered)是缺省的工作方式，并且同时支持block和no-block socket.在这种做法中，内核告诉你一个文件描述符是否就绪了，然后你可以对这个就绪的fd进行IO操作。如果你不作任何操作，内核还是会继续通知你的，所以，这种模式编程出错误可能性要小一点。传统的select/poll都是这种模型的代表．</p>
+<p>八股文时间~</p>
+<h3 id=netty-和-tomcat-的区别>Netty 和 Tomcat 的区别？</h3>
+<p>Netty 和 Tomcat 最大的区别就在于通信协议，Tomcat 是基于 http 协议的，他的实质是一个基于 http 协议的web容器，但是 Netty 不一样，他能通过编程自定义各种协议，因为 Netty 能够自己编码/解码字节流，完成类似Redis 访问的功能，这就是 Netty 和 Tomcat 最大的区别。</p>
+<h3 id=netty-发送消息有几种方式>Netty 发送消息有几种方式？</h3>
+<p>Netty 有两种发送消息的方式：</p>
+<ul>
+<li>
+<p>直接写入 Channel 中，消息从 ChannelPipeline 当中尾部开始移动；</p>
+</li>
+<li>
+<p>写入和 ChannelHandler 绑定的 ChannelHandlerContext 中，消息从 ChannelPipeline 中的下一个 ChannelHandler 中移动。</p>
+</li>
+</ul>
+<h3 id=netty-高性能表现在哪些方面>Netty 高性能表现在哪些方面？</h3>
+<ul>
+<li>
+<p>IO 线程模型：同步非阻塞，用最少的资源做更多的事。</p>
+</li>
+<li>
+<p>内存零拷贝：尽量减少不必要的内存拷贝，实现了更高效率的传输。</p>
+</li>
+<li>
+<p>内存池设计：申请的内存可以重用，主要指直接内存。内部实现是用一颗二叉查找树管理内存分配情况。</p>
+</li>
+<li>
+<p>串形化处理读写：避免使用锁带来的性能开销。</p>
+</li>
+<li>
+<p>高性能序列化协议：支持 protobuf 等高性能序列化协议。</p>
+</li>
+</ul>
+<h3 id=什么是-netty-的零拷贝>什么是 Netty 的零拷贝？</h3>
+<p>Netty 的零拷贝主要包含三个方面：</p>
+<ul>
+<li>
+<p>Netty 的接收和发送 ByteBuffer 采用 DIRECT BUFFERS，使用堆外直接内存进行 Socket 读写，不需要进行字节缓冲区的二次拷贝。如果使用传统的堆内存（HEAP BUFFERS）进行 Socket 读写，JVM 会将堆内存 Buffer 拷贝一份到直接内存中，然后才写入 Socket 中。相比于堆外直接内存，消息在发送过程中多了一次缓冲区的内存拷贝。</p>
+</li>
+<li>
+<p>Netty 提供了组合 Buffer 对象，可以聚合多个 ByteBuffer 对象，用户可以像操作一个 Buffer 那样方便的对组合 Buffer 进行操作，避免了传统通过内存拷贝的方式将几个小 Buffer 合并成一个大的 Buffer。</p>
+</li>
+<li>
+<p>Netty 的文件传输采用了 transferTo 方法，它可以直接将文件缓冲区的数据发送到目标 Channel，避免了传统通过循环 write 方式导致的内存拷贝问题。</p>
+</li>
+</ul>
+<h3 id=netty-的应用场景有哪些>Netty 的应用场景有哪些？</h3>
+<p>典型的应用有：阿里分布式服务框架 Dubbo，默认使用 Netty 作为基础通信组件，还有 RocketMQ 也是使用 Netty 作为通讯的基础。</p>
+</div>
+<footer class=post-footer>
+<nav class=paginav>
+<a class=next href=http://euthpic.github.io/tech/%E7%94%A8%E6%88%B7%E9%89%B4%E6%9D%83%E4%B9%8Bjwt/>
+<span class=title>下一页 »</span>
+<br>
+<span>用户鉴权之JWT</span>
+</a>
+</nav>
+<div class=share-buttons>
+<a target=_blank rel="noopener noreferrer" aria-label="share Netty笔记 on twitter" href="https://twitter.com/intent/tweet/?text=Netty%e7%ac%94%e8%ae%b0&url=http%3a%2f%2feuthpic.github.io%2ftech%2fnetty%25E7%25AC%2594%25E8%25AE%25B0%2f&hashtags="><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Netty笔记 on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2feuthpic.github.io%2ftech%2fnetty%25E7%25AC%2594%25E8%25AE%25B0%2f&title=Netty%e7%ac%94%e8%ae%b0&summary=Netty%e7%ac%94%e8%ae%b0&source=http%3a%2f%2feuthpic.github.io%2ftech%2fnetty%25E7%25AC%2594%25E8%25AE%25B0%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Netty笔记 on reddit" href="https://reddit.com/submit?url=http%3a%2f%2feuthpic.github.io%2ftech%2fnetty%25E7%25AC%2594%25E8%25AE%25B0%2f&title=Netty%e7%ac%94%e8%ae%b0"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Netty笔记 on facebook" href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2feuthpic.github.io%2ftech%2fnetty%25E7%25AC%2594%25E8%25AE%25B0%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Netty笔记 on whatsapp" href="https://api.whatsapp.com/send?text=Netty%e7%ac%94%e8%ae%b0%20-%20http%3a%2f%2feuthpic.github.io%2ftech%2fnetty%25E7%25AC%2594%25E8%25AE%25B0%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Netty笔记 on telegram" href="https://telegram.me/share/url?text=Netty%e7%ac%94%e8%ae%b0&url=http%3a%2f%2feuthpic.github.io%2ftech%2fnetty%25E7%25AC%2594%25E8%25AE%25B0%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg>
+</a>
+</div>
+</footer>
+</article>
+</main>
+<footer class=footer>
+<span>&copy; 2022 <a href=http://euthpic.github.io/>乱花渐欲迷人眼</a></span>
+<span>
+Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a>
+</span>
+</footer>
+<a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a>
+<script>let menu=document.getElementById('menu');menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
+<script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script>
+<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
+</body>
+</html>

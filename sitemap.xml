@@ -2,13 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>http://euthpic.github.io/tech/netty%E7%AC%94%E8%AE%B0/</loc>
+    <lastmod>2022-07-20T18:27:19+08:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
     <loc>http://euthpic.github.io/tech/</loc>
-    <lastmod>2022-07-10T17:27:19+08:00</lastmod>
+    <lastmod>2022-07-20T18:27:19+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
     <loc>http://euthpic.github.io/</loc>
-    <lastmod>2022-07-10T17:27:19+08:00</lastmod>
+    <lastmod>2022-07-20T18:27:19+08:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url><url>
