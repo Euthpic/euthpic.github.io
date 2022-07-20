@@ -34,7 +34,7 @@
 <meta name=twitter:title content="Netty笔记">
 <meta name=twitter:description content="优势:并发高,传输快,使用简单 为什么传输快? 零拷贝技术: 传统IO要经历4次复制,4次切换上下文,把文件复制到内核里面的缓存区,再复制到用户态">
 <script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Teches","item":"http://euthpic.github.io/tech/"},{"@type":"ListItem","position":2,"name":"Netty笔记","item":"http://euthpic.github.io/tech/netty%E7%AC%94%E8%AE%B0/"}]}</script>
-<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Netty笔记","name":"Netty笔记","description":"优势:并发高,传输快,使用简单 为什么传输快? 零拷贝技术: 传统IO要经历4次复制,4次切换上下文,把文件复制到内核里面的缓存区,再复制到用户态","keywords":[],"articleBody":"优势:并发高,传输快,使用简单\n为什么传输快?\n零拷贝技术: 传统IO要经历4次复制,4次切换上下文,把文件复制到内核里面的缓存区,再复制到用户态里的缓冲区,再复制到socket里的缓冲区(内核态),最后再复制到网卡.零拷贝有两种方式,mmap可以直接从内核缓存复制到socket,sendfile可以直接从内核缓存复制到网卡. 不光netty,kafka和nginx等中间件都使用了零拷贝.\nIO模型: 基于Reactor的IO模型,有单Reactor单线程和单Reactor多线程和主从Reactor多线程模型.\n单线程模型有四个部分,selector负责监听client的请求并转发给dispatcher,dispatcher收到请求后会将其分发给对应的handler,如果是建立连接的请求就会转发到acceptor,acceptor建立连接后会创建对应的handler,其后该连接的请求,例如read和send等都会由对应的handler处理,handler处理完再把数据返回给client.单线程的局限性在于处理任务的handler是单线程的,对于同一个连接的多个请求只能串行处理,有性能瓶颈.\n多线程模型主要区别在于handler,handler只负责响应请求,不再处理具体任务,它会把执行过程交由worker线程处理,如果有多个请求就有多个worker,可以并发处理.\n主从模型是为了解决acceptor的性能瓶颈问题,acceptor不再只是一个线程,而是拓展成了一个线程池.在这个模型下,所有请求都会经过主reactor(有个疑惑,请求直接交由从reactor不好嘛,为啥要多转发一次),主reactor只负责建立连接的请求,使用acceptor线程池处理,然后把读写等请求交由从reactor处理.\nBootstrap/ServerBootstrap: 启动基类\nchannel: 对应网络中的socket,作用包括维护当前连接的状态,连接的端口号,数据缓冲区的大小等,每个request对应一个channel,数据经由channel传入.\nEventLoop: 多路复用程序,轮询各个channel,获取其中的事件并予以响应,是Reactor模型的主体.有多种实现,例如基于select的NioEventLoop,基于Epoll的EpollEventLoop\nNioEventLoop: 维护了一个线程和任务队列，支持异步提交执行任务，线程启动时会调用NioEventLoop的run方法，执行I/O任务和非I/O任务.\nI/O任务，即selectionKey中就绪事件，例如read，write，accept，connect等，由processSelectedKeys方法触发。\n非I/O任务，添加到taskQueue中的任务，如register()，bind()等任务\n在 Netty 的每一个 NioEventLoop 中都有一个 TaskQueue，设计它的目的是在任务提交的速度大于线程的处理速度的时候起到缓冲作用。或者用于异步地处理 Selector 监听到的 IO 事件。\nSelector: NioEventLoop中负责监听事件的线程,一个NioEventLoop对应一个selector,一个selector可监听多个channel.\nNioEventLoopGroup: 主要负责管理eventloop的生命周期,内部维护了一组eventloop,和eventloop的关系可以理解为线程池和线程的关系.netty中分为bossGroup和workerGroup,bossGroup是负责建立连接的线程池(相当于主reactor),workerGroup是负责处理IO等请求的线程池(相当于从reactor).线程池的线程数默认为cpu核心数的两倍\nBossGroup工作过程:\n  轮询注册在其上的 ServerSocketChannel 的 accept 事件（OP_ACCEPT 事件）\n  处理 accept 事件，与客户端建立连接，生成一个 NioSocketChannel，并将其注册到 WorkerGroup 中某个线程上的 Selector 上\n  再去以此循环处理任务队列中的下一个事件\n  WorkerGroup工作过程\n  轮询注册在其上的 NioSocketChannel 的 read/write 事件（OP_READ/OP_WRITE 事件）\n  在对应的 NioSocketChannel 上处理 read/write 事件\n  再去以此循环处理任务队列中的下一个事件\n  ChannelFuture: 异步返回事件处理的结果\nChannelHandler: 就是Reactor中的handler,具体处理channel传过来的事件的组件.\nChannelHandlerContext: 保存Channel相关的上下文信息，同时关联一个ChannelHandler对象\nChannelPipeline: 维护了一个channelHandler的双向链表,channelHandler是以链式调用的形式工作的,pipeline和channel是一对一的关系.\nNetty服务端创建过程:\n/**\n 需要的依赖：    io.netty netty-all 4.1.52.Final     /\npublic static void main(String[] args) throws InterruptedException {\n​\n// 创建 BossGroup 和 WorkerGroup\n// 1. bossGroup 只处理连接请求\n// 2. 业务处理由 workerGroup 来完成\nEventLoopGroup bossGroup = new NioEventLoopGroup();\nEventLoopGroup workerGroup = new NioEventLoopGroup();\n​\ntry {\n// 创建服务器端的启动对象\nServerBootstrap bootstrap = new ServerBootstrap();\n// 配置参数\nbootstrap\n// 设置线程组\n.group(bossGroup, workerGroup)\n// 说明服务器端通道的实现类（便于 Netty 做反射处理）\n.channel(NioServerSocketChannel.class)\n// 设置等待连接的队列的容量（当客户端连接请求速率大\n// 于 NioServerSocketChannel 接收速率的时候，会使用\n// 该队列做缓冲）\n// option()方法用于给服务端的 ServerSocketChannel\n// 添加配置\n.option(ChannelOption.SO_BACKLOG, 128)\n// 设置连接保活\n// childOption()方法用于给服务端 ServerSocketChannel\n// 接收到的 SocketChannel 添加配置\n.childOption(ChannelOption.SO_KEEPALIVE, true)\n// handler()方法用于给 BossGroup 设置业务处理器\n// childHandler()方法用于给 WorkerGroup 设置业务处理器\n.childHandler(\n// 创建一个通道初始化对象\nnew ChannelInitializer() {\n// 向 Pipeline 添加业务处理器\n@Override\nprotected void initChannel(\nSocketChannel socketChannel\n) throws Exception {\nsocketChannel.pipeline().addLast(\nnew NettyServerHandler()\n);\n// 可以继续调用 socketChannel.pipeline().addLast()\n// 添加更多 Handler\n}\n}\n);\n​\nSystem.out.println(“server is ready…\");\n​\n// 绑定端口，启动服务器，生成一个 channelFuture 对象，\n// ChannelFuture 涉及到 Netty 的异步模型，后面展开讲\nChannelFuture channelFuture = bootstrap.bind(8080).sync();\n// 对通道关闭进行监听\nchannelFuture.channel().closeFuture().sync();\n} finally {\nbossGroup.shutdownGracefully();\nworkerGroup.shutdownGracefully();\n}\n}\n​\n/*\n 自定义一个 Handler，需要继承 Netty 规定好的某个 HandlerAdapter（规范） InboundHandler 用于处理数据流入本端（服务端）的 IO 事件 InboundHandler 用于处理数据流出本端（服务端）的 IO 事件\n/\nstatic class NettyServerHandler extends ChannelInboundHandlerAdapter {\n/*\n* 当通道有数据可读时执行\n*\n* @param ctx 上下文对象，可以从中取得相关联的 Pipeline、Channel、客户端地址等\n* @param msg 客户端发送的数据\n* @throws Exception\n/\n@Override\npublic void channelRead(ChannelHandlerContext ctx, Object msg)\nthrows Exception {\n// 接收客户端发来的数据\n​\nSystem.out.println(“client address: \"\n+ ctx.channel().remoteAddress());\n​\n// ByteBuf 是 Netty 提供的类，比 NIO 的 ByteBuffer 性能更高\nByteBuf byteBuf = (ByteBuf) msg;\nSystem.out.println(“data from client: \"\n+ byteBuf.toString(CharsetUtil.UTF_8));\n}\n​\n/*\n* 数据读取完毕后执行\n*\n* @param ctx 上下文对象\n* @throws Exception\n/\n@Override\npublic void channelReadComplete(ChannelHandlerContext ctx)\nthrows Exception {\n// 发送响应给客户端\nctx.writeAndFlush(\n// Unpooled 类是 Netty 提供的专门操作缓冲区的工具\n// 类，copiedBuffer 方法返回的 ByteBuf 对象类似于\n// NIO 中的 ByteBuffer，但性能更高\nUnpooled.copiedBuffer(\n“hello client! i have got your data.”,\nCharsetUtil.UTF_8\n)\n);\n}\n​\n/*\n* 发生异常时执行\n*\n* @param ctx 上下文对象\n* @param cause 异常对象\n* @throws Exception\n*/\n@Override\npublic void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)\nthrows Exception {\n// 关闭与客户端的 Socket 连接\nctx.channel().close();\n}\n}  客户端创建过程\n/**\n 需要的依赖：    io.netty netty-all 4.1.52.Final     /\npublic static void main(String[] args) throws InterruptedException {\n​\n// 客户端只需要一个事件循环组，可以看做 BossGroup\nEventLoopGroup eventLoopGroup = new NioEventLoopGroup();\n​\ntry {\n// 创建客户端的启动对象\nBootstrap bootstrap = new Bootstrap();\n// 配置参数\nbootstrap\n// 设置线程组\n.group(eventLoopGroup)\n// 说明客户端通道的实现类（便于 Netty 做反射处理）\n.channel(NioSocketChannel.class)\n// handler()方法用于给 BossGroup 设置业务处理器\n.handler(\n// 创建一个通道初始化对象\nnew ChannelInitializer() {\n// 向 Pipeline 添加业务处理器\n@Override\nprotected void initChannel(\nSocketChannel socketChannel\n) throws Exception {\nsocketChannel.pipeline().addLast(\nnew NettyClientHandler()\n);\n// 可以继续调用 socketChannel.pipeline().addLast()\n// 添加更多 Handler\n}\n}\n);\n​\nSystem.out.println(“client is ready…\");\n​\n// 启动客户端去连接服务器端，ChannelFuture 涉及到 Netty 的异步模型，后面展开讲\nChannelFuture channelFuture = bootstrap.connect(\n“127.0.0.1”,\n8080).sync();\n// 对通道关闭进行监听\nchannelFuture.channel().closeFuture().sync();\n} finally {\neventLoopGroup.shutdownGracefully();\n}\n}\n​\n/*\n 自定义一个 Handler，需要继承 Netty 规定好的某个 HandlerAdapter（规范） InboundHandler 用于处理数据流入本端（客户端）的 IO 事件 InboundHandler 用于处理数据流出本端（客户端）的 IO 事件\n/\nstatic class NettyClientHandler extends ChannelInboundHandlerAdapter {\n/*\n* 通道就绪时执行\n*\n* @param ctx 上下文对象\n* @throws Exception\n/\n@Override\npublic void channelActive(ChannelHandlerContext ctx)\nthrows Exception {\n// 向服务器发送数据\nctx.writeAndFlush(\n// Unpooled 类是 Netty 提供的专门操作缓冲区的工具\n// 类，copiedBuffer 方法返回的 ByteBuf 对象类似于\n// NIO 中的 ByteBuffer，但性能更高\nUnpooled.copiedBuffer(\n“hello server!”,\nCharsetUtil.UTF_8\n)\n);\n}\n​\n/*\n* 当通道有数据可读时执行\n*\n* @param ctx 上下文对象\n* @param msg 服务器端发送的数据\n* @throws Exception\n/\n@Override\npublic void channelRead(ChannelHandlerContext ctx, Object msg)\nthrows Exception {\n// 接收服务器端发来的数据\n​\nSystem.out.println(“server address: \"\n+ ctx.channel().remoteAddress());\n​\n// ByteBuf 是 Netty 提供的类，比 NIO 的 ByteBuffer 性能更高\nByteBuf byteBuf = (ByteBuf) msg;\nSystem.out.println(“data from server: \"\n+ byteBuf.toString(CharsetUtil.UTF_8));\n}\n​\n/*\n* 发生异常时执行\n*\n* @param ctx 上下文对象\n* @param cause 异常对象\n* @throws Exception\n*/\n@Override\npublic void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)\nthrows Exception {\n// 关闭与服务器端的 Socket 连接\nctx.channel().close();\n}\n}  select: 基于轮询,时间复杂度为O(n),当IO事件触发后,遍历fdset去查找事件对应的fd.在连接数较大的情况下开销也是线性增长.使用数组存储fdset,连接数上限较小.实现简单,兼容性好.\npoll: 和select基本相似,区别在于存储方式是链表,理论上能监听的fd没有数量限制.\nepoll: select和poll的改进版,基于事件驱动,时间复杂度为O(1),实现原理是为每个fd注册一个回调函数,当fd对应的设备发生IO事件时,就会调用这个回调函数,将该fd放入一个链表中,然后服务器从该链表中逐个取出fd来处理.性能随着连接数上涨不会有明显衰退,适合高并发情景.\n水平触发(level-trggered) 只要文件描述符关联的读内核缓冲区非空，有数据可以读取，就一直发出可读信号进行通知， 当文件描述符关联的内核写缓冲区不满，有空间可以写入，就一直发出可写信号进行通知 LT模式支持阻塞和非阻塞两种方式。epoll默认的模式是LT。select和poll都只支持水平.\n边缘触发(edge-triggered) 当文件描述符关联的读内核缓冲区由空转化为非空的时候，则发出可读信号进行通知， 当文件描述符关联的内核写缓冲区由满转化为不满的时候，则发出可写信号进行通知 两者的区别在哪里呢？水平触发是只要读缓冲区有数据，就会一直触发可读信号，而边缘触发仅仅在空变为非空的时候通知一次.\nLT(level triggered)是缺省的工作方式，并且同时支持block和no-block socket.在这种做法中，内核告诉你一个文件描述符是否就绪了，然后你可以对这个就绪的fd进行IO操作。如果你不作任何操作，内核还是会继续通知你的，所以，这种模式编程出错误可能性要小一点。传统的select/poll都是这种模型的代表．\n八股文时间~\nNetty 和 Tomcat 的区别？ Netty 和 Tomcat 最大的区别就在于通信协议，Tomcat 是基于 http 协议的，他的实质是一个基于 http 协议的web容器，但是 Netty 不一样，他能通过编程自定义各种协议，因为 Netty 能够自己编码/解码字节流，完成类似Redis 访问的功能，这就是 Netty 和 Tomcat 最大的区别。\nNetty 发送消息有几种方式？ Netty 有两种发送消息的方式：\n  直接写入 Channel 中，消息从 ChannelPipeline 当中尾部开始移动；\n  写入和 ChannelHandler 绑定的 ChannelHandlerContext 中，消息从 ChannelPipeline 中的下一个 ChannelHandler 中移动。\n  Netty 高性能表现在哪些方面？   IO 线程模型：同步非阻塞，用最少的资源做更多的事。\n  内存零拷贝：尽量减少不必要的内存拷贝，实现了更高效率的传输。\n  内存池设计：申请的内存可以重用，主要指直接内存。内部实现是用一颗二叉查找树管理内存分配情况。\n  串形化处理读写：避免使用锁带来的性能开销。\n  高性能序列化协议：支持 protobuf 等高性能序列化协议。\n  什么是 Netty 的零拷贝？ Netty 的零拷贝主要包含三个方面：\n  Netty 的接收和发送 ByteBuffer 采用 DIRECT BUFFERS，使用堆外直接内存进行 Socket 读写，不需要进行字节缓冲区的二次拷贝。如果使用传统的堆内存（HEAP BUFFERS）进行 Socket 读写，JVM 会将堆内存 Buffer 拷贝一份到直接内存中，然后才写入 Socket 中。相比于堆外直接内存，消息在发送过程中多了一次缓冲区的内存拷贝。\n  Netty 提供了组合 Buffer 对象，可以聚合多个 ByteBuffer 对象，用户可以像操作一个 Buffer 那样方便的对组合 Buffer 进行操作，避免了传统通过内存拷贝的方式将几个小 Buffer 合并成一个大的 Buffer。\n  Netty 的文件传输采用了 transferTo 方法，它可以直接将文件缓冲区的数据发送到目标 Channel，避免了传统通过循环 write 方式导致的内存拷贝问题。\n  Netty 的应用场景有哪些？ 典型的应用有：阿里分布式服务框架 Dubbo，默认使用 Netty 作为基础通信组件，还有 RocketMQ 也是使用 Netty 作为通讯的基础。\n","wordCount":"4680","inLanguage":"zh","datePublished":"2022-07-20T18:27:19+08:00","dateModified":"2022-07-20T18:27:19+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/netty%E7%AC%94%E8%AE%B0/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Netty笔记","name":"Netty笔记","description":"优势:并发高,传输快,使用简单 为什么传输快? 零拷贝技术: 传统IO要经历4次复制,4次切换上下文,把文件复制到内核里面的缓存区,再复制到用户态","keywords":[],"articleBody":"优势:并发高,传输快,使用简单\n为什么传输快?\n零拷贝技术: 传统IO要经历4次复制,4次切换上下文,把文件复制到内核里面的缓存区,再复制到用户态里的缓冲区,再复制到socket里的缓冲区(内核态),最后再复制到网卡.零拷贝有两种方式,mmap可以直接从内核缓存复制到socket,sendfile可以直接从内核缓存复制到网卡. 不光netty,kafka和nginx等中间件都使用了零拷贝.\nIO模型: 基于Reactor的IO模型,有单Reactor单线程和单Reactor多线程和主从Reactor多线程模型.\n单线程模型有四个部分,selector负责监听client的请求并转发给dispatcher,dispatcher收到请求后会将其分发给对应的handler,如果是建立连接的请求就会转发到acceptor,acceptor建立连接后会创建对应的handler,其后该连接的请求,例如read和send等都会由对应的handler处理,handler处理完再把数据返回给client.单线程的局限性在于处理任务的handler是单线程的,对于同一个连接的多个请求只能串行处理,有性能瓶颈.\n多线程模型主要区别在于handler,handler只负责响应请求,不再处理具体任务,它会把执行过程交由worker线程处理,如果有多个请求就有多个worker,可以并发处理.\n主从模型是为了解决acceptor的性能瓶颈问题,acceptor不再只是一个线程,而是拓展成了一个线程池.在这个模型下,所有请求都会经过主reactor(有个疑惑,请求直接交由从reactor不好嘛,为啥要多转发一次),主reactor只负责建立连接的请求,使用acceptor线程池处理,然后把读写等请求交由从reactor处理.\nBootstrap/ServerBootstrap: 启动基类\nchannel: 对应网络中的socket,作用包括维护当前连接的状态,连接的端口号,数据缓冲区的大小等,每个request对应一个channel,数据经由channel传入.\nEventLoop: 多路复用程序,轮询各个channel,获取其中的事件并予以响应,是Reactor模型的主体.有多种实现,例如基于select的NioEventLoop,基于Epoll的EpollEventLoop\nNioEventLoop: 维护了一个线程和任务队列，支持异步提交执行任务，线程启动时会调用NioEventLoop的run方法，执行I/O任务和非I/O任务.\nI/O任务，即selectionKey中就绪事件，例如read，write，accept，connect等，由processSelectedKeys方法触发。\n非I/O任务，添加到taskQueue中的任务，如register()，bind()等任务\n在 Netty 的每一个 NioEventLoop 中都有一个 TaskQueue，设计它的目的是在任务提交的速度大于线程的处理速度的时候起到缓冲作用。或者用于异步地处理 Selector 监听到的 IO 事件。\nSelector: NioEventLoop中负责监听事件的线程,一个NioEventLoop对应一个selector,一个selector可监听多个channel.\nNioEventLoopGroup: 主要负责管理eventloop的生命周期,内部维护了一组eventloop,和eventloop的关系可以理解为线程池和线程的关系.netty中分为bossGroup和workerGroup,bossGroup是负责建立连接的线程池(相当于主reactor),workerGroup是负责处理IO等请求的线程池(相当于从reactor).线程池的线程数默认为cpu核心数的两倍\nBossGroup工作过程:\n 轮询注册在其上的 ServerSocketChannel 的 accept 事件（OP_ACCEPT 事件） 处理 accept 事件，与客户端建立连接，生成一个 NioSocketChannel，并将其注册到 WorkerGroup 中某个线程上的 Selector 上 再去以此循环处理任务队列中的下一个事件  WorkerGroup工作过程\n 轮询注册在其上的 NioSocketChannel 的 read/write 事件（OP_READ/OP_WRITE 事件） 在对应的 NioSocketChannel 上处理 read/write 事件 再去以此循环处理任务队列中的下一个事件  ChannelFuture: 异步返回事件处理的结果\nChannelHandler: 就是Reactor中的handler,具体处理channel传过来的事件的组件.\nChannelHandlerContext: 保存Channel相关的上下文信息，同时关联一个ChannelHandler对象\nChannelPipeline: 维护了一个channelHandler的双向链表,channelHandler是以链式调用的形式工作的,pipeline和channel是一对一的关系.\nNetty服务端创建过程:\n/** * 需要的依赖： *  * io.netty * netty-all * 4.1.52.Final *  */ public static void main(String[] args) throws InterruptedException { // 创建 BossGroup 和 WorkerGroup  // 1. bossGroup 只处理连接请求  // 2. 业务处理由 workerGroup 来完成  EventLoopGroup bossGroup = new NioEventLoopGroup(); EventLoopGroup workerGroup = new NioEventLoopGroup(); try { // 创建服务器端的启动对象  ServerBootstrap bootstrap = new ServerBootstrap(); // 配置参数  bootstrap // 设置线程组  .group(bossGroup, workerGroup) // 说明服务器端通道的实现类（便于 Netty 做反射处理）  .channel(NioServerSocketChannel.class) // 设置等待连接的队列的容量（当客户端连接请求速率大  // 于 NioServerSocketChannel 接收速率的时候，会使用  // 该队列做缓冲）  // option()方法用于给服务端的 ServerSocketChannel  // 添加配置  .option(ChannelOption.SO_BACKLOG, 128) // 设置连接保活  // childOption()方法用于给服务端 ServerSocketChannel  // 接收到的 SocketChannel 添加配置  .childOption(ChannelOption.SO_KEEPALIVE, true) // handler()方法用于给 BossGroup 设置业务处理器  // childHandler()方法用于给 WorkerGroup 设置业务处理器  .childHandler( // 创建一个通道初始化对象  new ChannelInitializerSocketChannel() { // 向 Pipeline 添加业务处理器  @Override protected void initChannel( SocketChannel socketChannel ) throws Exception { socketChannel.pipeline().addLast( new NettyServerHandler() ); // 可以继续调用 socketChannel.pipeline().addLast()  // 添加更多 Handler  } } ); System.out.println(\"server is ready...\"); // 绑定端口，启动服务器，生成一个 channelFuture 对象，  // ChannelFuture 涉及到 Netty 的异步模型，后面展开讲  ChannelFuture channelFuture = bootstrap.bind(8080).sync(); // 对通道关闭进行监听  channelFuture.channel().closeFuture().sync(); } finally { bossGroup.shutdownGracefully(); workerGroup.shutdownGracefully(); } } /** * 自定义一个 Handler，需要继承 Netty 规定好的某个 HandlerAdapter（规范） * InboundHandler 用于处理数据流入本端（服务端）的 IO 事件 * InboundHandler 用于处理数据流出本端（服务端）的 IO 事件 */ static class NettyServerHandler extends ChannelInboundHandlerAdapter { /** * 当通道有数据可读时执行 * * @param ctx 上下文对象，可以从中取得相关联的 Pipeline、Channel、客户端地址等 * @param msg 客户端发送的数据 * @throws Exception */ @Override public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception { // 接收客户端发来的数据  System.out.println(\"client address: \" + ctx.channel().remoteAddress()); // ByteBuf 是 Netty 提供的类，比 NIO 的 ByteBuffer 性能更高  ByteBuf byteBuf = (ByteBuf) msg; System.out.println(\"data from client: \" + byteBuf.toString(CharsetUtil.UTF_8)); } /** * 数据读取完毕后执行 * * @param ctx 上下文对象 * @throws Exception */ @Override public void channelReadComplete(ChannelHandlerContext ctx) throws Exception { // 发送响应给客户端  ctx.writeAndFlush( // Unpooled 类是 Netty 提供的专门操作缓冲区的工具  // 类，copiedBuffer 方法返回的 ByteBuf 对象类似于  // NIO 中的 ByteBuffer，但性能更高  Unpooled.copiedBuffer( \"hello client! i have got your data.\", CharsetUtil.UTF_8 ) ); } /** * 发生异常时执行 * * @param ctx 上下文对象 * @param cause 异常对象 * @throws Exception */ @Override public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception { // 关闭与客户端的 Socket 连接  ctx.channel().close(); } } 客户端创建过程\n/** * 需要的依赖： *  * io.netty * netty-all * 4.1.52.Final *  */ public static void main(String[] args) throws InterruptedException { // 客户端只需要一个事件循环组，可以看做 BossGroup  EventLoopGroup eventLoopGroup = new NioEventLoopGroup(); try { // 创建客户端的启动对象  Bootstrap bootstrap = new Bootstrap(); // 配置参数  bootstrap // 设置线程组  .group(eventLoopGroup) // 说明客户端通道的实现类（便于 Netty 做反射处理）  .channel(NioSocketChannel.class) // handler()方法用于给 BossGroup 设置业务处理器  .handler( // 创建一个通道初始化对象  new ChannelInitializerSocketChannel() { // 向 Pipeline 添加业务处理器  @Override protected void initChannel( SocketChannel socketChannel ) throws Exception { socketChannel.pipeline().addLast( new NettyClientHandler() ); // 可以继续调用 socketChannel.pipeline().addLast()  // 添加更多 Handler  } } ); System.out.println(\"client is ready...\"); // 启动客户端去连接服务器端，ChannelFuture 涉及到 Netty 的异步模型，后面展开讲  ChannelFuture channelFuture = bootstrap.connect( \"127.0.0.1\", 8080).sync(); // 对通道关闭进行监听  channelFuture.channel().closeFuture().sync(); } finally { eventLoopGroup.shutdownGracefully(); } } /** * 自定义一个 Handler，需要继承 Netty 规定好的某个 HandlerAdapter（规范） * InboundHandler 用于处理数据流入本端（客户端）的 IO 事件 * InboundHandler 用于处理数据流出本端（客户端）的 IO 事件 */ static class NettyClientHandler extends ChannelInboundHandlerAdapter { /** * 通道就绪时执行 * * @param ctx 上下文对象 * @throws Exception */ @Override public void channelActive(ChannelHandlerContext ctx) throws Exception { // 向服务器发送数据  ctx.writeAndFlush( // Unpooled 类是 Netty 提供的专门操作缓冲区的工具  // 类，copiedBuffer 方法返回的 ByteBuf 对象类似于  // NIO 中的 ByteBuffer，但性能更高  Unpooled.copiedBuffer( \"hello server!\", CharsetUtil.UTF_8 ) ); } /** * 当通道有数据可读时执行 * * @param ctx 上下文对象 * @param msg 服务器端发送的数据 * @throws Exception */ @Override public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception { // 接收服务器端发来的数据  System.out.println(\"server address: \" + ctx.channel().remoteAddress()); // ByteBuf 是 Netty 提供的类，比 NIO 的 ByteBuffer 性能更高  ByteBuf byteBuf = (ByteBuf) msg; System.out.println(\"data from server: \" + byteBuf.toString(CharsetUtil.UTF_8)); } /** * 发生异常时执行 * * @param ctx 上下文对象 * @param cause 异常对象 * @throws Exception */ @Override public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception { // 关闭与服务器端的 Socket 连接  ctx.channel().close(); } } select: 基于轮询,时间复杂度为O(n),当IO事件触发后,遍历fdset去查找事件对应的fd.在连接数较大的情况下开销也是线性增长.使用数组存储fdset,连接数上限较小.实现简单,兼容性好.\npoll: 和select基本相似,区别在于存储方式是链表,理论上能监听的fd没有数量限制.\nepoll: select和poll的改进版,基于事件驱动,时间复杂度为O(1),实现原理是为每个fd注册一个回调函数,当fd对应的设备发生IO事件时,就会调用这个回调函数,将该fd放入一个链表中,然后服务器从该链表中逐个取出fd来处理.性能随着连接数上涨不会有明显衰退,适合高并发情景.\n水平触发(level-trggered) 只要文件描述符关联的读内核缓冲区非空，有数据可以读取，就一直发出可读信号进行通知， 当文件描述符关联的内核写缓冲区不满，有空间可以写入，就一直发出可写信号进行通知 LT模式支持阻塞和非阻塞两种方式。epoll默认的模式是LT。select和poll都只支持水平.\n边缘触发(edge-triggered) 当文件描述符关联的读内核缓冲区由空转化为非空的时候，则发出可读信号进行通知， 当文件描述符关联的内核写缓冲区由满转化为不满的时候，则发出可写信号进行通知 两者的区别在哪里呢？水平触发是只要读缓冲区有数据，就会一直触发可读信号，而边缘触发仅仅在空变为非空的时候通知一次.\nLT(level triggered)是缺省的工作方式，并且同时支持block和no-block socket.在这种做法中，内核告诉你一个文件描述符是否就绪了，然后你可以对这个就绪的fd进行IO操作。如果你不作任何操作，内核还是会继续通知你的，所以，这种模式编程出错误可能性要小一点。传统的select/poll都是这种模型的代表．\n八股文时间~\nNetty 和 Tomcat 的区别？ Netty 和 Tomcat 最大的区别就在于通信协议，Tomcat 是基于 http 协议的，他的实质是一个基于 http 协议的web容器，但是 Netty 不一样，他能通过编程自定义各种协议，因为 Netty 能够自己编码/解码字节流，完成类似Redis 访问的功能，这就是 Netty 和 Tomcat 最大的区别。\nNetty 发送消息有几种方式？ Netty 有两种发送消息的方式：\n 直接写入 Channel 中，消息从 ChannelPipeline 当中尾部开始移动； 写入和 ChannelHandler 绑定的 ChannelHandlerContext 中，消息从 ChannelPipeline 中的下一个 ChannelHandler 中移动。  Netty 高性能表现在哪些方面？  IO 线程模型：同步非阻塞，用最少的资源做更多的事。 内存零拷贝：尽量减少不必要的内存拷贝，实现了更高效率的传输。 内存池设计：申请的内存可以重用，主要指直接内存。内部实现是用一颗二叉查找树管理内存分配情况。 串形化处理读写：避免使用锁带来的性能开销。 高性能序列化协议：支持 protobuf 等高性能序列化协议。  什么是 Netty 的零拷贝？ Netty 的零拷贝主要包含三个方面：\n Netty 的接收和发送 ByteBuffer 采用 DIRECT BUFFERS，使用堆外直接内存进行 Socket 读写，不需要进行字节缓冲区的二次拷贝。如果使用传统的堆内存（HEAP BUFFERS）进行 Socket 读写，JVM 会将堆内存 Buffer 拷贝一份到直接内存中，然后才写入 Socket 中。相比于堆外直接内存，消息在发送过程中多了一次缓冲区的内存拷贝。 Netty 提供了组合 Buffer 对象，可以聚合多个 ByteBuffer 对象，用户可以像操作一个 Buffer 那样方便的对组合 Buffer 进行操作，避免了传统通过内存拷贝的方式将几个小 Buffer 合并成一个大的 Buffer。 Netty 的文件传输采用了 transferTo 方法，它可以直接将文件缓冲区的数据发送到目标 Channel，避免了传统通过循环 write 方式导致的内存拷贝问题。  Netty 的应用场景有哪些？ 典型的应用有：阿里分布式服务框架 Dubbo，默认使用 Netty 作为基础通信组件，还有 RocketMQ 也是使用 Netty 作为通讯的基础。\n","wordCount":"4684","inLanguage":"zh","datePublished":"2022-07-20T18:27:19+08:00","dateModified":"2022-07-20T18:27:19+08:00","author":{"@type":"Person","name":"Guangfa"},"mainEntityOfPage":{"@type":"WebPage","@id":"http://euthpic.github.io/tech/netty%E7%AC%94%E8%AE%B0/"},"publisher":{"@type":"Organization","name":"乱花渐欲迷人眼","logo":{"@type":"ImageObject","url":"http://euthpic.github.io/favicon.ico"}}}</script>
 </head>
 <body id=top>
 <script>localStorage.getItem("pref-theme")==="dark"?document.body.classList.add('dark'):localStorage.getItem("pref-theme")==="light"?document.body.classList.remove('dark'):window.matchMedia('(prefers-color-scheme: dark)').matches&&document.body.classList.add('dark')</script>
@@ -123,303 +123,279 @@ Netty笔记
 <p>NioEventLoopGroup: 主要负责管理eventloop的生命周期,内部维护了一组eventloop,和eventloop的关系可以理解为线程池和线程的关系.netty中分为bossGroup和workerGroup,bossGroup是负责建立连接的线程池(相当于主reactor),workerGroup是负责处理IO等请求的线程池(相当于从reactor).线程池的线程数默认为cpu核心数的两倍</p>
 <p>BossGroup工作过程:</p>
 <ul>
-<li>
-<p>轮询注册在其上的 ServerSocketChannel 的 accept 事件（OP_ACCEPT 事件）</p>
-</li>
-<li>
-<p>处理 accept 事件，与客户端建立连接，生成一个 NioSocketChannel，并将其注册到 WorkerGroup 中某个线程上的 Selector 上</p>
-</li>
-<li>
-<p>再去以此循环处理任务队列中的下一个事件</p>
-</li>
+<li>轮询注册在其上的 ServerSocketChannel 的 accept 事件（OP_ACCEPT 事件）</li>
+<li>处理 accept 事件，与客户端建立连接，生成一个 NioSocketChannel，并将其注册到 WorkerGroup 中某个线程上的 Selector 上</li>
+<li>再去以此循环处理任务队列中的下一个事件</li>
 </ul>
 <p>WorkerGroup工作过程</p>
 <ul>
-<li>
-<p>轮询注册在其上的 NioSocketChannel 的 read/write 事件（OP_READ/OP_WRITE 事件）</p>
-</li>
-<li>
-<p>在对应的 NioSocketChannel 上处理 read/write 事件</p>
-</li>
-<li>
-<p>再去以此循环处理任务队列中的下一个事件</p>
-</li>
+<li>轮询注册在其上的 NioSocketChannel 的 read/write 事件（OP_READ/OP_WRITE 事件）</li>
+<li>在对应的 NioSocketChannel 上处理 read/write 事件</li>
+<li>再去以此循环处理任务队列中的下一个事件</li>
 </ul>
 <p>ChannelFuture: 异步返回事件处理的结果</p>
 <p>ChannelHandler: 就是Reactor中的handler,具体处理channel传过来的事件的组件.</p>
 <p>ChannelHandlerContext: 保存Channel相关的上下文信息，同时关联一个ChannelHandler对象</p>
 <p>ChannelPipeline: 维护了一个channelHandler的双向链表,channelHandler是以链式调用的形式工作的,pipeline和channel是一对一的关系.</p>
 <p>Netty服务端创建过程:</p>
-<p>/**</p>
-<ul>
-<li>需要的依赖：</li>
-<li>
-<dependency>
-</li>
-<li><groupid>io.netty</groupid></li>
-<li><artifactid>netty-all</artifactid></li>
-<li><version>4.1.52.Final</version></li>
-<li>
-</dependency>
-</li>
-</ul>
-<p><em>/<br>
-public static void main(String[] args) throws InterruptedException {<br>
-​<br>
-   // 创建 BossGroup 和 WorkerGroup<br>
-   // 1. bossGroup 只处理连接请求<br>
-   // 2. 业务处理由 workerGroup 来完成<br>
-   EventLoopGroup bossGroup = new NioEventLoopGroup();<br>
-   EventLoopGroup workerGroup = new NioEventLoopGroup();<br>
-​<br>
-   try {<br>
-       // 创建服务器端的启动对象<br>
-       ServerBootstrap bootstrap = new ServerBootstrap();<br>
-       // 配置参数<br>
-       bootstrap<br>
-               // 设置线程组<br>
-              .group(bossGroup, workerGroup)<br>
-               // 说明服务器端通道的实现类（便于 Netty 做反射处理）<br>
-              .channel(NioServerSocketChannel.class)<br>
-               // 设置等待连接的队列的容量（当客户端连接请求速率大<br>
-            // 于 NioServerSocketChannel 接收速率的时候，会使用<br>
-               // 该队列做缓冲）<br>
-               // option()方法用于给服务端的 ServerSocketChannel<br>
-               // 添加配置<br>
-              .option(ChannelOption.SO_BACKLOG, 128)<br>
-               // 设置连接保活<br>
-               // childOption()方法用于给服务端 ServerSocketChannel<br>
-               // 接收到的 SocketChannel 添加配置<br>
-              .childOption(ChannelOption.SO_KEEPALIVE, true)<br>
-               // handler()方法用于给 BossGroup 设置业务处理器<br>
-               // childHandler()方法用于给 WorkerGroup 设置业务处理器<br>
-              .childHandler(<br>
-                       // 创建一个通道初始化对象<br>
-                       new ChannelInitializer<socketchannel>() {<br>
-                           // 向 Pipeline 添加业务处理器<br>
-                           @Override<br>
-                           protected void initChannel(<br>
-                                   SocketChannel socketChannel<br>
-                          ) throws Exception {<br>
-                               socketChannel.pipeline().addLast(<br>
-                                       new NettyServerHandler()<br>
-                              );<br>
-                               <br>
-                               // 可以继续调用 socketChannel.pipeline().addLast()<br>
-                               // 添加更多 Handler<br>
-                          }<br>
-                      }<br>
-              );<br>
-​<br>
-       System.out.println(&ldquo;server is ready&mldr;");<br>
-​<br>
-       // 绑定端口，启动服务器，生成一个 channelFuture 对象，<br>
-       // ChannelFuture 涉及到 Netty 的异步模型，后面展开讲<br>
-       ChannelFuture channelFuture = bootstrap.bind(8080).sync();<br>
-       // 对通道关闭进行监听<br>
-       channelFuture.channel().closeFuture().sync();<br>
-  } finally {<br>
-       bossGroup.shutdownGracefully();<br>
-       workerGroup.shutdownGracefully();<br>
-  }<br>
-}<br>
-​<br>
-/</em>*</p>
-<ul>
-<li>自定义一个 Handler，需要继承 Netty 规定好的某个 HandlerAdapter（规范）</li>
-<li>InboundHandler 用于处理数据流入本端（服务端）的 IO 事件</li>
-<li>InboundHandler 用于处理数据流出本端（服务端）的 IO 事件<br>
-<em>/<br>
-static class NettyServerHandler extends ChannelInboundHandlerAdapter {<br>
-   /</em>*<br>
-    * 当通道有数据可读时执行<br>
-    *<br>
-    * @param ctx 上下文对象，可以从中取得相关联的 Pipeline、Channel、客户端地址等<br>
-    * @param msg 客户端发送的数据<br>
-    * @throws Exception<br>
-    <em>/<br>
-   @Override<br>
-   public void channelRead(ChannelHandlerContext ctx, Object msg)<br>
-           throws Exception {<br>
-       // 接收客户端发来的数据<br>
-​<br>
-       System.out.println(&ldquo;client address: "<br>
-               + ctx.channel().remoteAddress());<br>
-​<br>
-       // ByteBuf 是 Netty 提供的类，比 NIO 的 ByteBuffer 性能更高<br>
-       ByteBuf byteBuf = (ByteBuf) msg;<br>
-       System.out.println(&ldquo;data from client: "<br>
-               + byteBuf.toString(CharsetUtil.UTF_8));<br>
-  }<br>
-​<br>
-   /</em>*<br>
-    * 数据读取完毕后执行<br>
-    *<br>
-    * @param ctx 上下文对象<br>
-    * @throws Exception<br>
-    <em>/<br>
-   @Override<br>
-   public void channelReadComplete(ChannelHandlerContext ctx)<br>
-           throws Exception {<br>
-       // 发送响应给客户端<br>
-       ctx.writeAndFlush(<br>
-               // Unpooled 类是 Netty 提供的专门操作缓冲区的工具<br>
-               // 类，copiedBuffer 方法返回的 ByteBuf 对象类似于<br>
-               // NIO 中的 ByteBuffer，但性能更高<br>
-               Unpooled.copiedBuffer(<br>
-                       &ldquo;hello client! i have got your data.&rdquo;,<br>
-                       CharsetUtil.UTF_8<br>
-              )<br>
-      );<br>
-  }<br>
-​<br>
-   /</em>*<br>
-    * 发生异常时执行<br>
-    *<br>
-    * @param ctx   上下文对象<br>
-    * @param cause 异常对象<br>
-    * @throws Exception<br>
-    */<br>
-   @Override<br>
-   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)<br>
-           throws Exception {<br>
-       // 关闭与客户端的 Socket 连接<br>
-       ctx.channel().close();<br>
-  }<br>
-}</li>
-</ul>
-<p>客户端创建过程</p>
-<p>/**</p>
-<ul>
-<li>需要的依赖：</li>
-<li>
-<dependency>
-</li>
-<li><groupid>io.netty</groupid></li>
-<li><artifactid>netty-all</artifactid></li>
-<li><version>4.1.52.Final</version></li>
-<li>
-</dependency>
-</li>
-</ul>
-<p><em>/<br>
-public static void main(String[] args) throws InterruptedException {<br>
-​<br>
-   // 客户端只需要一个事件循环组，可以看做 BossGroup<br>
-   EventLoopGroup eventLoopGroup = new NioEventLoopGroup();<br>
-​<br>
-   try {<br>
-       // 创建客户端的启动对象<br>
-       Bootstrap bootstrap = new Bootstrap();<br>
-       // 配置参数<br>
-       bootstrap<br>
-               // 设置线程组<br>
-              .group(eventLoopGroup)<br>
-               // 说明客户端通道的实现类（便于 Netty 做反射处理）<br>
-              .channel(NioSocketChannel.class)<br>
-               // handler()方法用于给 BossGroup 设置业务处理器<br>
-              .handler(<br>
-                       // 创建一个通道初始化对象<br>
-                       new ChannelInitializer<socketchannel>() {<br>
-                           // 向 Pipeline 添加业务处理器<br>
-                           @Override<br>
-                           protected void initChannel(<br>
-                                   SocketChannel socketChannel<br>
-                          ) throws Exception {<br>
-                               socketChannel.pipeline().addLast(<br>
-                                       new NettyClientHandler()<br>
-                              );<br>
-                               <br>
-                               // 可以继续调用 socketChannel.pipeline().addLast()<br>
-                               // 添加更多 Handler<br>
-                          }<br>
-                      }<br>
-              );<br>
-​<br>
-       System.out.println(&ldquo;client is ready&mldr;");<br>
-​<br>
-       // 启动客户端去连接服务器端，ChannelFuture 涉及到 Netty 的异步模型，后面展开讲<br>
-       ChannelFuture channelFuture = bootstrap.connect(<br>
-               &ldquo;127.0.0.1&rdquo;,<br>
-               8080).sync();<br>
-       // 对通道关闭进行监听<br>
-       channelFuture.channel().closeFuture().sync();<br>
-  } finally {<br>
-       eventLoopGroup.shutdownGracefully();<br>
-  }<br>
-}<br>
-​<br>
-/</em>*</p>
-<ul>
-<li>自定义一个 Handler，需要继承 Netty 规定好的某个 HandlerAdapter（规范）</li>
-<li>InboundHandler 用于处理数据流入本端（客户端）的 IO 事件</li>
-<li>InboundHandler 用于处理数据流出本端（客户端）的 IO 事件<br>
-<em>/<br>
-static class NettyClientHandler extends ChannelInboundHandlerAdapter {<br>
-   /</em>*<br>
-    * 通道就绪时执行<br>
-    *<br>
-    * @param ctx 上下文对象<br>
-    * @throws Exception<br>
-    <em>/<br>
-   @Override<br>
-   public void channelActive(ChannelHandlerContext ctx)<br>
-           throws Exception {<br>
-       // 向服务器发送数据<br>
-       ctx.writeAndFlush(<br>
-               // Unpooled 类是 Netty 提供的专门操作缓冲区的工具<br>
-               // 类，copiedBuffer 方法返回的 ByteBuf 对象类似于<br>
-               // NIO 中的 ByteBuffer，但性能更高<br>
-               Unpooled.copiedBuffer(<br>
-                       &ldquo;hello server!&rdquo;,<br>
-                       CharsetUtil.UTF_8<br>
-              )<br>
-      );<br>
-  }<br>
-​<br>
-   /</em>*<br>
-    * 当通道有数据可读时执行<br>
-    *<br>
-    * @param ctx 上下文对象<br>
-    * @param msg 服务器端发送的数据<br>
-    * @throws Exception<br>
-    <em>/<br>
-   @Override<br>
-   public void channelRead(ChannelHandlerContext ctx, Object msg)<br>
-           throws Exception {<br>
-       // 接收服务器端发来的数据<br>
-​<br>
-       System.out.println(&ldquo;server address: "<br>
-               + ctx.channel().remoteAddress());<br>
-​<br>
-       // ByteBuf 是 Netty 提供的类，比 NIO 的 ByteBuffer 性能更高<br>
-       ByteBuf byteBuf = (ByteBuf) msg;<br>
-       System.out.println(&ldquo;data from server: "<br>
-               + byteBuf.toString(CharsetUtil.UTF_8));<br>
-  }<br>
-​<br>
-   /</em>*<br>
-    * 发生异常时执行<br>
-    *<br>
-    * @param ctx   上下文对象<br>
-    * @param cause 异常对象<br>
-    * @throws Exception<br>
-    */<br>
-   @Override<br>
-   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)<br>
-           throws Exception {<br>
-       // 关闭与服务器端的 Socket 连接<br>
-       ctx.channel().close();<br>
-  }<br>
-}</li>
-</ul>
-<p>select: 基于轮询,时间复杂度为O(n),当IO事件触发后,遍历fdset去查找事件对应的fd.在连接数较大的情况下开销也是线性增长.使用数组存储fdset,连接数上限较小.实现简单,兼容性好.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#75715e>/**
+</span><span style=color:#75715e> * 需要的依赖：
+</span><span style=color:#75715e> * &lt;dependency&gt;
+</span><span style=color:#75715e> * &lt;groupId&gt;io.netty&lt;/groupId&gt;
+</span><span style=color:#75715e> * &lt;artifactId&gt;netty-all&lt;/artifactId&gt;
+</span><span style=color:#75715e> * &lt;version&gt;4.1.52.Final&lt;/version&gt;
+</span><span style=color:#75715e> * &lt;/dependency&gt;
+</span><span style=color:#75715e> */</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>main</span><span style=color:#f92672>(</span>String<span style=color:#f92672>[]</span> args<span style=color:#f92672>)</span> <span style=color:#66d9ef>throws</span> InterruptedException <span style=color:#f92672>{</span>
+
+    <span style=color:#75715e>// 创建 BossGroup 和 WorkerGroup
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// 1. bossGroup 只处理连接请求
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// 2. 业务处理由 workerGroup 来完成
+</span><span style=color:#75715e></span>    EventLoopGroup bossGroup <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> NioEventLoopGroup<span style=color:#f92672>();</span>
+    EventLoopGroup workerGroup <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> NioEventLoopGroup<span style=color:#f92672>();</span>
+
+    <span style=color:#66d9ef>try</span> <span style=color:#f92672>{</span>
+        <span style=color:#75715e>// 创建服务器端的启动对象
+</span><span style=color:#75715e></span>        ServerBootstrap bootstrap <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> ServerBootstrap<span style=color:#f92672>();</span>
+        <span style=color:#75715e>// 配置参数
+</span><span style=color:#75715e></span>        bootstrap
+                <span style=color:#75715e>// 设置线程组
+</span><span style=color:#75715e></span>                <span style=color:#f92672>.</span><span style=color:#a6e22e>group</span><span style=color:#f92672>(</span>bossGroup<span style=color:#f92672>,</span> workerGroup<span style=color:#f92672>)</span>
+                <span style=color:#75715e>// 说明服务器端通道的实现类（便于 Netty 做反射处理）
+</span><span style=color:#75715e></span>                <span style=color:#f92672>.</span><span style=color:#a6e22e>channel</span><span style=color:#f92672>(</span>NioServerSocketChannel<span style=color:#f92672>.</span><span style=color:#a6e22e>class</span><span style=color:#f92672>)</span>
+                <span style=color:#75715e>// 设置等待连接的队列的容量（当客户端连接请求速率大
+</span><span style=color:#75715e></span>             <span style=color:#75715e>// 于 NioServerSocketChannel 接收速率的时候，会使用
+</span><span style=color:#75715e></span>                <span style=color:#75715e>// 该队列做缓冲）
+</span><span style=color:#75715e></span>                <span style=color:#75715e>// option()方法用于给服务端的 ServerSocketChannel
+</span><span style=color:#75715e></span>                <span style=color:#75715e>// 添加配置
+</span><span style=color:#75715e></span>                <span style=color:#f92672>.</span><span style=color:#a6e22e>option</span><span style=color:#f92672>(</span>ChannelOption<span style=color:#f92672>.</span><span style=color:#a6e22e>SO_BACKLOG</span><span style=color:#f92672>,</span> 128<span style=color:#f92672>)</span>
+                <span style=color:#75715e>// 设置连接保活
+</span><span style=color:#75715e></span>                <span style=color:#75715e>// childOption()方法用于给服务端 ServerSocketChannel
+</span><span style=color:#75715e></span>                <span style=color:#75715e>// 接收到的 SocketChannel 添加配置
+</span><span style=color:#75715e></span>                <span style=color:#f92672>.</span><span style=color:#a6e22e>childOption</span><span style=color:#f92672>(</span>ChannelOption<span style=color:#f92672>.</span><span style=color:#a6e22e>SO_KEEPALIVE</span><span style=color:#f92672>,</span> <span style=color:#66d9ef>true</span><span style=color:#f92672>)</span>
+                <span style=color:#75715e>// handler()方法用于给 BossGroup 设置业务处理器
+</span><span style=color:#75715e></span>                <span style=color:#75715e>// childHandler()方法用于给 WorkerGroup 设置业务处理器
+</span><span style=color:#75715e></span>                <span style=color:#f92672>.</span><span style=color:#a6e22e>childHandler</span><span style=color:#f92672>(</span>
+                        <span style=color:#75715e>// 创建一个通道初始化对象
+</span><span style=color:#75715e></span>                        <span style=color:#66d9ef>new</span> ChannelInitializer<span style=color:#f92672>&lt;</span>SocketChannel<span style=color:#f92672>&gt;()</span> <span style=color:#f92672>{</span>
+                            <span style=color:#75715e>// 向 Pipeline 添加业务处理器
+</span><span style=color:#75715e></span>                            <span style=color:#a6e22e>@Override</span>
+                            <span style=color:#66d9ef>protected</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>initChannel</span><span style=color:#f92672>(</span>
+                                    SocketChannel socketChannel
+                            <span style=color:#f92672>)</span> <span style=color:#66d9ef>throws</span> Exception <span style=color:#f92672>{</span>
+                                socketChannel<span style=color:#f92672>.</span><span style=color:#a6e22e>pipeline</span><span style=color:#f92672>().</span><span style=color:#a6e22e>addLast</span><span style=color:#f92672>(</span>
+                                        <span style=color:#66d9ef>new</span> NettyServerHandler<span style=color:#f92672>()</span>
+                                <span style=color:#f92672>);</span>
+                                
+                                <span style=color:#75715e>// 可以继续调用 socketChannel.pipeline().addLast()
+</span><span style=color:#75715e></span>                                <span style=color:#75715e>// 添加更多 Handler
+</span><span style=color:#75715e></span>                            <span style=color:#f92672>}</span>
+                        <span style=color:#f92672>}</span>
+                <span style=color:#f92672>);</span>
+
+        System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>println</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;server is ready...&#34;</span><span style=color:#f92672>);</span>
+
+        <span style=color:#75715e>// 绑定端口，启动服务器，生成一个 channelFuture 对象，
+</span><span style=color:#75715e></span>        <span style=color:#75715e>// ChannelFuture 涉及到 Netty 的异步模型，后面展开讲
+</span><span style=color:#75715e></span>        ChannelFuture channelFuture <span style=color:#f92672>=</span> bootstrap<span style=color:#f92672>.</span><span style=color:#a6e22e>bind</span><span style=color:#f92672>(</span>8080<span style=color:#f92672>).</span><span style=color:#a6e22e>sync</span><span style=color:#f92672>();</span>
+        <span style=color:#75715e>// 对通道关闭进行监听
+</span><span style=color:#75715e></span>        channelFuture<span style=color:#f92672>.</span><span style=color:#a6e22e>channel</span><span style=color:#f92672>().</span><span style=color:#a6e22e>closeFuture</span><span style=color:#f92672>().</span><span style=color:#a6e22e>sync</span><span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span> <span style=color:#66d9ef>finally</span> <span style=color:#f92672>{</span>
+        bossGroup<span style=color:#f92672>.</span><span style=color:#a6e22e>shutdownGracefully</span><span style=color:#f92672>();</span>
+        workerGroup<span style=color:#f92672>.</span><span style=color:#a6e22e>shutdownGracefully</span><span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+
+<span style=color:#75715e>/**
+</span><span style=color:#75715e> * 自定义一个 Handler，需要继承 Netty 规定好的某个 HandlerAdapter（规范）
+</span><span style=color:#75715e> * InboundHandler 用于处理数据流入本端（服务端）的 IO 事件
+</span><span style=color:#75715e> * InboundHandler 用于处理数据流出本端（服务端）的 IO 事件
+</span><span style=color:#75715e> */</span>
+<span style=color:#66d9ef>static</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>NettyServerHandler</span> <span style=color:#66d9ef>extends</span> ChannelInboundHandlerAdapter <span style=color:#f92672>{</span>
+    <span style=color:#75715e>/**
+</span><span style=color:#75715e>     * 当通道有数据可读时执行
+</span><span style=color:#75715e>     *
+</span><span style=color:#75715e>     * @param ctx 上下文对象，可以从中取得相关联的 Pipeline、Channel、客户端地址等
+</span><span style=color:#75715e>     * @param msg 客户端发送的数据
+</span><span style=color:#75715e>     * @throws Exception
+</span><span style=color:#75715e>     */</span>
+    <span style=color:#a6e22e>@Override</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>channelRead</span><span style=color:#f92672>(</span>ChannelHandlerContext ctx<span style=color:#f92672>,</span> Object msg<span style=color:#f92672>)</span>
+            <span style=color:#66d9ef>throws</span> Exception <span style=color:#f92672>{</span>
+        <span style=color:#75715e>// 接收客户端发来的数据
+</span><span style=color:#75715e></span>
+        System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>println</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;client address: &#34;</span>
+                <span style=color:#f92672>+</span> ctx<span style=color:#f92672>.</span><span style=color:#a6e22e>channel</span><span style=color:#f92672>().</span><span style=color:#a6e22e>remoteAddress</span><span style=color:#f92672>());</span>
+
+        <span style=color:#75715e>// ByteBuf 是 Netty 提供的类，比 NIO 的 ByteBuffer 性能更高
+</span><span style=color:#75715e></span>        ByteBuf byteBuf <span style=color:#f92672>=</span> <span style=color:#f92672>(</span>ByteBuf<span style=color:#f92672>)</span> msg<span style=color:#f92672>;</span>
+        System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>println</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;data from client: &#34;</span>
+                <span style=color:#f92672>+</span> byteBuf<span style=color:#f92672>.</span><span style=color:#a6e22e>toString</span><span style=color:#f92672>(</span>CharsetUtil<span style=color:#f92672>.</span><span style=color:#a6e22e>UTF_8</span><span style=color:#f92672>));</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#75715e>/**
+</span><span style=color:#75715e>     * 数据读取完毕后执行
+</span><span style=color:#75715e>     *
+</span><span style=color:#75715e>     * @param ctx 上下文对象
+</span><span style=color:#75715e>     * @throws Exception
+</span><span style=color:#75715e>     */</span>
+    <span style=color:#a6e22e>@Override</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>channelReadComplete</span><span style=color:#f92672>(</span>ChannelHandlerContext ctx<span style=color:#f92672>)</span>
+            <span style=color:#66d9ef>throws</span> Exception <span style=color:#f92672>{</span>
+        <span style=color:#75715e>// 发送响应给客户端
+</span><span style=color:#75715e></span>        ctx<span style=color:#f92672>.</span><span style=color:#a6e22e>writeAndFlush</span><span style=color:#f92672>(</span>
+                <span style=color:#75715e>// Unpooled 类是 Netty 提供的专门操作缓冲区的工具
+</span><span style=color:#75715e></span>                <span style=color:#75715e>// 类，copiedBuffer 方法返回的 ByteBuf 对象类似于
+</span><span style=color:#75715e></span>                <span style=color:#75715e>// NIO 中的 ByteBuffer，但性能更高
+</span><span style=color:#75715e></span>                Unpooled<span style=color:#f92672>.</span><span style=color:#a6e22e>copiedBuffer</span><span style=color:#f92672>(</span>
+                        <span style=color:#e6db74>&#34;hello client! i have got your data.&#34;</span><span style=color:#f92672>,</span>
+                        CharsetUtil<span style=color:#f92672>.</span><span style=color:#a6e22e>UTF_8</span>
+                <span style=color:#f92672>)</span>
+        <span style=color:#f92672>);</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#75715e>/**
+</span><span style=color:#75715e>     * 发生异常时执行
+</span><span style=color:#75715e>     *
+</span><span style=color:#75715e>     * @param ctx   上下文对象
+</span><span style=color:#75715e>     * @param cause 异常对象
+</span><span style=color:#75715e>     * @throws Exception
+</span><span style=color:#75715e>     */</span>
+    <span style=color:#a6e22e>@Override</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>exceptionCaught</span><span style=color:#f92672>(</span>ChannelHandlerContext ctx<span style=color:#f92672>,</span> Throwable cause<span style=color:#f92672>)</span>
+            <span style=color:#66d9ef>throws</span> Exception <span style=color:#f92672>{</span>
+        <span style=color:#75715e>// 关闭与客户端的 Socket 连接
+</span><span style=color:#75715e></span>        ctx<span style=color:#f92672>.</span><span style=color:#a6e22e>channel</span><span style=color:#f92672>().</span><span style=color:#a6e22e>close</span><span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+</code></pre></div><p>客户端创建过程</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-java data-lang=java><span style=color:#75715e>/**
+</span><span style=color:#75715e> * 需要的依赖：
+</span><span style=color:#75715e> * &lt;dependency&gt;
+</span><span style=color:#75715e> * &lt;groupId&gt;io.netty&lt;/groupId&gt;
+</span><span style=color:#75715e> * &lt;artifactId&gt;netty-all&lt;/artifactId&gt;
+</span><span style=color:#75715e> * &lt;version&gt;4.1.52.Final&lt;/version&gt;
+</span><span style=color:#75715e> * &lt;/dependency&gt;
+</span><span style=color:#75715e> */</span>
+<span style=color:#66d9ef>public</span> <span style=color:#66d9ef>static</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>main</span><span style=color:#f92672>(</span>String<span style=color:#f92672>[]</span> args<span style=color:#f92672>)</span> <span style=color:#66d9ef>throws</span> InterruptedException <span style=color:#f92672>{</span>
+
+    <span style=color:#75715e>// 客户端只需要一个事件循环组，可以看做 BossGroup
+</span><span style=color:#75715e></span>    EventLoopGroup eventLoopGroup <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> NioEventLoopGroup<span style=color:#f92672>();</span>
+
+    <span style=color:#66d9ef>try</span> <span style=color:#f92672>{</span>
+        <span style=color:#75715e>// 创建客户端的启动对象
+</span><span style=color:#75715e></span>        Bootstrap bootstrap <span style=color:#f92672>=</span> <span style=color:#66d9ef>new</span> Bootstrap<span style=color:#f92672>();</span>
+        <span style=color:#75715e>// 配置参数
+</span><span style=color:#75715e></span>        bootstrap
+                <span style=color:#75715e>// 设置线程组
+</span><span style=color:#75715e></span>                <span style=color:#f92672>.</span><span style=color:#a6e22e>group</span><span style=color:#f92672>(</span>eventLoopGroup<span style=color:#f92672>)</span>
+                <span style=color:#75715e>// 说明客户端通道的实现类（便于 Netty 做反射处理）
+</span><span style=color:#75715e></span>                <span style=color:#f92672>.</span><span style=color:#a6e22e>channel</span><span style=color:#f92672>(</span>NioSocketChannel<span style=color:#f92672>.</span><span style=color:#a6e22e>class</span><span style=color:#f92672>)</span>
+                <span style=color:#75715e>// handler()方法用于给 BossGroup 设置业务处理器
+</span><span style=color:#75715e></span>                <span style=color:#f92672>.</span><span style=color:#a6e22e>handler</span><span style=color:#f92672>(</span>
+                        <span style=color:#75715e>// 创建一个通道初始化对象
+</span><span style=color:#75715e></span>                        <span style=color:#66d9ef>new</span> ChannelInitializer<span style=color:#f92672>&lt;</span>SocketChannel<span style=color:#f92672>&gt;()</span> <span style=color:#f92672>{</span>
+                            <span style=color:#75715e>// 向 Pipeline 添加业务处理器
+</span><span style=color:#75715e></span>                            <span style=color:#a6e22e>@Override</span>
+                            <span style=color:#66d9ef>protected</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>initChannel</span><span style=color:#f92672>(</span>
+                                    SocketChannel socketChannel
+                            <span style=color:#f92672>)</span> <span style=color:#66d9ef>throws</span> Exception <span style=color:#f92672>{</span>
+                                socketChannel<span style=color:#f92672>.</span><span style=color:#a6e22e>pipeline</span><span style=color:#f92672>().</span><span style=color:#a6e22e>addLast</span><span style=color:#f92672>(</span>
+                                        <span style=color:#66d9ef>new</span> NettyClientHandler<span style=color:#f92672>()</span>
+                                <span style=color:#f92672>);</span>
+                                
+                                <span style=color:#75715e>// 可以继续调用 socketChannel.pipeline().addLast()
+</span><span style=color:#75715e></span>                                <span style=color:#75715e>// 添加更多 Handler
+</span><span style=color:#75715e></span>                            <span style=color:#f92672>}</span>
+                        <span style=color:#f92672>}</span>
+                <span style=color:#f92672>);</span>
+
+        System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>println</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;client is ready...&#34;</span><span style=color:#f92672>);</span>
+
+        <span style=color:#75715e>// 启动客户端去连接服务器端，ChannelFuture 涉及到 Netty 的异步模型，后面展开讲
+</span><span style=color:#75715e></span>        ChannelFuture channelFuture <span style=color:#f92672>=</span> bootstrap<span style=color:#f92672>.</span><span style=color:#a6e22e>connect</span><span style=color:#f92672>(</span>
+                <span style=color:#e6db74>&#34;127.0.0.1&#34;</span><span style=color:#f92672>,</span>
+                8080<span style=color:#f92672>).</span><span style=color:#a6e22e>sync</span><span style=color:#f92672>();</span>
+        <span style=color:#75715e>// 对通道关闭进行监听
+</span><span style=color:#75715e></span>        channelFuture<span style=color:#f92672>.</span><span style=color:#a6e22e>channel</span><span style=color:#f92672>().</span><span style=color:#a6e22e>closeFuture</span><span style=color:#f92672>().</span><span style=color:#a6e22e>sync</span><span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span> <span style=color:#66d9ef>finally</span> <span style=color:#f92672>{</span>
+        eventLoopGroup<span style=color:#f92672>.</span><span style=color:#a6e22e>shutdownGracefully</span><span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+
+<span style=color:#75715e>/**
+</span><span style=color:#75715e> * 自定义一个 Handler，需要继承 Netty 规定好的某个 HandlerAdapter（规范）
+</span><span style=color:#75715e> * InboundHandler 用于处理数据流入本端（客户端）的 IO 事件
+</span><span style=color:#75715e> * InboundHandler 用于处理数据流出本端（客户端）的 IO 事件
+</span><span style=color:#75715e> */</span>
+<span style=color:#66d9ef>static</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>NettyClientHandler</span> <span style=color:#66d9ef>extends</span> ChannelInboundHandlerAdapter <span style=color:#f92672>{</span>
+    <span style=color:#75715e>/**
+</span><span style=color:#75715e>     * 通道就绪时执行
+</span><span style=color:#75715e>     *
+</span><span style=color:#75715e>     * @param ctx 上下文对象
+</span><span style=color:#75715e>     * @throws Exception
+</span><span style=color:#75715e>     */</span>
+    <span style=color:#a6e22e>@Override</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>channelActive</span><span style=color:#f92672>(</span>ChannelHandlerContext ctx<span style=color:#f92672>)</span>
+            <span style=color:#66d9ef>throws</span> Exception <span style=color:#f92672>{</span>
+        <span style=color:#75715e>// 向服务器发送数据
+</span><span style=color:#75715e></span>        ctx<span style=color:#f92672>.</span><span style=color:#a6e22e>writeAndFlush</span><span style=color:#f92672>(</span>
+                <span style=color:#75715e>// Unpooled 类是 Netty 提供的专门操作缓冲区的工具
+</span><span style=color:#75715e></span>                <span style=color:#75715e>// 类，copiedBuffer 方法返回的 ByteBuf 对象类似于
+</span><span style=color:#75715e></span>                <span style=color:#75715e>// NIO 中的 ByteBuffer，但性能更高
+</span><span style=color:#75715e></span>                Unpooled<span style=color:#f92672>.</span><span style=color:#a6e22e>copiedBuffer</span><span style=color:#f92672>(</span>
+                        <span style=color:#e6db74>&#34;hello server!&#34;</span><span style=color:#f92672>,</span>
+                        CharsetUtil<span style=color:#f92672>.</span><span style=color:#a6e22e>UTF_8</span>
+                <span style=color:#f92672>)</span>
+        <span style=color:#f92672>);</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#75715e>/**
+</span><span style=color:#75715e>     * 当通道有数据可读时执行
+</span><span style=color:#75715e>     *
+</span><span style=color:#75715e>     * @param ctx 上下文对象
+</span><span style=color:#75715e>     * @param msg 服务器端发送的数据
+</span><span style=color:#75715e>     * @throws Exception
+</span><span style=color:#75715e>     */</span>
+    <span style=color:#a6e22e>@Override</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>channelRead</span><span style=color:#f92672>(</span>ChannelHandlerContext ctx<span style=color:#f92672>,</span> Object msg<span style=color:#f92672>)</span>
+            <span style=color:#66d9ef>throws</span> Exception <span style=color:#f92672>{</span>
+        <span style=color:#75715e>// 接收服务器端发来的数据
+</span><span style=color:#75715e></span>
+        System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>println</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;server address: &#34;</span>
+                <span style=color:#f92672>+</span> ctx<span style=color:#f92672>.</span><span style=color:#a6e22e>channel</span><span style=color:#f92672>().</span><span style=color:#a6e22e>remoteAddress</span><span style=color:#f92672>());</span>
+
+        <span style=color:#75715e>// ByteBuf 是 Netty 提供的类，比 NIO 的 ByteBuffer 性能更高
+</span><span style=color:#75715e></span>        ByteBuf byteBuf <span style=color:#f92672>=</span> <span style=color:#f92672>(</span>ByteBuf<span style=color:#f92672>)</span> msg<span style=color:#f92672>;</span>
+        System<span style=color:#f92672>.</span><span style=color:#a6e22e>out</span><span style=color:#f92672>.</span><span style=color:#a6e22e>println</span><span style=color:#f92672>(</span><span style=color:#e6db74>&#34;data from server: &#34;</span>
+                <span style=color:#f92672>+</span> byteBuf<span style=color:#f92672>.</span><span style=color:#a6e22e>toString</span><span style=color:#f92672>(</span>CharsetUtil<span style=color:#f92672>.</span><span style=color:#a6e22e>UTF_8</span><span style=color:#f92672>));</span>
+    <span style=color:#f92672>}</span>
+
+    <span style=color:#75715e>/**
+</span><span style=color:#75715e>     * 发生异常时执行
+</span><span style=color:#75715e>     *
+</span><span style=color:#75715e>     * @param ctx   上下文对象
+</span><span style=color:#75715e>     * @param cause 异常对象
+</span><span style=color:#75715e>     * @throws Exception
+</span><span style=color:#75715e>     */</span>
+    <span style=color:#a6e22e>@Override</span>
+    <span style=color:#66d9ef>public</span> <span style=color:#66d9ef>void</span> <span style=color:#a6e22e>exceptionCaught</span><span style=color:#f92672>(</span>ChannelHandlerContext ctx<span style=color:#f92672>,</span> Throwable cause<span style=color:#f92672>)</span>
+            <span style=color:#66d9ef>throws</span> Exception <span style=color:#f92672>{</span>
+        <span style=color:#75715e>// 关闭与服务器端的 Socket 连接
+</span><span style=color:#75715e></span>        ctx<span style=color:#f92672>.</span><span style=color:#a6e22e>channel</span><span style=color:#f92672>().</span><span style=color:#a6e22e>close</span><span style=color:#f92672>();</span>
+    <span style=color:#f92672>}</span>
+<span style=color:#f92672>}</span>
+</code></pre></div><p>select: 基于轮询,时间复杂度为O(n),当IO事件触发后,遍历fdset去查找事件对应的fd.在连接数较大的情况下开销也是线性增长.使用数组存储fdset,连接数上限较小.实现简单,兼容性好.</p>
 <p>poll: 和select基本相似,区别在于存储方式是链表,理论上能监听的fd没有数量限制.</p>
 <p>epoll: select和poll的改进版,基于事件驱动,时间复杂度为O(1),实现原理是为每个fd注册一个回调函数,当fd对应的设备发生IO事件时,就会调用这个回调函数,将该fd放入一个链表中,然后服务器从该链表中逐个取出fd来处理.性能随着连接数上涨不会有明显衰退,适合高并发情景.</p>
 <h3 id=水平触发level-trggered>水平触发(level-trggered)</h3>
-<p>只要文件描述符关联的读内核缓冲区非空，有数据可以读取，就一直发出可读信号进行通知， 当文件描述符关联的内核写缓冲区不满，有空间可以写入，就一直发出可写信号进行通知 LT模式支持阻塞和非阻塞两种方式。epoll默认的模式是LT。select和poll都只支持水平.</p>
+<p>只要文件描述符关联的读内核缓冲区非空，有数据可以读取，就一直发出可读信号进行通知，
+当文件描述符关联的内核写缓冲区不满，有空间可以写入，就一直发出可写信号进行通知
+LT模式支持阻塞和非阻塞两种方式。epoll默认的模式是LT。select和poll都只支持水平.</p>
 <h3 id=边缘触发edge-triggered>边缘触发(edge-triggered)</h3>
-<p>当文件描述符关联的读内核缓冲区由空转化为非空的时候，则发出可读信号进行通知， 当文件描述符关联的内核写缓冲区由满转化为不满的时候，则发出可写信号进行通知 两者的区别在哪里呢？水平触发是只要读缓冲区有数据，就会一直触发可读信号，而边缘触发仅仅在空变为非空的时候通知一次.</p>
+<p>当文件描述符关联的读内核缓冲区由空转化为非空的时候，则发出可读信号进行通知，
+当文件描述符关联的内核写缓冲区由满转化为不满的时候，则发出可写信号进行通知
+两者的区别在哪里呢？水平触发是只要读缓冲区有数据，就会一直触发可读信号，而边缘触发仅仅在空变为非空的时候通知一次.</p>
 <p>LT(level triggered)是缺省的工作方式，并且同时支持block和no-block socket.在这种做法中，内核告诉你一个文件描述符是否就绪了，然后你可以对这个就绪的fd进行IO操作。如果你不作任何操作，内核还是会继续通知你的，所以，这种模式编程出错误可能性要小一点。传统的select/poll都是这种模型的代表．</p>
 <p>八股文时间~</p>
 <h3 id=netty-和-tomcat-的区别>Netty 和 Tomcat 的区别？</h3>
@@ -427,43 +403,23 @@ static class NettyClientHandler extends ChannelInboundHandlerAdapter {<br>
 <h3 id=netty-发送消息有几种方式>Netty 发送消息有几种方式？</h3>
 <p>Netty 有两种发送消息的方式：</p>
 <ul>
-<li>
-<p>直接写入 Channel 中，消息从 ChannelPipeline 当中尾部开始移动；</p>
-</li>
-<li>
-<p>写入和 ChannelHandler 绑定的 ChannelHandlerContext 中，消息从 ChannelPipeline 中的下一个 ChannelHandler 中移动。</p>
-</li>
+<li>直接写入 Channel 中，消息从 ChannelPipeline 当中尾部开始移动；</li>
+<li>写入和 ChannelHandler 绑定的 ChannelHandlerContext 中，消息从 ChannelPipeline 中的下一个 ChannelHandler 中移动。</li>
 </ul>
 <h3 id=netty-高性能表现在哪些方面>Netty 高性能表现在哪些方面？</h3>
 <ul>
-<li>
-<p>IO 线程模型：同步非阻塞，用最少的资源做更多的事。</p>
-</li>
-<li>
-<p>内存零拷贝：尽量减少不必要的内存拷贝，实现了更高效率的传输。</p>
-</li>
-<li>
-<p>内存池设计：申请的内存可以重用，主要指直接内存。内部实现是用一颗二叉查找树管理内存分配情况。</p>
-</li>
-<li>
-<p>串形化处理读写：避免使用锁带来的性能开销。</p>
-</li>
-<li>
-<p>高性能序列化协议：支持 protobuf 等高性能序列化协议。</p>
-</li>
+<li>IO 线程模型：同步非阻塞，用最少的资源做更多的事。</li>
+<li>内存零拷贝：尽量减少不必要的内存拷贝，实现了更高效率的传输。</li>
+<li>内存池设计：申请的内存可以重用，主要指直接内存。内部实现是用一颗二叉查找树管理内存分配情况。</li>
+<li>串形化处理读写：避免使用锁带来的性能开销。</li>
+<li>高性能序列化协议：支持 protobuf 等高性能序列化协议。</li>
 </ul>
 <h3 id=什么是-netty-的零拷贝>什么是 Netty 的零拷贝？</h3>
 <p>Netty 的零拷贝主要包含三个方面：</p>
 <ul>
-<li>
-<p>Netty 的接收和发送 ByteBuffer 采用 DIRECT BUFFERS，使用堆外直接内存进行 Socket 读写，不需要进行字节缓冲区的二次拷贝。如果使用传统的堆内存（HEAP BUFFERS）进行 Socket 读写，JVM 会将堆内存 Buffer 拷贝一份到直接内存中，然后才写入 Socket 中。相比于堆外直接内存，消息在发送过程中多了一次缓冲区的内存拷贝。</p>
-</li>
-<li>
-<p>Netty 提供了组合 Buffer 对象，可以聚合多个 ByteBuffer 对象，用户可以像操作一个 Buffer 那样方便的对组合 Buffer 进行操作，避免了传统通过内存拷贝的方式将几个小 Buffer 合并成一个大的 Buffer。</p>
-</li>
-<li>
-<p>Netty 的文件传输采用了 transferTo 方法，它可以直接将文件缓冲区的数据发送到目标 Channel，避免了传统通过循环 write 方式导致的内存拷贝问题。</p>
-</li>
+<li>Netty 的接收和发送 ByteBuffer 采用 DIRECT BUFFERS，使用堆外直接内存进行 Socket 读写，不需要进行字节缓冲区的二次拷贝。如果使用传统的堆内存（HEAP BUFFERS）进行 Socket 读写，JVM 会将堆内存 Buffer 拷贝一份到直接内存中，然后才写入 Socket 中。相比于堆外直接内存，消息在发送过程中多了一次缓冲区的内存拷贝。</li>
+<li>Netty 提供了组合 Buffer 对象，可以聚合多个 ByteBuffer 对象，用户可以像操作一个 Buffer 那样方便的对组合 Buffer 进行操作，避免了传统通过内存拷贝的方式将几个小 Buffer 合并成一个大的 Buffer。</li>
+<li>Netty 的文件传输采用了 transferTo 方法，它可以直接将文件缓冲区的数据发送到目标 Channel，避免了传统通过循环 write 方式导致的内存拷贝问题。</li>
 </ul>
 <h3 id=netty-的应用场景有哪些>Netty 的应用场景有哪些？</h3>
 <p>典型的应用有：阿里分布式服务框架 Dubbo，默认使用 Netty 作为基础通信组件，还有 RocketMQ 也是使用 Netty 作为通讯的基础。</p>
